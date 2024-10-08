@@ -1,0 +1,88 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bo.com.micrium.modulobase.validators;
+
+import bo.com.micrium.modulobase.commons.GlobalValidator;
+import bo.com.micrium.modulobase.security.services.ActiveDirectoryService;
+import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
+import bo.com.micrium.modulobase.models.Grupo;
+import bo.com.micrium.modulobase.repositories.IGrupoRepository;
+import bo.com.micrium.modulobase.models.dto.GrupoRequest;
+import bo.com.micrium.modulobase.services.ParametroService;
+import bo.com.micrium.modulobase.commons.ParametroID;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+
+/**
+ *
+ * @author alepaco.maton
+ */
+@Component
+public class GrupoValidator extends GlobalValidator {
+
+    @Autowired
+    IGrupoRepository repository;
+
+    @Autowired
+    ParametroService parametroService;
+
+    public void validate(GrupoRequest input, Long id, Errors errors) {
+        if (isBlanck(input.getNombre()) || input.getNombre().length() > 255) {
+            errors.rejectValue("nombre", "field.nombre", "La longitud del nombre debe ser mayor a 0 y menor a 255.");
+            return;
+        }
+        
+        if (!input.getNombre().matches(parametroService.getParametro(ParametroID.EXPRESION_REGULAR_GENERAL).getValor())) {
+            errors.rejectValue("nombre", "field.nombre", parametroService.getParametro(ParametroID.MENSAJE_VALIDACION_GENERAL).getValor());
+            return;
+        }
+        
+        if (input.getRolId() == null) {
+            errors.rejectValue("rolId", "field.rolId", "Seleccione un rol.");
+            return;
+        }
+        
+        /*log.error("AAA: id: " + id);
+        {
+            Optional<Rol> model = rolRepository.findById(input.getRolId());
+            if (!model.isPresent()) {
+                errors.rejectValue("rolId", "field.rolId", "Seleccione un rol.");
+            }
+        }*/
+
+        if (id != null) {
+            Optional<Grupo> model = repository.findById(id);
+            if (!model.isPresent()) {
+                errors.rejectValue("id", "field.invalido", "Identificador de usuario invalido.");
+            } else {
+                Grupo temp = repository.findByNombreAndEstadoTrue(input.getNombre());
+                if (!temp.getRolId().equals(model.get().getRolId())) {
+                    errors.rejectValue("nombre", "field.invalido", "El nombre del grupo, se encuentra en uso.");
+                }
+            }
+        } else {
+            Grupo temp = repository.findByNombreAndEstadoTrue(input.getNombre());
+            if (temp != null) {
+                errors.rejectValue("nombre", "field.invalido", "El nombre del grupo, se encuentra en uso.");
+            }
+        }
+        if (errors.hasErrors()) {
+            return;
+        }
+        try {
+            if (!(new ActiveDirectoryService(parametroService).validarGrupo(input.getNombre().trim()))) {
+                errors.rejectValue("nombre", "field.nombre", "No se encontró el grupo en active directory.");
+            }
+        } catch (LdapContextException e1) {
+            //log.error("Error de conexion ldap " + e1.getMessage(), e1);
+            errors.rejectValue("nombre", "ldap.nombre", "Error de conexión con active directory, " + e1.getMessage());
+        }
+    }
+
+}

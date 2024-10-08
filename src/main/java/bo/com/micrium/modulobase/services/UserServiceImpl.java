@@ -1,0 +1,30 @@
+package bo.com.micrium.modulobase.services;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import bo.com.micrium.modulobase.models.Usuario;
+import bo.com.micrium.modulobase.repositories.IUsuarioRepository;
+
+@Service
+public class UserServiceImpl implements IUserService {
+
+    @Autowired
+    private IUsuarioRepository repository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Usuario> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public Usuario save(Usuario user) {
+        return repository.save(user);
+    }
+
+}
