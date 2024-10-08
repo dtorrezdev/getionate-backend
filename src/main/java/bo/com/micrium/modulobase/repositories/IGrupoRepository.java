@@ -26,14 +26,14 @@ public interface IGrupoRepository extends JpaRepository<Grupo, Long> {
     long countByEstadoTrueAndRolId(Rol rol_Id);
 
     @Query(value = "select g.* "
-            + "from mu_grupo_ad g,mu_rol r "
-            + "where g.rol_id=r.id and g.estado= 1 "
+            + "from mu_grupo_ad g inner join mu_rol r "
+            + "on g.rol_id = r.id and g.estado= 1 "            
             + "and (-1 = ? or UPPER(g.nombre) like ?) "
             + "and (-1 = ? or UPPER(g.descripcion) like ?) "
             + "and (-1 = ? or UPPER(r.nombre) like ?) ",
             countQuery = "select count(*) "
-            + "from mu_grupo_ad g,mu_rol r "
-            + "where g.rol_id=r.id and g.estado= 1 "
+            + "from mu_grupo_ad g inner join mu_rol r "
+            + "on g.rol_id = r.id and g.estado= 1 "
             + "and (-1 = ? or UPPER(g.nombre) like ?) "
             + "and (-1 = ? or UPPER(g.descripcion) like ?) "
             + "and (-1 = ? or UPPER(r.nombre) like ?) ",

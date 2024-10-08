@@ -36,10 +36,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
             <!-- Excluir Tomcat embebido -->
 			<exclusions>
-                <exclusion>
+                <!-- <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
+                </exclusion> -->
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
@@ -175,9 +175,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<!-- Desactivar el modo ejecutable con Tomcat -->
-<!--				<configuration>
-                    <executable>false</executable> 
-                </configuration>-->
+				<configuration>
+                    <executable>true</executable> 
+                </configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -108,6 +108,9 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                 LoggerMain.printRequest(Stream.of(
                         new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                         new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                        new AbstractMap.SimpleEntry<>("nombre ", nombre),
+                        new AbstractMap.SimpleEntry<>("descripcion ", descripcion),
+                        new AbstractMap.SimpleEntry<>("rolNombre ", rolNombre),
                         new AbstractMap.SimpleEntry<>("token ", token),
                         new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                         new AbstractMap.SimpleEntry<>("ipClient ", ipClient),

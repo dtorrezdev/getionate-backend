@@ -67,7 +67,7 @@ public class BitacoraControler extends GenericControler implements Serializable 
             ipClient = obtenerIp(ipClient);
             String fi = ConfigEncriptacion.decrypt(fechaIniStr);
             String ff = ConfigEncriptacion.decrypt(fechaFinStr);
-
+            LoggerMain.info("***dtn accion " + accion);
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -84,7 +84,7 @@ public class BitacoraControler extends GenericControler implements Serializable 
                     new AbstractMap.SimpleEntry<>("usuario ", usuario),
                     new AbstractMap.SimpleEntry<>("request ", pageRequest)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
+            LoggerMain.info("***dtn accion 1 " + accion);
             Page<BitacoraResponse> out = respository.filter(queryfilterTexto(fi), fi, queryfilterTexto(ff), ff,
                     queryfilterTexto(fecha), filterTextoQueryUpperLike(fecha),
                     queryfilterTexto(accion), filterTextoQueryUpperLike(accion),

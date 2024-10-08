@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.modulobase.commons.ParametroID;
-import bo.com.micrium.modulobase.security.filters.JwtRequestFilter;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Claims;
@@ -71,7 +70,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        log.info("getClaimFromToken ");
+        //log.info("getClaimFromToken ");
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
