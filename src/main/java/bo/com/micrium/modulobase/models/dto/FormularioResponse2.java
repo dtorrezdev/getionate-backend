@@ -17,18 +17,18 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FormularioResponse implements Serializable, Comparable<FormularioResponse> {
+public class FormularioResponse2 implements Serializable, Comparable<FormularioResponse2> {
 
     private Long id;
     private String nombre;
     private Integer orden;
-    private int moduloId;
+    private Integer moduloId;
     private String url;
     private String icono;
-    private List<AccionResponse> acciones;
+   // private List<AccionResponse> acciones;
 
     @Override
-    public int compareTo(FormularioResponse o) {
+    public int compareTo(FormularioResponse2 o) {
         return Integer.compare(this.getOrden(), o.getOrden());
     }
 

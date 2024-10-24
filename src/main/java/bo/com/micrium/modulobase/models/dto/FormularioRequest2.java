@@ -1,10 +1,7 @@
 package bo.com.micrium.modulobase.models.dto;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,21 +12,17 @@ import lombok.NoArgsConstructor;
  */
 @JsonIgnoreProperties(ignoreUnknown = false)
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class FormularioResponse implements Serializable, Comparable<FormularioResponse> {
+@AllArgsConstructor
+public class FormularioRequest2 implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
 
-    private Long id;
     private String nombre;
     private Integer orden;
-    private int moduloId;
+    private Long moduloId;
+    //private Integer tipo;
     private String url;
     private String icono;
-    private List<AccionResponse> acciones;
-
-    @Override
-    public int compareTo(FormularioResponse o) {
-        return Integer.compare(this.getOrden(), o.getOrden());
-    }
-
+    //private List<AccionResponse> acciones;
 }
