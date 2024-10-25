@@ -12,6 +12,7 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
+import bo.com.micrium.modulobase.models.Accion;
 import bo.com.micrium.modulobase.models.Formulario;
 import bo.com.micrium.modulobase.models.Grupo;
 import bo.com.micrium.modulobase.models.Rol;
@@ -19,7 +20,7 @@ import bo.com.micrium.modulobase.models.dto.FormularioRequest2;
 import bo.com.micrium.modulobase.models.dto.FormularioResponse2;
 import bo.com.micrium.modulobase.models.dto.RolResponse;
 import bo.com.micrium.modulobase.repositories.IFormularioRepository;
-//import bo.com.micrium.modulobase.repositories.IModuloRepository;
+import bo.com.micrium.modulobase.repositories.IAccionRepository;
 import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.FormularioValidator;
 
@@ -47,6 +48,7 @@ import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.Refill;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -58,8 +60,8 @@ public class FormularioControler extends GenericControler implements ICrudContro
     @Autowired
     private transient IFormularioRepository repository;
 
-   // @Autowired
-    //private transient IModuloRepository moduloRepository;
+    @Autowired
+    private transient IAccionRepository accionRepository;
 
     @Autowired
     private transient FormularioValidator validator;
@@ -288,13 +290,12 @@ public class FormularioControler extends GenericControler implements ICrudContro
             throw e;
         }
     }
-
     @Override
-    public ResponseEntity<Void> delete(String token, String ipClient, String form, String id) throws ApiException {
+    public ResponseEntity<Map<String, String>> delete(String token, String ipClient, String form, String id) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
-
+    
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -303,31 +304,54 @@ public class FormularioControler extends GenericControler implements ICrudContro
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
+    
             Optional<Formulario> formularioOptional = repository.findById(Long.parseLong(id));
             if (!formularioOptional.isPresent()) {
                 throw new ApiException("El formulario con id " + id + " no existe.");
             }
-
+    
+            // Verificar si hay acciones relacionadas con este formulario
+            List<Accion> acciones = accionRepository.findByFormularioId(Long.parseLong(id));
+            if (!acciones.isEmpty()) {
+                // Crear el mensaje de error
+                String mensaje = "No se puede eliminar el formulario porque tiene acciones asociadas.";
+                map.put(TiposComunes.MENSAJE_ERROR, mensaje);
+    
+                LoggerMain.printResponse(Stream.of(
+                        new AbstractMap.SimpleEntry<>("token ", token),
+                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                        new AbstractMap.SimpleEntry<>("response ", mensaje)).
+                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    
+                // Devolver una respuesta con el mensaje de error
+                return ResponseEntity
+                        .badRequest()
+                        .body(map); // Devolvemos el mapa con el mensaje de error
+            }
+    
+            // Eliminar el formulario si no tiene acciones relacionadas
             repository.deleteById(Long.parseLong(id));
-
+    
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FORMULARIO_ELIMINAR, null, map);
-
+    
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
+    
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             final String mensajeError = "Error al eliminar el formulario. " + e.getMessage();
-
+    
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FORMULARIO_ELIMINAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FORMULARIO_ELIMINAR, null, map, logSistemaId);
-
+    
             throw e;
         }
     }
+    
+
 }
