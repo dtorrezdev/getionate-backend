@@ -1,9 +1,9 @@
 package bo.com.micrium.modulobase.validators;
 
 import bo.com.micrium.modulobase.commons.GlobalValidator;
-import bo.com.micrium.modulobase.models.Formulario;
-import bo.com.micrium.modulobase.repositories.IFormularioRepository;
-import bo.com.micrium.modulobase.models.dto.FormularioRequest2;
+import com.micrium.bd.access.jpa.models.Formulario;
+import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
+import com.micrium.bd.access.jpa.models.dto.FormularioRequest2;
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import java.util.ArrayList;

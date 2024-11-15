@@ -15,10 +15,10 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.models.TipoParametro;
-import bo.com.micrium.modulobase.models.dto.TipoParametroRequest;
-import bo.com.micrium.modulobase.models.dto.TipoParametroResponse;
-import bo.com.micrium.modulobase.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.models.TipoParametro;
+import com.micrium.bd.access.jpa.models.dto.TipoParametroRequest;
+import com.micrium.bd.access.jpa.models.dto.TipoParametroResponse;
+import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.validators.TipoParametroValidator;
 
 import java.net.URI;

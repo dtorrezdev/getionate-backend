@@ -6,10 +6,10 @@
 package bo.com.micrium.modulobase.validators;
 
 import bo.com.micrium.modulobase.commons.GlobalValidator;
-import bo.com.micrium.modulobase.models.Parametro;
-import bo.com.micrium.modulobase.repositories.IParametroRepository;
-import bo.com.micrium.modulobase.repositories.ITipoParametroRepository;
-import bo.com.micrium.modulobase.models.dto.ParametroRequest;
+import com.micrium.bd.access.jpa.models.Parametro;
+import com.micrium.bd.access.jpa.repositories.IParametroRepository;
+import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.models.dto.ParametroRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.ParametroTipo;

@@ -11,12 +11,12 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.models.Accion;
-import bo.com.micrium.modulobase.models.RolAccion;
-import bo.com.micrium.modulobase.models.dto.AccionRequest;
-import bo.com.micrium.modulobase.models.dto.AccionResponse2;
-import bo.com.micrium.modulobase.repositories.IAccionRepository;
-import bo.com.micrium.modulobase.repositories.IRolAccionRepository;
+import com.micrium.bd.access.jpa.models.Accion;
+import com.micrium.bd.access.jpa.models.RolAccion;
+import com.micrium.bd.access.jpa.models.dto.AccionRequest;
+import com.micrium.bd.access.jpa.models.dto.AccionResponse2;
+import com.micrium.bd.access.jpa.repositories.IAccionRepository;
+import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
 import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.AccionValidator;
 

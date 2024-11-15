@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import bo.com.micrium.modulobase.repositories.IParametroRepository;
+import com.micrium.bd.access.jpa.repositories.IParametroRepository;
 import bo.com.micrium.modulobase.commons.ParametroTipo;
-import bo.com.micrium.modulobase.models.Parametro;
+import com.micrium.bd.access.jpa.models.Parametro;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 

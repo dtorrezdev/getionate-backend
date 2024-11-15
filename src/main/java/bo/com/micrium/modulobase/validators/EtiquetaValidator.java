@@ -6,8 +6,8 @@
 package bo.com.micrium.modulobase.validators;
 
 import bo.com.micrium.modulobase.commons.GlobalValidator;
-import bo.com.micrium.modulobase.repositories.IEtiquetaRepository;
-import bo.com.micrium.modulobase.models.dto.EtiquetaRequest;
+import com.micrium.bd.access.jpa.repositories.IEtiquetaRepository;
+import com.micrium.bd.access.jpa.models.dto.EtiquetaRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

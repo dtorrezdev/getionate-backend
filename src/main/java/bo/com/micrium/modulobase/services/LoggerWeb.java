@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import bo.com.micrium.modulobase.repositories.ILogSistemaRepository;
-import bo.com.micrium.modulobase.models.LogSistema;
+import com.micrium.bd.access.jpa.repositories.ILogSistemaRepository;
+import com.micrium.bd.access.jpa.models.LogSistema;
 import bo.com.micrium.modulobase.commons.LogNivel;
 import bo.com.micrium.logger.AbstractLogger;
 import bo.com.micrium.logger.ILoggerPersist;

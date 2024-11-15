@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
-import bo.com.micrium.modulobase.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.services.BitacoraService;
 import bo.com.micrium.modulobase.commons.GlobalValidator;

@@ -16,11 +16,11 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.models.Grupo;
-import bo.com.micrium.modulobase.models.dto.GrupoRequest;
-import bo.com.micrium.modulobase.models.dto.GrupoResponse;
-import bo.com.micrium.modulobase.repositories.IGrupoRepository;
-import bo.com.micrium.modulobase.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.models.Grupo;
+import com.micrium.bd.access.jpa.models.dto.GrupoRequest;
+import com.micrium.bd.access.jpa.models.dto.GrupoResponse;
+import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
+import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.GrupoValidator;
 

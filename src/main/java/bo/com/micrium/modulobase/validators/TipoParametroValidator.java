@@ -6,9 +6,9 @@
 package bo.com.micrium.modulobase.validators;
 
 import bo.com.micrium.modulobase.commons.GlobalValidator;
-import bo.com.micrium.modulobase.models.TipoParametro;
-import bo.com.micrium.modulobase.repositories.ITipoParametroRepository;
-import bo.com.micrium.modulobase.models.dto.TipoParametroRequest;
+import com.micrium.bd.access.jpa.models.TipoParametro;
+import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.models.dto.TipoParametroRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import java.util.Optional;

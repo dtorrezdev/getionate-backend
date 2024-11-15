@@ -8,8 +8,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import bo.com.micrium.modulobase.models.Bitacora;
-import bo.com.micrium.modulobase.repositories.IBitacoraRespository;
+import com.micrium.bd.access.jpa.models.Bitacora;
+import com.micrium.bd.access.jpa.repositories.IBitacoraRespository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 
 /**

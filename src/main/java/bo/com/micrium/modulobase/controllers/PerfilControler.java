@@ -33,10 +33,10 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
-import bo.com.micrium.modulobase.models.Usuario;
-import bo.com.micrium.modulobase.models.dto.CambioContrasenaRequest;
-import bo.com.micrium.modulobase.models.dto.CambioContrasenaRequestLogin;
-import bo.com.micrium.modulobase.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.models.Usuario;
+import com.micrium.bd.access.jpa.models.dto.CambioContrasenaRequest;
+import com.micrium.bd.access.jpa.models.dto.CambioContrasenaRequestLogin;
+import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.validators.UsuarioValidator;
 

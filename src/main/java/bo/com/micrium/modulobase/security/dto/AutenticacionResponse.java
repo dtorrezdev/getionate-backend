@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import bo.com.micrium.modulobase.models.dto.ModuloResponse;
+import com.micrium.bd.access.jpa.models.dto.ModuloResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

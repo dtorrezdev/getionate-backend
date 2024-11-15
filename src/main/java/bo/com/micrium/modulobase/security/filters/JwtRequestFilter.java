@@ -23,14 +23,14 @@ import org.apache.logging.log4j.Logger;
 
 import bo.com.micrium.modulobase.security.controllers.JwtAuthenticationController;
 import bo.com.micrium.modulobase.security.services.JwtUserDetailsService;
-import bo.com.micrium.modulobase.repositories.IRolAccionRepository;
-import bo.com.micrium.modulobase.repositories.IAccionRepository;
+import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
+import com.micrium.bd.access.jpa.repositories.IAccionRepository;
 import bo.com.micrium.modulobase.controllers.EtiquetaControler;
-import bo.com.micrium.modulobase.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
-import bo.com.micrium.modulobase.models.RolAccion;
-import bo.com.micrium.modulobase.models.Accion;
-import bo.com.micrium.modulobase.models.Rol;
+import com.micrium.bd.access.jpa.models.RolAccion;
+import com.micrium.bd.access.jpa.models.Accion;
+import com.micrium.bd.access.jpa.models.Rol;
 import bo.com.micrium.logger.LoggerMain;
 
 /**
