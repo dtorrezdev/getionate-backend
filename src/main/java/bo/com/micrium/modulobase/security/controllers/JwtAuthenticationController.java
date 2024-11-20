@@ -36,9 +36,11 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.PrivilegioTipo;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Accion;
 import com.micrium.bd.access.jpa.models.Formulario;
-import com.micrium.bd.access.jpa.models.Parametro;
+import com.micrium.bd.access.natives.model.dto.ParametroDto;
 import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.models.RolAccion;
 import com.micrium.bd.access.jpa.models.Usuario;
@@ -95,7 +97,7 @@ public class JwtAuthenticationController extends GenericControler {
 
     @RequestMapping(value = METODO_VERSION, method = RequestMethod.GET)
     public ResponseEntity<?> version() {
-        Parametro modoSistema = parametroService.getParametro(ParametroID.VALIDACION_ACTIVE_DIRECTORY);
+        ParametroDto modoSistema = parametroService.getParametroByNombre(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name());
 
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("Version", "Version 1.0");
@@ -163,7 +165,7 @@ public class JwtAuthenticationController extends GenericControler {
             List<Long> formularios = new ArrayList<>();
             Map<Long, Boolean> formVisible = new HashMap<>();
 
-//            int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(ParametroID.VALIDACION_ACTIVE_DIRECTORY)).intValue();
+//            int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY)).intValue();
             List<RolAccion> rolAcciones = rolAccionRepository.findAllByRolId(rol.getId());
             for (RolAccion rolAccion : rolAcciones) {
                 /*if (1701 == rolAccion.getAccionId() && rol.getId() != Rol.SUPER_ADMINISTRADOR) {
@@ -177,7 +179,7 @@ public class JwtAuthenticationController extends GenericControler {
 
                 Formulario formulario = optionalForm.get();
 
-//                if (!(validacionActiveDirectory == ParametroID.LOCAL && formulario.getId() == ParametroID.FORMULARIO_GRUPO)) {
+//                if (!(validacionActiveDirectory == Parametro.DelSistema.LOCAL && formulario.getId() == Parametro.DelSistema.FORMULARIO_GRUPO)) {
                 if (!formularios.stream().anyMatch(id -> id.equals(accion.getFormularioId()))) {
                     formularios.add(accion.getFormularioId());
                     formVisible.put(accion.getFormularioId(), accion.getNombre().contains("Navega"));
@@ -239,11 +241,11 @@ public class JwtAuthenticationController extends GenericControler {
 
             Usuario usuario = usuarioRepository.findByNombreUsuarioAndEstadoIn(authenticationRequest.getNombreUsuario(), Arrays.asList(UsuarioEstado.HABILITADO));
 
-            Parametro inactivityTime = parametroService.getParametro(ParametroID.INACTIVITY_TIME);
-            Parametro timeoutBackend = parametroService.getParametro(ParametroID.TIMEOUT_BACKEND);
-            Parametro urlNoTimeoutBackend = parametroService.getParametro(ParametroID.URL_NO_TIMEOUT_BACKEND);
-            Parametro tipoAD = parametroService.getParametro(ParametroID.VALIDACION_ACTIVE_DIRECTORY);
-            Parametro fraseSecreta = parametroService.getParametro(ParametroID.FRASE_SECRETA_ENCRIPTAR);
+            ParametroDto inactivityTime = parametroService.getParametroByNombre(Parametro.DelSistema.INACTIVITY_TIME.name());
+            ParametroDto timeoutBackend = parametroService.getParametroByNombre(Parametro.DelSistema.TIME_OUT_BACKEND.name());
+            ParametroDto urlNoTimeoutBackend = parametroService.getParametroByNombre(Parametro.DelSistema.URL_NO_TIME_OUT_BACKEND.name());
+            ParametroDto tipoAD = parametroService.getParametroByNombre(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name());
+            ParametroDto fraseSecreta = parametroService.getParametroByNombre(Parametro.DelSistema.FRASE_SECRETA_ENCRIPTAR.name());
             ConfigEncriptacion.phaseSecret = fraseSecreta.getValor();
             try {
                 String tipoAuth = tipoAD.getValor().equals(TipoAutenticacion.HIBRIDO.getId())? "1": tipoAD.getValor();

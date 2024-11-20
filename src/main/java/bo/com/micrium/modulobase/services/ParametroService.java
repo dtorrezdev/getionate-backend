@@ -22,6 +22,18 @@ import com.micrium.bd.access.jpa.models.Parametro;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 
+import com.micrium.bd.access.natives.dao.ParametroDao;
+//import com.micrium.bd.access.enuns.Parametro;
+import com.micrium.bd.access.enuns.TipoParametro;
+import com.micrium.bd.access.exceptions.DaoException;
+import com.micrium.bd.access.exceptions.MapperException;
+import com.micrium.bd.access.exceptions.ParameterException;
+import com.micrium.bd.access.natives.model.MuParametro;
+import com.micrium.bd.access.natives.model.dto.ParametroDto;
+//import com.micrium.bd.access.natives.service.ParametroService;
+
+import java.util.Optional;
+
 /**
  *
  * @author alepaco.maton
@@ -32,28 +44,43 @@ import bo.com.micrium.cifrado.ConfigEncriptacion;
 @Scope("singleton")
 public class ParametroService {
     private static final Logger log = LogManager.getLogger(ParametroService.class);
+    //@Autowired
+    //private IParametroRepository repository;
 
-    // @Autowired
-    // InicializacionService inicializacionService;
-    @Autowired
-    private IParametroRepository repository;
-
-    private HashMap<Long, Parametro> listParametro;
+    //private HashMap<Long, Parametro> listParametro;
 
     private final SimpleDateFormat sdf = new SimpleDateFormat(ParametroTipo.FORMATO_FECHA_HORA);
+    
+    private com.micrium.bd.access.natives.service.ParametroService paramService;
+
+    public com.micrium.bd.access.natives.service.ParametroService getParametroService() {
+        return paramService;
+    };
 
     @PostConstruct
     public void init() {
-        log.info("ParametroService inicializado");
+        log.info("ParametroService inicializado & validar");
+        try {
+            paramService = new com.micrium.bd.access.natives.service.ParametroService();
+            paramService.getParametroByName("BLOQUEO_USUARIOS_DIAS");
+        } catch (Exception e) {
+            log.error(e.getMessage(),e);
+            System.exit(1);
+        }
     }
 
-    public synchronized Parametro getParametro(Long idParametro) {
-        return cargarParametros().get(idParametro);
+    public synchronized ParametroDto getParametroByNombre(String nombreParametro) {
+        try {
+            return paramService.getParametroByName(nombreParametro);
+        } catch (ParameterException | DaoException | MapperException e) {            
+            log.error(e);            
+        }
+        return null;
     }
 
-    public synchronized Object getParamVal(Long idParametro) {
-        Parametro p = cargarParametros().get(idParametro);
-        log.debug("idParametro: " + idParametro + ", parametro encontrado: " + p);
+    public synchronized Object getParamVal(String nombre) {
+        ParametroDto p = this.getParametroByNombre(nombre);
+        log.debug("idParametro: " + nombre + ", parametro encontrado: " + p);
         switch (p.getTipo()) {
             case ParametroTipo.TIPO_CADENA:
                 return p.getValor();
@@ -83,77 +110,9 @@ public class ParametroService {
         return null;
     }
 
-    /**
-     * Este metodo debe ser invocado cuando se haga alguna modificacion a un
-     * Parametro para que el cambio se manifieste en el resto del sistema. Si en
-     * el transcurso del Desarrollo se crean terceras clases que son de tipo
-     * singleton estas clases deberan proverer mecanismos para reinicar sus
-     * atributos propios para que desde aqui sean invocados y asi el cambio del
-     * Parametro sean aplicables en todo contexto.
-     *
-     * *
-     */
-    public synchronized void restartParameter() {
-        // log.info("****** Reiniciarparametros..");
-        listParametro = null;
-
-        try {
-            Parametro reaload = repository.findById(ParametroID.RELOAD_PARAMETER_ID).get();
-            reaload.setValor("true");
-            repository.save(reaload);
-        } catch (Exception e) {
-            log.error("Error al cargar ó guardar el parametro RELOAD con ID=" + ParametroID.RELOAD_PARAMETER_ID, e);
-        }
-    }
-
-    private synchronized HashMap<Long, Parametro> cargarParametros() {
-        boolean reload = false;
-        // log.info("reload: " + reload + " listParametro; " + listParametro);
-        if (listParametro == null) {
-            reload = true;
-        } else {
-            reload = verifRealoadParameters();
-        }
-
-        if (reload) {
-            // log.info("\n\n ***Recargando los parametros***");
-            listParametro = new HashMap<>();
-            for (Parametro item : repository.findAll()) {
-                listParametro.put(item.getId(), item);
-                // log.info(item);
-            }
-
-            // log.info("*** Final de cargar parametros ***\n\n ");
-            updateParameterReload();
-
-        }
-        return listParametro;
-    }
-
-    private boolean verifRealoadParameters() {
-        // log.info("verifRealoadParameters");
-        Optional<Parametro> p = repository.findById(ParametroID.RELOAD_PARAMETER_ID);
-        // log.info("Parametro: " + p);
-        if (p.isPresent()) {
-            return p.get().getValor().equals("true");
-        }
-
-        return false;
-    }
-
-    private boolean updateParameterReload() {
-        Optional<Parametro> p = repository.findById(ParametroID.RELOAD_PARAMETER_ID);
-
-        if (p.isPresent()) {
-            p.get().setValor("false");
-            repository.save(p.get());
-
-            log.info("Valor del parametro reaload  actualizado a false");
-
-            return true;
-        }
-
-        return false;
+    public void updateParameter(String nombre, String valor) throws DaoException {
+        log.info("updateParameter");
+        paramService.updateParametroByNombre(nombre, valor);
     }
 
 }

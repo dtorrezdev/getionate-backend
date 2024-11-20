@@ -6,6 +6,8 @@
 package bo.com.micrium.modulobase.validators;
 
 import bo.com.micrium.modulobase.commons.GlobalValidator;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import com.micrium.bd.access.jpa.models.dto.RolRequest;
@@ -43,8 +45,8 @@ public class RolValidator extends GlobalValidator {
             return;
         }
 
-        if (!input.getNombre().matches(parametroService.getParametro(ParametroID.EXPRESION_REGULAR_GENERAL).getValor())) {
-            errors.rejectValue("nombre", "field.nombre", parametroService.getParametro(ParametroID.MENSAJE_VALIDACION_GENERAL).getValor());
+        if (!input.getNombre().matches(parametroService.getParametroByNombre(Parametro.DelSistema.EXPRESION_REGULAR_GENERAL.name()).getValor())) {
+            errors.rejectValue("nombre", "field.nombre", parametroService.getParametroByNombre(Parametro.DelSistema.MENSAJE_VALIDACION_GENERAL.name()).getValor());
             return;
         }
 

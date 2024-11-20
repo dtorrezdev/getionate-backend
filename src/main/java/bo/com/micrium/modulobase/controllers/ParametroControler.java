@@ -33,6 +33,8 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.ParametroTipo;
 import bo.com.micrium.modulobase.commons.PermisoTipo;
+
+import com.micrium.bd.access.exceptions.DaoException;
 import com.micrium.bd.access.jpa.models.Parametro;
 import com.micrium.bd.access.jpa.models.RolTipoParametroPermiso;
 import com.micrium.bd.access.jpa.models.TipoParametro;
@@ -312,9 +314,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
 
             map.put(TiposComunes.ModuloBase.PARAMETRO, ConvercionUtil.toJson(model));
             //bitacoraService.guardarBitacora(token, ipClient, form, "Se adiciono:" + model);
-            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_CREAR, null, map);
-
-            parametroService.restartParameter();
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_CREAR, null, map);            
 
             /*ResponseEntity<ParametroResponse> out = ResponseEntity.created(new URI("/parametros/" + model.getId()))
                 .body(ConvercionUtil.convertir(model, tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));*/
@@ -403,7 +403,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
                 if (request.getValor().equals("")) {
                     request.setValor(model.getValor());
                 } else {
-                    request.setValor(ConfigEncriptacion.encryptValue(request.getValor()));
+                    request.setValor(ConfigEncriptacion.encrypt(request.getValor()));
                 }
                 LoggerMain.info("request: " + request.toString());
             }
@@ -420,8 +420,8 @@ public class ParametroControler extends GenericControler implements ICrudControl
             mapNuevo.put(TiposComunes.ModuloBase.PARAMETRO, model.toString());
 
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_MODIFICAR, map, mapNuevo);
-
-            parametroService.restartParameter();
+            
+            parametroService.updateParameter(request.getNombre(), request.getValor());
 
             /*ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertir(model,
         tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));*/
@@ -445,7 +445,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        } catch (EncriptacionExcepcion | ApiException e) {
+        } catch (DaoException | EncriptacionExcepcion | ApiException e) {
             final String mensajeError = "Error al modificar un parametro, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.PARAMETRO_MODIFICAR, mensajeError, e);

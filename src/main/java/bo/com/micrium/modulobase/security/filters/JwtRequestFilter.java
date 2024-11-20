@@ -236,10 +236,11 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 Accion accion = accionRepository.findById(rolAccion.getAccionId()).get();
                 String[] urls = accion.getUrl().split(",");
                 String[] metodos = accion.getMetodo().split(",");
-                int size = urls.length;
-
+                int size = urls.length; 
+                log.info("req.url=" + request.getRequestURI() + "  " + request.getMethod());
                 for (int i = 0; i < size; i++) {
                     String uri = request.getContextPath() + urls[i];
+                    log.info("uri="+ uri + "  metodo="+ metodos[i]);
                     if (request.getRequestURI().startsWith(uri) && metodos[i].equals(request.getMethod().toUpperCase())) {
                         flag = false;
                         break exito;
@@ -248,6 +249,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 }
             }
             if (flag) {
+                log.info("sin permiso");
                 sinPermiso(request, response);
                 return;
             }
@@ -261,7 +263,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                             
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         }
-        //LoggerMain.info("***dtn URL " + request.getRequestURL());
+        //LoggerMain.info("***dtn URL " + request.getRequestURL()); 
         
         chain.doFilter(request, response);
     }

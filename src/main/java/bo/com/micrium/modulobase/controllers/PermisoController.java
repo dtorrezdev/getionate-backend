@@ -41,6 +41,8 @@ import bo.com.micrium.modulobase.commons.TipoAutenticacion;
 import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Accion;
 import com.micrium.bd.access.jpa.models.Formulario;
 import com.micrium.bd.access.jpa.models.RolAccion;
@@ -129,7 +131,7 @@ public class PermisoController extends GenericControler implements Serializable 
                 collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         List<ModuloResponse> modulos = new ArrayList<>();
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(ParametroID.VALIDACION_ACTIVE_DIRECTORY)).intValue();
+        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
         //Boolean validacionGrupoLDAP=(Boolean) parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
 
         for (Formulario modulo : formularioRepository.findByModuloIdIsNull(Sort.by(Sort.Direction.ASC, "orden"))) {
@@ -227,7 +229,7 @@ public class PermisoController extends GenericControler implements Serializable 
         }
 
         List<AccionResponse> acciones = new ArrayList<>();
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(ParametroID.VALIDACION_ACTIVE_DIRECTORY)).intValue();
+        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
         //Boolean validacionGrupoLDAP=(Boolean) parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
 
         for (RolAccion rolAccion : rolAccionRepository.findAllByRolId(rolIdInt)) {
@@ -371,7 +373,7 @@ public class PermisoController extends GenericControler implements Serializable 
                     tipoparametroRepository.findById(m.getTipoParametroId()).get().getNombre(), m.getTipoPermiso());
         }).collect(Collectors.toList());
 
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(ParametroID.VALIDACION_ACTIVE_DIRECTORY)).intValue();
+        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
         LoggerMain.info("VALOR DE ROL ID Despues: " + rolId + " desencriptado= " + desencriptadoId);
         for (TipoParametro tipoParametro : tipoparametroRepository.findAll()) {
             if (!temp.stream().anyMatch(t -> t.getTipoParametroId().equals(tipoParametro.getId()))) {

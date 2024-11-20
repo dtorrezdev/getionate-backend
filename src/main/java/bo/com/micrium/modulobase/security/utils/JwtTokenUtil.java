@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.micrium.bd.access.enuns.Parametro;
+
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.modulobase.commons.ParametroID;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -108,7 +110,7 @@ public class JwtTokenUtil implements Serializable {
     // compaction of the JWT to a URL-safe string
     // para que token expire en minutos seria 30min/60 *1000 *60*60
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-        Integer tokenTime = Integer.valueOf(parametroService.getParametro(ParametroID.TOKEN_TIME).getValor());
+        Integer tokenTime = Integer.valueOf(parametroService.getParametroByNombre(Parametro.DelSistema.TOKEN_TIME.name()).getValor());
         /*return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + (((tokenTime) * 1000) * 60)))
                 .signWith(SignatureAlgorithm.HS512, secret.getBytes(StandardCharsets.UTF_8)).compact();*/

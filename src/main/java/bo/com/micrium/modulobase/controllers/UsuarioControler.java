@@ -53,6 +53,8 @@ import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Usuario;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
@@ -312,7 +314,7 @@ public class UsuarioControler extends GenericControler implements ICrudControler
                 }
             }
             
-            int dias = ((BigDecimal) parametroService.getParamVal(ParametroID.BLOQUEO_USUARIOS_DIAS)).intValue();
+            int dias = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.BLOQUEO_USUARIOS_DIAS.name())).intValue();
             Date fechaActualizacion = sumarDiasAFecha(new Date(), dias);
 
             //  OAC LDAP
@@ -321,7 +323,7 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             (request.getTipo() == UsuarioTipo.USUARIO_ACTIVE_DIRECTORY ? UsuarioTipo.USUARIO_ACTIVE_DIRECTORY : UsuarioTipo.USUARIO_NORMAL),
             (short) 0, null, rolRepository.findById(request.getRolId()).get(), UsuarioEstado.HABILITADO,
             fechaActualizacion));*/
-            String pass = (request.getTipo().equals(TipoAutenticacion.LDAP.getId())) ? (String) parametroService.getParamVal(ParametroID.CONTRASENA_POR_DEFECTO) : request.getPass();
+            String pass = (request.getTipo().equals(TipoAutenticacion.LDAP.getId())) ? (String) parametroService.getParamVal(Parametro.DelSistema.CONTRASENA_POR_DEFECTO.name()) : request.getPass();
             //passwordEncoder
             //LoggerWeb.debug("***** OAC pass:" + pass);
             pass = (pass == null || pass.isEmpty()) ? null : passwordEncoder.encode(ConfigEncriptacion.atob(pass));
@@ -405,7 +407,7 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             map.put(TiposComunes.ModuloBase.USUARIO, ConvercionUtil.toJson(model));
 
             // model.setNombreUsuario(request.getNombreUsuario());
-            String pass = (request.getTipo().equals(TipoAutenticacion.LDAP.getId())) ? (String) parametroService.getParamVal(ParametroID.CONTRASENA_POR_DEFECTO) : request.getPass();
+            String pass = (request.getTipo().equals(TipoAutenticacion.LDAP.getId())) ? (String) parametroService.getParamVal(Parametro.DelSistema.CONTRASENA_POR_DEFECTO.name()) : request.getPass();
             model.setRolId(rolRepository.findById(request.getRolId()).get());
             if (pass != null) {
                 model.setContrasena(passwordEncoder.encode(ConfigEncriptacion.atob(pass)));
@@ -520,7 +522,7 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             Usuario model = optional.get();
             
             map.put(TiposComunes.ModuloBase.USUARIO, ConvercionUtil.toJson(model));
-            model.setContrasena((String) parametroService.getParamVal(ParametroID.CONTRASENA_POR_DEFECTO));
+            model.setContrasena((String) parametroService.getParamVal(Parametro.DelSistema.CONTRASENA_POR_DEFECTO.name()));
             model = repository.save(model);
             
             mapNuevo.put(TiposComunes.ModuloBase.USUARIO, ConvercionUtil.toJson(model));

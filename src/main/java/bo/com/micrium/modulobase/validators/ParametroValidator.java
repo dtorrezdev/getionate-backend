@@ -64,6 +64,7 @@ public class ParametroValidator extends GlobalValidator {
         if (input.getValor() != null && input.getValor().length() > 4000) {
             errors.rejectValue("valor", "field.valor", "La longitud del nombre debe ser menor a 4000.");
         }
+        // Descomentar cuando se tengas tipo Parametro cron quartz
         /*if (input.getNombre().contains("_CRON")) {
             //log.error("valido: " + org.quartz.CronExpression.isValidExpression(input.getValor()));
             if (!org.quartz.CronExpression.isValidExpression(input.getValor())) {
@@ -80,8 +81,8 @@ public class ParametroValidator extends GlobalValidator {
             return;
         }
 
-        if (!input.getNombre().matches(parametroService.getParametro(ParametroID.EXPRESION_REGULAR_GENERAL).getValor())) {
-            errors.rejectValue("nombre", "field.nombre", parametroService.getParametro(ParametroID.MENSAJE_VALIDACION_GENERAL).getValor());
+        if (!input.getNombre().matches(parametroService.getParametroByNombre(com.micrium.bd.access.enuns.Parametro.DelSistema.EXPRESION_REGULAR_GENERAL.name()).getValor())) {
+            errors.rejectValue("nombre", "field.nombre", parametroService.getParametroByNombre(com.micrium.bd.access.enuns.Parametro.DelSistema.MENSAJE_VALIDACION_GENERAL.name()).getValor());
         }
 
         if (!tipoParametroRepository.findById(input.getTipoParametroId()).isPresent()) {

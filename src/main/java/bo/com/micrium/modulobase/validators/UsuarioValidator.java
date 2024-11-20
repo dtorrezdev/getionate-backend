@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.models.Usuario;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
@@ -99,8 +101,8 @@ public class UsuarioValidator extends GlobalValidator {
             return;
         }
 
-        if (!input.getNombreUsuario().matches(parametroService.getParametro(ParametroID.EXPRESION_REGULAR_NOMBRE_USUARIO).getValor())) {
-            errors.rejectValue("nombreUsuario", "field.nombreUsuario", parametroService.getParametro(ParametroID.MENSAJE_VALIDACION_NOMBRE_USUARIO).getValor());
+        if (!input.getNombreUsuario().matches(parametroService.getParametroByNombre(Parametro.DelSistema.EXPRESION_REGULAR_NOMBRE_USUARIO.name()).getValor())) {
+            errors.rejectValue("nombreUsuario", "field.nombreUsuario", parametroService.getParametroByNombre(Parametro.DelSistema.MENSAJE_VALIDACION_NOMBRE_USUARIO.name()).getValor());
             return;
         }
 

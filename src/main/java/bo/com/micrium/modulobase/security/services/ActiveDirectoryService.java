@@ -13,6 +13,9 @@ import javax.naming.NamingException;
 import javax.naming.directory.*;
 
 import org.springframework.stereotype.Component;
+
+import com.micrium.bd.access.enuns.Parametro;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,10 +45,10 @@ public class ActiveDirectoryService implements Serializable {
 
     private Hashtable<String, String> cargarContext(String usuario, String password) {
         Hashtable<String, String> env = new Hashtable<String, String>();
-        env.put("java.naming.factory.initial", (String) parametroService.getParamVal(ParametroID.INITIAL_CONTEXT_FACTORY));
-        env.put("java.naming.provider.url", (String) parametroService.getParamVal(ParametroID.PROVIDER_URL));
-        env.put("java.naming.security.authentication", (String) parametroService.getParamVal(ParametroID.SECURITY_AUTHENTICACION));
-        env.put("java.naming.security.principal", (String) parametroService.getParamVal(ParametroID.DOMINIO) + usuario);
+        env.put("java.naming.factory.initial", (String) parametroService.getParamVal(Parametro.LDAP.INITIAL_CONTEXT_FACTORY.name()));
+        env.put("java.naming.provider.url", (String) parametroService.getParamVal(Parametro.LDAP.PROVIDER_URL.name()));
+        env.put("java.naming.security.authentication", (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_AUTHENTICACION.name()));
+        env.put("java.naming.security.principal", (String) parametroService.getParamVal(Parametro.LDAP.DOMINIO.name()) + usuario);
         env.put("java.naming.security.credentials", password);
 
         return env;
@@ -57,13 +60,13 @@ public class ActiveDirectoryService implements Serializable {
             return false;
         }
         Hashtable<String, String> env = new Hashtable<String, String>();
-        env.put("java.naming.factory.initial", (String) parametroService.getParamVal(ParametroID.INITIAL_CONTEXT_FACTORY));
-        env.put("java.naming.provider.url", (String) parametroService.getParamVal(ParametroID.PROVIDER_URL));
-        env.put("java.naming.security.authentication", (String) parametroService.getParamVal(ParametroID.SECURITY_AUTHENTICACION));
+        env.put("java.naming.factory.initial", (String) parametroService.getParamVal(Parametro.LDAP.INITIAL_CONTEXT_FACTORY.name()));
+        env.put("java.naming.provider.url", (String) parametroService.getParamVal(Parametro.LDAP.PROVIDER_URL.name()));
+        env.put("java.naming.security.authentication", (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_AUTHENTICACION.name()));
         //env.put("java.naming.security.principal", (String) parametroService.getParamVal(ParametroID.SECURITY_PRINCIPAL) + (String)parametroService.getParamVal(ParametroID.SECURITY_USER));
         //env.put("java.naming.security.credentials", (String) parametroService.getParamVal(ParametroID.SECURITY_CREDENTIALS));
 
-        env.put("java.naming.security.principal", (String) parametroService.getParamVal(ParametroID.SECURITY_PRINCIPAL) + usuario);
+        env.put("java.naming.security.principal", (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_PRINCIPAL.name()) + usuario);
         env.put("java.naming.security.credentials", password);
         try {
             InitialDirContext ctx = new InitialDirContext(env);
@@ -84,11 +87,11 @@ public class ActiveDirectoryService implements Serializable {
 
         Hashtable<String, String> env = new Hashtable<String, String>();
 
-        env.put("java.naming.factory.initial", (String) parametroService.getParamVal(ParametroID.INITIAL_CONTEXT_FACTORY));
-        env.put("java.naming.provider.url", (String) parametroService.getParamVal(ParametroID.PROVIDER_URL));
-        env.put("java.naming.security.authentication", (String) parametroService.getParamVal(ParametroID.SECURITY_AUTHENTICACION));
-        env.put("java.naming.security.principal", (String) parametroService.getParamVal(ParametroID.SECURITY_PRINCIPAL) + (String) parametroService.getParamVal(ParametroID.SECURITY_USER));
-        env.put("java.naming.security.credentials", (String) parametroService.getParamVal(ParametroID.SECURITY_CREDENTIALS));
+        env.put("java.naming.factory.initial", (String) parametroService.getParamVal(Parametro.LDAP.INITIAL_CONTEXT_FACTORY.name()));
+        env.put("java.naming.provider.url", (String) parametroService.getParamVal(Parametro.LDAP.PROVIDER_URL.name()));
+        env.put("java.naming.security.authentication", (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_AUTHENTICACION.name()));
+        env.put("java.naming.security.principal", (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_PRINCIPAL.name()) + (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_USER.name()));
+        env.put("java.naming.security.credentials", (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_CREDENTIALS.name()));
 
         try {
             /*dirC = new InitialDirContext(cargarContext((String) parametroService.getParamVal(ParametroID.SECURITY_USER),
@@ -143,8 +146,8 @@ public class ActiveDirectoryService implements Serializable {
 
         InitialLdapContext ctx = null;
         try {
-            ctx = new InitialLdapContext(cargarContext((String) parametroService.getParamVal(ParametroID.SECURITY_USER),
-                    (String) parametroService.getParamVal(ParametroID.SECURITY_CREDENTIALS)), null);
+            ctx = new InitialLdapContext(cargarContext((String) parametroService.getParamVal(Parametro.LDAP.SECURITY_USER.name()),
+                    (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_CREDENTIALS.name())), null);
             String searchBase = "DC=tigo,DC=net,DC=bo";
             SearchControls searchCtls = new SearchControls();
             searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -221,8 +224,8 @@ public class ActiveDirectoryService implements Serializable {
         InitialLdapContext ctx = null;
 
         try {
-            ctx = new InitialLdapContext(cargarContext((String) parametroService.getParamVal(ParametroID.SECURITY_USER),
-                    (String) parametroService.getParamVal(ParametroID.SECURITY_CREDENTIALS)), null);
+            ctx = new InitialLdapContext(cargarContext((String) parametroService.getParamVal(Parametro.LDAP.SECURITY_USER.name()),
+                    (String) parametroService.getParamVal(Parametro.LDAP.SECURITY_CREDENTIALS.name())), null);
 
             String searchBase = "DC=tigo,DC=net,DC=bo";
 

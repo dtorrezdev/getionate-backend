@@ -30,6 +30,8 @@ import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import bo.com.micrium.modulobase.services.ParametroService;
 import com.micrium.bd.access.jpa.models.Usuario;
 import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Grupo;
 import com.micrium.bd.access.jpa.models.Rol;
 import bo.com.micrium.logger.AbstractLogger;
@@ -92,7 +94,7 @@ public class AuthenticationLdapManager implements AuthenticationManager, Seriali
     }
 
     private Usuario cambiaEstadoUsuarioAHabilitadoSiPasoElTiempoDeBloqueo(Usuario usuario) {
-        int tiempoDeBloqueo = ((BigDecimal) parametroService.getParamVal(ParametroID.TIEMPO_BLOQUEO_AUTENTICACION)).intValue();
+        int tiempoDeBloqueo = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.TIEMPO_BLOQUEO_AUTENTICACION.name())).intValue();
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(usuario.getUltimoIntento());
@@ -108,8 +110,8 @@ public class AuthenticationLdapManager implements AuthenticationManager, Seriali
     }
 
     private Usuario contarNroIntentoDeInicioLogin(Usuario usuario) {
-        int nroIntentos = ((BigDecimal) parametroService.getParamVal(ParametroID.NUMERO_INTENTOS_AUTENTICACION)).intValue();
-        int tiempoDeBloqueo = ((BigDecimal) parametroService.getParamVal(ParametroID.TIEMPO_BLOQUEO_AUTENTICACION)).intValue();
+        int nroIntentos = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.NUMERO_INTENTOS_AUTENTICACION.name())).intValue();
+        int tiempoDeBloqueo = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.TIEMPO_BLOQUEO_AUTENTICACION.name())).intValue();
 
         if (usuario.getUltimoIntento() != null) {
             Calendar cal = Calendar.getInstance();
@@ -139,7 +141,7 @@ public class AuthenticationLdapManager implements AuthenticationManager, Seriali
     }
 
     public Rol validarCredenciales(String nombreUsuario, String contrasena) throws AuthenticationException {
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(ParametroID.VALIDACION_ACTIVE_DIRECTORY)).intValue();
+        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
         log.info("validacionActiveDirectory: " + validacionActiveDirectory);
         Usuario usuario = usuarioRepository.findByNombreUsuarioAndEstadoIn(nombreUsuario, Arrays.asList(UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO, UsuarioEstado.INHABILITADO));
 
@@ -152,7 +154,7 @@ public class AuthenticationLdapManager implements AuthenticationManager, Seriali
         LoggerMain.debug("***** OAC validacion si es usuario null y GRUPO LDAP");
         if (usuario == null && (validacionActiveDirectory == TipoAutenticacion.LDAP.getId() || validacionActiveDirectory == TipoAutenticacion.HIBRIDO.getId())) {
             try {
-                Boolean validacionGrupoLDAP = (Boolean) parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
+                Boolean validacionGrupoLDAP = (Boolean) parametroService.getParamVal(Parametro.DelSistema.ACTIVE_DIRECTORY_GRUPOLDAP.name());
                 log.debug("************* OAC Logueo por logica de GrupoLDAP - validacionGrupoLDAP: " + validacionGrupoLDAP);
                 //Si el usuario no existe, empieza a intentar loguear por Logica de GrupoLDAP, primero verifica parametro
                 if (!validacionGrupoLDAP) {
