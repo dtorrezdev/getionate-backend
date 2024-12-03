@@ -1,54 +1,41 @@
 package bo.com.micrium.modulobase.controllers;
 
-import java.util.AbstractMap;
-import java.util.Map;
+import java.net.URISyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.AbstractMap;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.net.URI;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.validation.BindingResult;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
-import bo.com.micrium.modulobase.commons.GrupoEstado;
 import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
 import com.micrium.bd.access.jpa.models.Accion;
 import com.micrium.bd.access.jpa.models.Formulario;
-import com.micrium.bd.access.jpa.models.Grupo;
-import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.models.dto.FormularioRequest2;
 import com.micrium.bd.access.jpa.models.dto.FormularioResponse2;
-import com.micrium.bd.access.jpa.models.dto.RolResponse;
 import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
 import com.micrium.bd.access.jpa.repositories.IAccionRepository;
-import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.FormularioValidator;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.NoHandlerFoundException;
-
-import bo.com.micrium.cifrado.ConfigEncriptacion;
-import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -66,100 +53,88 @@ public class FormularioControler extends GenericControler implements ICrudContro
     @Autowired
     private transient FormularioValidator validator;
 
-    private transient final Bucket bucket;
-
-    public FormularioControler() {
-        Long peticiones = ApplicationProperties.LIMIT;
-        Long minutes = ApplicationProperties.DURATION;
-
-        Bandwidth limit = Bandwidth.classic(peticiones, Refill.greedy(peticiones, Duration.ofMinutes(minutes)));
-        this.bucket = Bucket4j.builder().addLimit(limit).build();
-    }
-
     @Override
     public Page<FormularioResponse2> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
 
         try {
-            if (bucket.tryConsume(1)) {
-                validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
 
-                //final String nombre = this.httpServletRequest.getParameter("nombre");
-                //final String url = this.httpServletRequest.getParameter("url");
-                //final String tipo = this.httpServletRequest.getParameter("tipo");
-                final String nombre = filterTextoQueryUpper(this.httpServletRequest.getParameter("nombre"));
-                final String orden = filterTextoQueryUpper(this.httpServletRequest.getParameter("orden"));
-                final String moduloId = filterTextoQueryUpper(this.httpServletRequest.getParameter("moduloId"));
-                final String url = filterTextoQueryUpper(this.httpServletRequest.getParameter("url"));
-                final String icono = filterTextoQueryUpper(this.httpServletRequest.getParameter("icono"));
+            //final String nombre = this.httpServletRequest.getParameter("nombre");
+            //final Stringe url = this.httpServletRequest.getParameter("url");
+            //final String tipo = this.httpServletRequest.getParameter("tipo");
+            final String nombre = filterTextoQueryUpper(this.httpServletRequest.getParameter("nombre"));
+            final String orden = filterTextoQueryUpper(this.httpServletRequest.getParameter("orden"));
+            final String moduloId = filterTextoQueryUpper(this.httpServletRequest.getParameter("moduloId"));
+            final String url = filterTextoQueryUpper(this.httpServletRequest.getParameter("url"));
+            final String icono = filterTextoQueryUpper(this.httpServletRequest.getParameter("icono"));
 
-                if (!isBlanck(nombre) && (nombre.length() > 200)) {
-                    throw new Exception("La longitud del nombre no debe ser mayor a 100.");
-                }
-
-                if (!isBlanck(url) && (url.length() > 255)) {
-                    throw new Exception("La longitud de la url no debe ser mayor a 255.");
-                }
-
-                if (!isBlanck(icono) && (icono.length() > 150)) {
-                    throw new Exception("La longitud del tipo no debe ser mayor a 50.");
-                }
-
-                ipClient = obtenerIp(ipClient);
-              
-                LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("nombre ", nombre),
-                        new AbstractMap.SimpleEntry<>("orden ", orden),
-                        new AbstractMap.SimpleEntry<>("moduloId ", moduloId),
-                        new AbstractMap.SimpleEntry<>("url ", url),
-                        new AbstractMap.SimpleEntry<>("icono ", icono),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
-                        //collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing)));
-
-
-                /*Page<FormularioResponse2> out = repository.filter(
-                        ((nombre == null || nombre.isEmpty()) ? -1 : 0), 
-                        ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                        ((url == null || url.isEmpty()) ? -1 : 0), 
-                        ((url == null || url.trim().isEmpty()) ? "" : "%" + url.trim().toUpperCase() + "%"),
-                        ((tipo == null || tipo.isEmpty()) ? -1 : 0), 
-                        ((tipo == null || tipo.trim().isEmpty()) ? "" : "%" + tipo.trim().toUpperCase() + "%"),
-                        pageRequest).map(model -> {
-                            FormularioResponse2 formularioResponse = ConvercionUtil.convertToObject(model, FormularioResponse2.class);
-                            formularioResponse.setModuloId(model.getModuloId().getId());
-                            return formularioResponse;
-                        });*/
-                         Page<FormularioResponse2> out = repository.filter(
-                            queryfilterTexto(nombre), filterTextoQueryUpperLike(nombre),
-                            queryfilterTexto(orden), filterTextoQueryUpperLike(orden),
-                            queryfilterTexto(moduloId), filterTextoQueryUpperLike(moduloId),
-                            queryfilterTexto(url), filterTextoQueryUpperLike(url),
-                            queryfilterTexto(icono), filterTextoQueryUpperLike(icono),
-                            //Rol.SUPER_ADMINISTRADOR, 
-                            pageRequest)
-                            .map(model -> {
-                                FormularioResponse2 convertToObject = ConvercionUtil.convertToObject(model, FormularioResponse2.class);
-                                return convertToObject;
-                            });
-                    //.map(model
-                
-                LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("response ", out),
-                        new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-                return out;
+            if (!isBlanck(nombre) && (nombre.length() > 200)) {
+                throw new Exception("La longitud del nombre no debe ser mayor a 100.");
             }
-            throw new Exception("Demasiadas solicitudes, vuelva intentar más tarde...");
+
+            if (!isBlanck(url) && (url.length() > 255)) {
+                throw new Exception("La longitud de la url no debe ser mayor a 255.");
+            }
+
+            if (!isBlanck(icono) && (icono.length() > 150)) {
+                throw new Exception("La longitud del tipo no debe ser mayor a 50.");
+            }
+
+            ipClient = obtenerIp(ipClient);
+        
+            LoggerMain.printRequest(Stream.of(
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("nombre ", nombre),
+                new AbstractMap.SimpleEntry<>("orden ", orden),
+                new AbstractMap.SimpleEntry<>("moduloId ", moduloId),
+                new AbstractMap.SimpleEntry<>("url ", url),
+                new AbstractMap.SimpleEntry<>("icono ", icono),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
+                //collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing))
+            );
+
+            /*Page<FormularioResponse2> out = repository.filter(
+                ((nombre == null || nombre.isEmpty()) ? -1 : 0), 
+                ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                ((url == null || url.isEmpty()) ? -1 : 0), 
+                ((url == null || url.trim().isEmpty()) ? "" : "%" + url.trim().toUpperCase() + "%"),
+                ((tipo == null || tipo.isEmpty()) ? -1 : 0), 
+                ((tipo == null || tipo.trim().isEmpty()) ? "" : "%" + tipo.trim().toUpperCase() + "%"),
+                pageRequest).map(model -> {
+                    FormularioResponse2 formularioResponse = ConvercionUtil.convertToObject(model, FormularioResponse2.class);
+                    formularioResponse.setModuloId(model.getModuloId().getId());
+                    return formularioResponse;
+                });*/
+            Page<FormularioResponse2> out = repository.filter(
+                queryfilterTexto(nombre), filterTextoQueryUpperLike(nombre),
+                queryfilterTexto(orden), filterTextoQueryUpperLike(orden),
+                queryfilterTexto(moduloId), filterTextoQueryUpperLike(moduloId),
+                queryfilterTexto(url), filterTextoQueryUpperLike(url),
+                queryfilterTexto(icono), filterTextoQueryUpperLike(icono),
+                //Rol.SUPER_ADMINISTRADOR, 
+                pageRequest)
+                .map(model -> {
+                    FormularioResponse2 convertToObject = ConvercionUtil.convertToObject(
+                        model, FormularioResponse2.class);
+                    return convertToObject;
+                });
+                            
+            LoggerMain.printResponse(Stream.of(
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("response ", out),
+                new AbstractMap.SimpleEntry<>("content ", out.getContent())).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
+
+            return out;            
 
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar formulario, " + e.getMessage();
@@ -353,5 +328,4 @@ public class FormularioControler extends GenericControler implements ICrudContro
         }
     }
     
-
 }

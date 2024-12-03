@@ -19,7 +19,6 @@ import com.micrium.bd.access.enuns.Parametro;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
 import bo.com.micrium.modulobase.services.ParametroService;
 

@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.AbstractMap;
-import java.time.Duration;
 
 import jakarta.validation.Valid;
 
@@ -29,10 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
+
 
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
@@ -44,7 +40,6 @@ import com.micrium.bd.access.jpa.repositories.IEtiquetaRepository;
 import com.micrium.bd.access.jpa.models.dto.EtiquetaRequest;
 import com.micrium.bd.access.jpa.models.dto.EtiquetaResponse;
 // import bo.com.micrium.modulobase.security.utils.JWTTokenUtil;
-import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.EtiquetaValidator;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
@@ -75,43 +70,26 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
     @Autowired
     private transient EtiquetaValidator validator;
 
-    private transient final Bucket bucket;
-
-    public EtiquetaControler() {
-        Long peticiones = ApplicationProperties.LIMIT;
-        Long minutes = ApplicationProperties.DURATION;
-        Bandwidth limit = Bandwidth.classic(peticiones, Refill.greedy(peticiones, Duration.ofMinutes(minutes)));
-        this.bucket = Bucket4j.builder().addLimit(limit).build();
-    }
-
     @PostMapping("/by/llave")
     List<EtiquetaResponse> findAllByLlaveIn(@Valid @RequestBody List<String> request) {
         String ipClient = obtenerIp(null);
         LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()), 
-                    new AbstractMap.SimpleEntry<>("request ", request),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("dtn-------------------REQUEST----------------------\n").
-                append("ipClient ").append(httpServletRequest.getRemoteAddr()).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-        log.info(sb.toString());*/
-        List<EtiquetaResponse> out = (List<EtiquetaResponse>)this.repository.findAllByLlaveIn(request).stream().map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class)).collect(Collectors.toList());
-        /*sb = new StringBuilder();
-        sb.append("dtn-------------------RESPONSE----------------------\n").
-                append("ipClient ").append(httpServletRequest.getRemoteAddr()).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("------------------------------------------------\n");
-        LoggerMain.info(sb.toString());*/
+            new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+            new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()), 
+            new AbstractMap.SimpleEntry<>("request ", request),
+            new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
+            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
+        
+        List<EtiquetaResponse> out = (List<EtiquetaResponse>) this.repository.findAllByLlaveIn(request)
+            .stream().map( model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class)
+            ).collect(Collectors.toList());
+        
         LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+            new AbstractMap.SimpleEntry<>("response ", out)).
+            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
 
         return out;
     }
@@ -120,32 +98,22 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
     List<EtiquetaResponse> findAllByGrupo(@Valid @RequestBody List<String> request) {
         String ipClient = obtenerIp(null);
         LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),                    
-                    new AbstractMap.SimpleEntry<>("request ", request),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("ipClient ").append(httpServletRequest.getRemoteAddr()).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-        log.info(sb.toString());*/
+            new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+            new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),                    
+            new AbstractMap.SimpleEntry<>("request ", request),
+            new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
+            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
+        
+        List<EtiquetaResponse> out = repository.findAllByGrupoIn(request)
+            .stream().map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class)
+            ).collect(Collectors.toList());
 
-        List<EtiquetaResponse> out = repository.findAllByGrupoIn(request).stream().map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class)).collect(Collectors.toList());
-
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("ipClient ").append(httpServletRequest.getRemoteAddr()).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("------------------------------------------------\n");
-        log.info(sb.toString());*/
         LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+            new AbstractMap.SimpleEntry<>("response ", out)).
+            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
 
         return out;
     }
@@ -154,33 +122,22 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
     List<EtiquetaResponse> findAllByGrupo2(@Valid @RequestBody List<String> request) {
         String ipClient = obtenerIp(null);
         LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),                    
-                    new AbstractMap.SimpleEntry<>("request ", request),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("ipClient ").append(httpServletRequest.getRemoteAddr()).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-        log.info(sb.toString());*/
+            new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+            new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),                    
+            new AbstractMap.SimpleEntry<>("request ", request),
+            new AbstractMap.SimpleEntry<>("ipClient ", ipClient)).
+            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
 
-        List<EtiquetaResponse> out = repository.findAllByGrupoIn(request).stream().map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class)).collect(Collectors.toList());
-
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("ipClient ").append(httpServletRequest.getRemoteAddr()).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        List<EtiquetaResponse> out = repository.findAllByGrupoIn(request)
+            .stream().map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class)
+            ).collect(Collectors.toList());
+        
         LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+            new AbstractMap.SimpleEntry<>("response ", out)).
+            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
 
         return out;
     }
@@ -189,69 +146,53 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
     public Page<EtiquetaResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
 
         try {
-            if (bucket.tryConsume(1)) {
-                validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            
+            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
 
-                final String llave = this.httpServletRequest.getParameter("llave");
-                final String grupo = this.httpServletRequest.getParameter("grupo");
-                final String valor = this.httpServletRequest.getParameter("valor");
-                if (!isBlanck(llave) && (llave.length() > 255)) {
-                    throw new Exception("La longitud del llave no debe ser mayor a 255.");
-                }
-
-                if (!isBlanck(grupo) && (grupo.length() > 255)) {
-                    throw new Exception("La longitud del grupo no debe ser mayor a 255.");
-                }
-
-                if (!isBlanck(valor) && (valor.length() > 255)) {
-                    throw new Exception("La longitud del valor no debe ser mayor a 255.");
-                }
-
-                /*StringBuilder sb = new StringBuilder();
-                sb.append("-------------------REQUEST----------------------\n").
-                        append("token ").append(token).append(", \n").
-                        append("form ").append(form).append(", \n").
-                        append("ipClient ").append(ipClient).append(", \n").
-                        append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                        append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                        append("pageRequest ").append(pageRequest).append(", \n").
-                        append("------------------------------------------------\n");
-                log.info(sb.toString());*/
-                ipClient = obtenerIp(ipClient);
-                LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-                Page<EtiquetaResponse> out = repository.filter(((llave == null || llave.isEmpty()) ? -1 : 0), ((llave == null || llave.trim().isEmpty()) ? "" : "%" + llave.trim().toUpperCase() + "%"),
-                        ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
-                        ((grupo == null || grupo.isEmpty()) ? -1 : 0), ((grupo == null || grupo.trim().isEmpty()) ? "" : "%" + grupo.trim().toUpperCase() + "%"),
-                        pageRequest)
-                        .map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class));
-
-                /*sb = new StringBuilder();
-                sb.append("-------------------RESPONSE----------------------\n").
-                        append("token ").append(token).append(", \n").
-                        append("DATA ").append(out).append(", \n").
-                        append("CONTENT ").append(out.getContent()).append(", \n").
-                        append("------------------------------------------------\n");
-                log.info(sb.toString());*/
-                bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
-                LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out),
-                        new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                return out;
+            final String llave = this.httpServletRequest.getParameter("llave");
+            final String grupo = this.httpServletRequest.getParameter("grupo");
+            final String valor = this.httpServletRequest.getParameter("valor");
+            if (!isBlanck(llave) && (llave.length() > 255)) {
+                throw new Exception("La longitud del llave no debe ser mayor a 255.");
             }
-            //return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
-            throw new Exception("Demasiadas solicitudes, vuelva intentar mas tarde...");
 
+            if (!isBlanck(grupo) && (grupo.length() > 255)) {
+                throw new Exception("La longitud del grupo no debe ser mayor a 255.");
+            }
+
+            if (!isBlanck(valor) && (valor.length() > 255)) {
+                throw new Exception("La longitud del valor no debe ser mayor a 255.");
+            }
+
+            
+            ipClient = obtenerIp(ipClient);
+            LoggerMain.printRequest(Stream.of(
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("request ", pageRequest)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
+
+            Page<EtiquetaResponse> out = repository.filter(
+                    ((llave == null || llave.isEmpty()) ? -1 : 0), ((llave == null || llave.trim().isEmpty()) ? "" : "%" + llave.trim().toUpperCase() + "%"),
+                    ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
+                    ((grupo == null || grupo.isEmpty()) ? -1 : 0), ((grupo == null || grupo.trim().isEmpty()) ? "" : "%" + grupo.trim().toUpperCase() + "%"),
+                    pageRequest)
+                    .map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class));
+            
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
+            LoggerMain.printResponse(Stream.of(
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", out),
+                new AbstractMap.SimpleEntry<>("content ", out.getContent())).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
+
+            return out;            
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar etiquetas, " + e.getMessage();
 
@@ -307,25 +248,16 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
         try {
             ipClient = obtenerIp(ipClient);
 
-            /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-        log.info(sb.toString());*/
             LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("request ", request)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
 
             validator.validate(request, null, result);
 
@@ -341,18 +273,13 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
 
             ResponseEntity<EtiquetaResponse> out = ResponseEntity.created(new URI("/etiquetas/" + model.getId()))
                     .body(ConvercionUtil.convertToObject(model, EtiquetaResponse.class));
-
-            /*sb = new StringBuilder();
-            sb.append("-------------------RESPONSE----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("DATA ").append(out).append(", \n").
-                    append("------------------------------------------------\n");
-            log.info(sb.toString());*/
+           
             LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("response ", out)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
 
             return out;
         } catch (ApiException | URISyntaxException e) {
@@ -376,15 +303,16 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
         try {
             ipClient = obtenerIp(ipClient);
             LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("id ", id),
+                new AbstractMap.SimpleEntry<>("request ", request)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
 
             Long idDesenciptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesenciptado, result);
@@ -406,10 +334,11 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
             ResponseEntity<EtiquetaResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertToObject(model, EtiquetaResponse.class));
             
             LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("response ", out)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
 
             return out;
         } catch (ApiException | EncriptacionExcepcion e) {

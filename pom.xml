@@ -163,7 +163,7 @@
 		<dependency>
             <groupId>com.github.vladimir-bukhtoyarov</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>4.10.0</version>
+            <version>8.0.1</version>
         </dependency>
 		<!-- migrar a esta Versio pronto -->
 		<!-- <dependency>
@@ -171,14 +171,6 @@
 			<artifactId>bucket4j-core</artifactId>
 			<version>8.10.1</version>
 		</dependency> -->
-
-		<!-- Uso para menejo de Rate Limiter (Limitar la peticiones) para solucionar la vulnerabilidad de Negacion de Servicio
-		  https://mvnrepository.com/artifact/com.google.guava/guava-rate-limiter -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>32.0.1-jre</version> <!-- Utiliza la versión más reciente -->
-        </dependency>					
 
 	</dependencies>
 

@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -29,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.PermisoTipo;
 import bo.com.micrium.modulobase.commons.PrivilegioTipo;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
@@ -66,9 +63,8 @@ import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.NoHandlerFoundException;
 

@@ -19,12 +19,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import bo.com.micrium.modulobase.commons.DateUtil;
+
 import com.micrium.bd.access.jpa.repositories.ILogSistemaRepository;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import com.micrium.bd.access.jpa.models.dto.LogSistemaResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
-import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;

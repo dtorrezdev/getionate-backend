@@ -5,10 +5,27 @@
  */
 package bo.com.micrium.modulobase.controllers;
 
-import java.util.AbstractMap;
-import java.util.Map;
 import java.util.stream.Collectors;
+import java.net.URISyntaxException;
 import java.util.stream.Stream;
+import java.util.AbstractMap;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
+import java.net.URI;
+
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.validation.BindingResult;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
@@ -21,34 +38,11 @@ import com.micrium.bd.access.jpa.models.dto.GrupoRequest;
 import com.micrium.bd.access.jpa.models.dto.GrupoResponse;
 import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
-import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.GrupoValidator;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.NoHandlerFoundException;
-
 import bo.com.micrium.modulobase.commons.GrupoEstado;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
-import java.time.Duration;
-import java.util.HashMap;
 
 /**
  *
@@ -69,85 +63,72 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
 
     @Autowired
     private transient GrupoValidator validator;
-
-    private transient final Bucket bucket;
-
-    public GrupoControler() {
-        Long peticiones = ApplicationProperties.LIMIT;
-        Long minutes = ApplicationProperties.DURATION;
-
-        Bandwidth limit = Bandwidth.classic(peticiones, Refill.greedy(peticiones, Duration.ofMinutes(minutes)));
-        this.bucket = Bucket4j.builder().addLimit(limit).build();
-    }
+    
 
     @Override
     public Page<GrupoResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
 
         try {
-            if (bucket.tryConsume(1)) {
-                validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
 
-                final String nombre = this.httpServletRequest.getParameter("nombre");
-                final String descripcion = this.httpServletRequest.getParameter("descripcion");
-                final String rolNombre = this.httpServletRequest.getParameter("rolNombre");
+            final String nombre = this.httpServletRequest.getParameter("nombre");
+            final String descripcion = this.httpServletRequest.getParameter("descripcion");
+            final String rolNombre = this.httpServletRequest.getParameter("rolNombre");
 
-                if (!isBlanck(nombre) && (nombre.length() > 100)) {
-                    throw new Exception("La longitud del nombre no debe ser mayor a 100.");
-                }
-
-                if (!isBlanck(descripcion) && (descripcion.length() > 255)) {
-                    throw new Exception("La longitud de descripcion no debe ser mayor a 255.");
-                }
-
-                if (!isBlanck(rolNombre) && (rolNombre.length() > 50)) {
-                    throw new Exception("La longitud del rolNombre no debe ser mayor a 50.");
-                }
-
-                ipClient = obtenerIp(ipClient);
-              
-                LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("nombre ", nombre),
-                        new AbstractMap.SimpleEntry<>("descripcion ", descripcion),
-                        new AbstractMap.SimpleEntry<>("rolNombre ", rolNombre),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-                Page<GrupoResponse> out = repository.filter(((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                        ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
-                        ((rolNombre == null || rolNombre.isEmpty()) ? -1 : 0), ((rolNombre == null || rolNombre.trim().isEmpty()) ? "" : "%" + rolNombre.trim().toUpperCase() + "%"),
-                        pageRequest).map(model -> {
-                            GrupoResponse grupoResponse = ConvercionUtil.convertToObject(model, GrupoResponse.class);
-                            grupoResponse.setRolId(model.getRolId().getId());
-                            grupoResponse.setRolNombre(model.getRolId().getNombre());
-                            return grupoResponse;
-                        });
-                
-                LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("response ", out),
-                        new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-                return out;
+            if (!isBlanck(nombre) && (nombre.length() > 100)) {
+                throw new Exception("La longitud del nombre no debe ser mayor a 100.");
             }
-            throw new Exception("Demasiadas solicitudes, vuelva intentar mas tarde...");
+
+            if (!isBlanck(descripcion) && (descripcion.length() > 255)) {
+                throw new Exception("La longitud de descripcion no debe ser mayor a 255.");
+            }
+
+            if (!isBlanck(rolNombre) && (rolNombre.length() > 50)) {
+                throw new Exception("La longitud del rolNombre no debe ser mayor a 50.");
+            }
+
+            ipClient = obtenerIp(ipClient);
+        
+            LoggerMain.printRequest(Stream.of(
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("nombre ", nombre),
+                    new AbstractMap.SimpleEntry<>("descripcion ", descripcion),
+                    new AbstractMap.SimpleEntry<>("rolNombre ", rolNombre),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
+                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            Page<GrupoResponse> out = repository.filter(((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                    ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
+                    ((rolNombre == null || rolNombre.isEmpty()) ? -1 : 0), ((rolNombre == null || rolNombre.trim().isEmpty()) ? "" : "%" + rolNombre.trim().toUpperCase() + "%"),
+                    pageRequest).map(model -> {
+                        GrupoResponse grupoResponse = ConvercionUtil.convertToObject(model, GrupoResponse.class);
+                        grupoResponse.setRolId(model.getRolId().getId());
+                        grupoResponse.setRolNombre(model.getRolId().getNombre());
+                        return grupoResponse;
+                    });
+            
+            LoggerMain.printResponse(Stream.of(
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("response ", out),
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
+                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            return out;
 
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar grupo, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
-            HashMap<String, String> map = new HashMap();
+            HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
-
             throw e;
         }
     }
@@ -161,7 +142,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
     @Override
     public ResponseEntity<GrupoResponse> create(String token, String ipClient, String form,
             GrupoRequest request, BindingResult result) throws URISyntaxException, ApiException {
-        HashMap<String, String> map = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
             
@@ -212,8 +193,8 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
     @Override
     public ResponseEntity<GrupoResponse> update(String token, String ipClient, String form,
             GrupoRequest request, String id, BindingResult result) throws ApiException {
-        HashMap<String, String> map = new HashMap();
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> mapNuevo = new HashMap<>();
 
         try {
             ipClient = obtenerIp(ipClient);
@@ -272,8 +253,8 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
     @Override
     public ResponseEntity<?> delete(String token, String ipClient, String form,
             String id) throws ApiException {
-        HashMap<String, String> map = new HashMap();
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> mapNuevo = new HashMap<>();
 
         ipClient = obtenerIp(ipClient);
         try {

@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -49,17 +48,12 @@ import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
 import bo.com.micrium.modulobase.validators.ParametroValidator;
-import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.TipoAutenticacion;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
-import java.time.Duration;
+
 
 /**
  *
@@ -90,97 +84,86 @@ public class ParametroControler extends GenericControler implements ICrudControl
     @Autowired
     private transient ParametroService parametroService;
 
-    private transient final Bucket bucket;
-
-    public ParametroControler() {
-        Long peticiones = ApplicationProperties.LIMIT;
-        Long minutes = ApplicationProperties.DURATION;
-        Bandwidth limit = Bandwidth.classic(peticiones, Refill.greedy(peticiones, Duration.ofMinutes(minutes)));
-        this.bucket = Bucket4j.builder().addLimit(limit).build();
-    }
-
     @Override
     public Page<ParametroResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
         try {
-            if (bucket.tryConsume(1)) {
-                validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            
+            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
 
-                final String nombre = this.httpServletRequest.getParameter("nombre");
-                final String valor = this.httpServletRequest.getParameter("valor");
-                final String descripcion = this.httpServletRequest.getParameter("descripcion");
-                final String idtipoparametro = this.httpServletRequest.getParameter("idtipoparametro");
+            final String nombre = this.httpServletRequest.getParameter("nombre");
+            final String valor = this.httpServletRequest.getParameter("valor");
+            final String descripcion = this.httpServletRequest.getParameter("descripcion");
+            final String idtipoparametro = this.httpServletRequest.getParameter("idtipoparametro");
 
-                ipClient = obtenerIp(ipClient);
+            ipClient = obtenerIp(ipClient);
 
-                LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            LoggerMain.printRequest(Stream.of(
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("request ", pageRequest)).
+                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-                Page<ParametroResponse> out = null;
-                if (idtipoparametro == null || idtipoparametro.isEmpty()) {
-                    List<RolTipoParametroPermiso> tiposparametrosIds = rolTipoparametroRepository.
-                            findAllByRolId(rolRepository.findByNombreAndEstadoTrue(obtenerRol()).getId()).
-                            stream().filter(p -> p.getTipoPermiso() != PermisoTipo.PERMISO_NINGUNO).collect(Collectors.toList());
+            Page<ParametroResponse> out = null;
+            if (idtipoparametro == null || idtipoparametro.isEmpty()) {
+                List<RolTipoParametroPermiso> tiposparametrosIds = rolTipoparametroRepository.
+                        findAllByRolId(rolRepository.findByNombreAndEstadoTrue(obtenerRol()).getId()).
+                        stream().filter(p -> p.getTipoPermiso() != PermisoTipo.PERMISO_NINGUNO).collect(Collectors.toList());
 
-                    /*out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
-                            map(model -> ConvercionUtil.convertir(model,
-                            tipoParametroRepository.findById(model.getTipoParametroId()).get(),
-                            tiposparametrosIds.stream().filter(
-                                    o -> o.getTipoParametroId() == model.getTipoParametroId()).findFirst().get().getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA));*/
-                    out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
-                            map(model -> {
-                                TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
-                                ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
-                                parametroResponse.setTipoParametroNombre(tipoParametro.getNombre());
-                                parametroResponse.setEditable(tiposparametrosIds.stream().filter(
-                                        o -> o.getTipoParametroId().equals(model.getTipoParametroId())).findFirst().get().getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA);
-                                return parametroResponse;
-                            });
-                } else {
-                    Optional<TipoParametro> tiposparametro = tipoParametroRepository.findById(Long.valueOf(idtipoparametro.trim()));
-                    TipoParametro tipoParametroValue = tiposparametro.get();
+                /*out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
+                        map(model -> ConvercionUtil.convertir(model,
+                        tipoParametroRepository.findById(model.getTipoParametroId()).get(),
+                        tiposparametrosIds.stream().filter(
+                                o -> o.getTipoParametroId() == model.getTipoParametroId()).findFirst().get().getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA));*/
+                out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
+                        map(model -> {
+                            TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
+                            ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
+                            parametroResponse.setTipoParametroNombre(tipoParametro.getNombre());
+                            parametroResponse.setEditable(tiposparametrosIds.stream().filter(
+                                    o -> o.getTipoParametroId().equals(model.getTipoParametroId())).findFirst().get().getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA);
+                            return parametroResponse;
+                        });
+            } else {
+                Optional<TipoParametro> tiposparametro = tipoParametroRepository.findById(Long.valueOf(idtipoparametro.trim()));
+                TipoParametro tipoParametroValue = tiposparametro.get();
 
-                    /*out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                            ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
-                            ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
-                            pageRequest)
-                            .map(model -> ConvercionUtil.convertir(model, tipoParametroValue, true));*/
-                    out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                            ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
-                            ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
-                            pageRequest)
-                            .map(model -> {
-                                ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
-                                parametroResponse.setTipoParametroNombre(tipoParametroValue.getNombre());
-                                parametroResponse.setEditable(false);
-                                return parametroResponse;
-                            });
-                }
-        
-                bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
-                LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out),
-                        new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-                return out;
+                /*out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                        ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
+                        ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
+                        pageRequest)
+                        .map(model -> ConvercionUtil.convertir(model, tipoParametroValue, true));*/
+                out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                        ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
+                        ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
+                        pageRequest)
+                        .map(model -> {
+                            ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
+                            parametroResponse.setTipoParametroNombre(tipoParametroValue.getNombre());
+                            parametroResponse.setEditable(false);
+                            return parametroResponse;
+                        });
             }
-            throw new Exception("Demasiadas solicitudes, vuelva intentar mas tarde...");
+    
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
+            LoggerMain.printResponse(Stream.of(
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("response ", out),
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
+                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            return out;            
 
         } catch (Exception e) {
             final String mensajeError = "Error al obtener Parametro, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
-            HashMap<String, String> map = new HashMap();
+            HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
             throw e;
@@ -240,7 +223,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
         } catch (EncriptacionExcepcion e) {
             final String mensajeError = "Error al obtener Parametro, " + e.getMessage();
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
-            HashMap<String, String> map = new HashMap();
+            HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
             throw new ApiException(e.getMessage(), e);

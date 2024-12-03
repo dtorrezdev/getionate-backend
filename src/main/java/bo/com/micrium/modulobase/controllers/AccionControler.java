@@ -1,9 +1,25 @@
 package bo.com.micrium.modulobase.controllers;
 
-import java.util.AbstractMap;
-import java.util.Map;
+import java.net.URISyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.AbstractMap;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.net.URI;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
@@ -17,34 +33,9 @@ import com.micrium.bd.access.jpa.models.dto.AccionRequest;
 import com.micrium.bd.access.jpa.models.dto.AccionResponse2;
 import com.micrium.bd.access.jpa.repositories.IAccionRepository;
 import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
-import bo.com.micrium.modulobase.security.config.ApplicationProperties;
 import bo.com.micrium.modulobase.validators.AccionValidator;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.NoHandlerFoundException;
-
-import bo.com.micrium.cifrado.ConfigEncriptacion;
-import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -60,99 +51,88 @@ public class AccionControler extends GenericControler implements ICrudControler<
     private transient IRolAccionRepository rolAccionRepository;
 
     @Autowired
-    private transient AccionValidator validator;
+    private transient AccionValidator validator;    
 
-    private transient final Bucket bucket;
-
-    public AccionControler() {
-        Long peticiones = ApplicationProperties.LIMIT;
-        Long minutes = ApplicationProperties.DURATION;
-
-        Bandwidth limit = Bandwidth.classic(peticiones, Refill.greedy(peticiones, Duration.ofMinutes(minutes)));
-        this.bucket = Bucket4j.builder().addLimit(limit).build();
-    }
 
     @Override
     public Page<AccionResponse2> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
 
         try {
-            if (bucket.tryConsume(1)) {
-                validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
 
-                //final String formularioId = this.httpServletRequest.getParameter("formularioId");
-                //final String url = this.httpServletRequest.getParameter("url");
-                //final String tipo = this.httpServletRequest.getParameter("tipo");
-                final String formularioId = filterTextoQueryUpper(this.httpServletRequest.getParameter("formularioId"));
-                final String nombre = filterTextoQueryUpper(this.httpServletRequest.getParameter("nombre"));
-                final String url = filterTextoQueryUpper(this.httpServletRequest.getParameter("url"));
-                final String metodo = filterTextoQueryUpper(this.httpServletRequest.getParameter("metodo"));
+            //final String formularioId = this.httpServletRequest.getParameter("formularioId");
+            //final String url = this.httpServletRequest.getParameter("url");
+            //final String tipo = this.httpServletRequest.getParameter("tipo");
+            final String formularioId = filterTextoQueryUpper(this.httpServletRequest.getParameter("formularioId"));
+            final String nombre = filterTextoQueryUpper(this.httpServletRequest.getParameter("nombre"));
+            final String url = filterTextoQueryUpper(this.httpServletRequest.getParameter("url"));
+            final String metodo = filterTextoQueryUpper(this.httpServletRequest.getParameter("metodo"));
 
-                if (!isBlanck(formularioId) && (formularioId.length() > 200)) {
-                    throw new Exception("La longitud del formularioId no debe ser mayor a 100.");
-                }
-
-                if (!isBlanck(url) && (url.length() > 255)) {
-                    throw new Exception("La longitud de la url no debe ser mayor a 255.");
-                }
-
-                if (!isBlanck(metodo) && (metodo.length() > 150)) {
-                    throw new Exception("La longitud del tipo no debe ser mayor a 50.");
-                }
-
-                ipClient = obtenerIp(ipClient);
-              
-                LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("formularioId ", formularioId),
-                        new AbstractMap.SimpleEntry<>("nombre ", nombre),
-                        new AbstractMap.SimpleEntry<>("url ", url),
-                        new AbstractMap.SimpleEntry<>("metodo ", metodo),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
-                        //collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing)));
-
-
-                /*Page<AccionResponse2> out = repository.filter(
-                        ((nombre == null || nombre.isEmpty()) ? -1 : 0), 
-                        ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                        ((url == null || url.isEmpty()) ? -1 : 0), 
-                        ((url == null || url.trim().isEmpty()) ? "" : "%" + url.trim().toUpperCase() + "%"),
-                        ((tipo == null || tipo.isEmpty()) ? -1 : 0), 
-                        ((tipo == null || tipo.trim().isEmpty()) ? "" : "%" + tipo.trim().toUpperCase() + "%"),
-                        pageRequest).map(model -> {
-                            AccionResponse2 accionResponse = ConvercionUtil.convertToObject(model, AccionResponse2.class);
-                            accionResponse.setModuloId(model.getModuloId().getId());
-                            return accionResponse;
-                        });*/
-                         Page<AccionResponse2> out = repository.filter(
-                            queryfilterTexto(formularioId), filterTextoQueryUpperLike(formularioId),
-                            queryfilterTexto(nombre), filterTextoQueryUpperLike(nombre),
-                            queryfilterTexto(url), filterTextoQueryUpperLike(url),
-                            queryfilterTexto(metodo), filterTextoQueryUpperLike(metodo),
-                            //Rol.SUPER_ADMINISTRADOR, 
-                            pageRequest)
-                            .map(model -> {
-                                AccionResponse2 convertToObject = ConvercionUtil.convertToObject(model, AccionResponse2.class);
-                                return convertToObject;
-                            });
-                    //.map(model
-                
-                LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("response ", out),
-                        new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-                return out;
+            if (!isBlanck(formularioId) && (formularioId.length() > 200)) {
+                throw new Exception("La longitud del formularioId no debe ser mayor a 100.");
             }
-            throw new Exception("Demasiadas solicitudes, vuelva intentar más tarde...");
+
+            if (!isBlanck(url) && (url.length() > 255)) {
+                throw new Exception("La longitud de la url no debe ser mayor a 255.");
+            }
+
+            if (!isBlanck(metodo) && (metodo.length() > 150)) {
+                throw new Exception("La longitud del tipo no debe ser mayor a 50.");
+            }
+
+            ipClient = obtenerIp(ipClient);
+            
+            LoggerMain.printRequest(Stream.of(
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("formularioId ", formularioId),
+                    new AbstractMap.SimpleEntry<>("nombre ", nombre),
+                    new AbstractMap.SimpleEntry<>("url ", url),
+                    new AbstractMap.SimpleEntry<>("metodo ", metodo),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
+                    //collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing)));
+
+
+            /*Page<AccionResponse2> out = repository.filter(
+                    ((nombre == null || nombre.isEmpty()) ? -1 : 0), 
+                    ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                    ((url == null || url.isEmpty()) ? -1 : 0), 
+                    ((url == null || url.trim().isEmpty()) ? "" : "%" + url.trim().toUpperCase() + "%"),
+                    ((tipo == null || tipo.isEmpty()) ? -1 : 0), 
+                    ((tipo == null || tipo.trim().isEmpty()) ? "" : "%" + tipo.trim().toUpperCase() + "%"),
+                    pageRequest).map(model -> {
+                        AccionResponse2 accionResponse = ConvercionUtil.convertToObject(model, AccionResponse2.class);
+                        accionResponse.setModuloId(model.getModuloId().getId());
+                        return accionResponse;
+                    });*/
+                        Page<AccionResponse2> out = repository.filter(
+                        queryfilterTexto(formularioId), filterTextoQueryUpperLike(formularioId),
+                        queryfilterTexto(nombre), filterTextoQueryUpperLike(nombre),
+                        queryfilterTexto(url), filterTextoQueryUpperLike(url),
+                        queryfilterTexto(metodo), filterTextoQueryUpperLike(metodo),
+                        //Rol.SUPER_ADMINISTRADOR, 
+                        pageRequest)
+                        .map(model -> {
+                            AccionResponse2 convertToObject = ConvercionUtil.convertToObject(model, AccionResponse2.class);
+                            return convertToObject;
+                        });
+                //.map(model
+            
+            LoggerMain.printResponse(Stream.of(
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("response ", out),
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
+                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            return out;
+            
 
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar accion, " + e.getMessage();

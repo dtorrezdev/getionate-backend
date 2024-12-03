@@ -5,49 +5,44 @@
  */
 package bo.com.micrium.modulobase.controllers;
 
-import bo.com.micrium.cifrado.ConfigEncriptacion;
-import bo.com.micrium.exception.EncriptacionExcepcion;
-import bo.com.micrium.logger.LoggerMain;
-import bo.com.micrium.modulobase.services.LoggerWeb;
-import java.math.BigDecimal;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.AbstractMap;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.AbstractMap;
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Date;
+import java.util.Map;
+import java.net.URI;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.NoHandlerFoundException;
-import com.google.common.util.concurrent.RateLimiter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
 import bo.com.micrium.modulobase.commons.TiposComunes;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import bo.com.micrium.modulobase.commons.TipoAutenticacion;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
-import bo.com.micrium.modulobase.commons.UsuarioTipo;
+
 import bo.com.micrium.modulobase.security.services.ActiveDirectoryService;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
@@ -63,15 +58,12 @@ import com.micrium.bd.access.jpa.models.dto.UsuarioResponse;
 import com.micrium.bd.access.jpa.models.dto.PageResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.security.config.ApplicationProperties;
-import bo.com.micrium.modulobase.security.filters.JwtRequestFilter;
+import bo.com.micrium.cifrado.ConfigEncriptacion;
+import bo.com.micrium.exception.EncriptacionExcepcion;
+import bo.com.micrium.logger.LoggerMain;
+import bo.com.micrium.modulobase.services.LoggerWeb;
 import bo.com.micrium.modulobase.validators.UsuarioValidator;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
-import java.time.Duration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 /**
  *
@@ -96,134 +88,115 @@ public class UsuarioControler extends GenericControler implements ICrudControler
     private transient IRolRepository rolRepository;
     
     @Autowired
-    private transient ParametroService parametroService;
-    
-    private transient final RateLimiter rateLimiter = RateLimiter.create(5.0); // 10 requests per second
-
-    private transient final Bucket bucket;
+    private transient ParametroService parametroService;    
     
     @Autowired
     private transient BCryptPasswordEncoder passwordEncoder;
-    
-    public UsuarioControler() {
-        Long peticiones = ApplicationProperties.LIMIT;
-        Long minutes = ApplicationProperties.DURATION;        
-        
-        Bandwidth limit = Bandwidth.classic(peticiones, Refill.greedy(peticiones, Duration.ofMinutes(minutes)));
-        this.bucket = Bucket4j.builder().addLimit(limit).build();
-    }
     
     @Override
     public Page<UsuarioResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
         
         try {            
-            if (bucket.tryConsume(1)) {
-                Map<String, String> parametros = getParametersMap(httpServletRequest);
-                validator.page(parametros);
-                validator.validateListar(parametros);
-                final String id = parametros.get("id");
-                final String nombreCompleto = parametros.get("nombreCompleto");
-                final String nombreUsuario = parametros.get("nombreUsuario");
-                final String rolId = parametros.get("rolId");
-                final String rolNombre = parametros.get("rolNombre");
-                final String tipo = parametros.get("tipo");
-                final String estado = parametros.get("estado");
-                
-                if (rateLimiter.tryAcquire(1, TimeUnit.SECONDS)) {
-                    ipClient = obtenerIp(ipClient);
-                    
-                    LoggerMain.printRequest(Stream.of(
-                            new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                            new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                            new AbstractMap.SimpleEntry<>("token ", token),
-                            new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                            new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                            new AbstractMap.SimpleEntry<>("form ", form),
-                            new AbstractMap.SimpleEntry<>("id ", filterTexto(id)),
-                            new AbstractMap.SimpleEntry<>("nombreCompleto ", filterTexto(nombreCompleto)),
-                            new AbstractMap.SimpleEntry<>("nombreUsuario ", filterTexto(nombreUsuario)),
-                            new AbstractMap.SimpleEntry<>("rolId ", filterTexto(rolId)),
-                            new AbstractMap.SimpleEntry<>("rolNombre ", filterTexto(rolNombre)),
-                            new AbstractMap.SimpleEntry<>("tipo ", filterTexto(tipo)),
-                            new AbstractMap.SimpleEntry<>("estado ", filterTexto(estado)),
-                            new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    
-                    String tipoTemporal = "";
-                    if (tipo != null && !tipo.isEmpty()) {
-                        // OAC LDAP
-                        /*if (UsuarioTipo.USUARIO_NORMAL_VALOR.equals(tipo)) {
-                            tipoTemporal = String.valueOf(UsuarioTipo.USUARIO_NORMAL);
-                        } else if (UsuarioTipo.USUARIO_ACTIVE_DIRECTORY_VALOR.equals(tipo)) {
-                            tipoTemporal = String.valueOf(UsuarioTipo.USUARIO_ACTIVE_DIRECTORY);
-                        }*/
-                        if (TipoAutenticacion.LOCAL.getId().equals(tipo)) {
-                            tipoTemporal = String.valueOf(TipoAutenticacion.LOCAL.getId());
-                        } else if (TipoAutenticacion.LDAP.getId().equals(tipo)) {
-                            tipoTemporal = String.valueOf(TipoAutenticacion.LDAP.getId());
-                        }
-                    }
-                    
-                    String estadoTemporal = "";
-                    if (estado != null && !estado.isEmpty()) {
-                        if (UsuarioEstado.HABILITADO_VALOR.equals(estado)) {
-                            estadoTemporal = String.valueOf(UsuarioEstado.HABILITADO);
-                        } else if (UsuarioEstado.INHABILITADO_VALOR.equals(estado)) {
-                            estadoTemporal = String.valueOf(UsuarioEstado.INHABILITADO);
-                        } else if (UsuarioEstado.BLOQUEADO_VALOR.equals(estado)) {
-                            estadoTemporal = String.valueOf(UsuarioEstado.BLOQUEADO);
-                        }
-                    }
-                    
-                    Page<UsuarioResponse> out = repository.filter(
-                            ((id == null || id.trim().isEmpty()) ? -1 : 0),
-                            ((id == null || id.trim().isEmpty()) ? "" : id.trim()),
-                            ((nombreUsuario == null || nombreUsuario.isEmpty()) ? -1 : 0),
-                            ((nombreUsuario == null || nombreUsuario.trim().isEmpty()) ? "" : "%" + nombreUsuario.trim().toUpperCase() + "%"),
-                            ((nombreCompleto == null || nombreCompleto.isEmpty()) ? -1 : 0),
-                            ((nombreCompleto == null || nombreCompleto.trim().isEmpty()) ? "" : "%" + nombreCompleto.trim().toUpperCase() + "%"),
-                            ((rolId == null || rolId.isEmpty()) ? -1 : 0),
-                            ((rolId == null || rolId.trim().isEmpty()) ? "" : rolNombre.trim().toUpperCase()),
-                            ((rolNombre == null || rolNombre.isEmpty()) ? -1 : 0),
-                            ((rolNombre == null || rolNombre.trim().isEmpty()) ? "" : rolNombre.trim().toUpperCase()),
-                            ((tipo == null || tipo.isEmpty()) ? -1 : 0),
-                            tipoTemporal,
-                            ((estado == null || estado.isEmpty()) ? -1 : 0),
-                            estadoTemporal,
-                            //UsuarioTipo.SUPER_USUARIO, // OAC LDAP
-                            TipoAutenticacion.SUPER.getId(),
-                            pageRequest)
-                            //.map(model -> ConvercionUtil.convertToObject(model, UsuarioResponse.class));
-                            .map(model -> {
-                                UsuarioResponse usuarioResponse = ConvercionUtil.convertToObject(model, UsuarioResponse.class);
-                                usuarioResponse.setRolId(model.getRolId().getId());
-                                usuarioResponse.setRolNombre(model.getRolId().getNombre());
-                                usuarioResponse.setEstado(model.getEstado() == UsuarioEstado.HABILITADO ? UsuarioEstado.HABILITADO_VALOR
-                                        : model.getEstado() == UsuarioEstado.INHABILITADO ? UsuarioEstado.INHABILITADO_VALOR
-                                        : model.getEstado() == UsuarioEstado.BLOQUEADO ? UsuarioEstado.BLOQUEADO_VALOR : "");
-                                return usuarioResponse;
-                            });
-                    
-                    bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
-                    
-                    LoggerMain.printResponse(Stream.of(
-                            new AbstractMap.SimpleEntry<>("token ", token),
-                            new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                            new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                            new AbstractMap.SimpleEntry<>("response ", new PageResponse<>(out)),
-                            new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                            collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    
-                    return out;
-                    
-                } else {
-                    LoggerMain.warn("excedio limite de peticiones por seguridad... configurado en 5 segundos" + rateLimiter.getRate());
-                    throw new NoHandlerFoundException("GET", "/", HttpHeaders.EMPTY);
+            
+            Map<String, String> parametros = getParametersMap(httpServletRequest);
+            validator.page(parametros);
+            validator.validateListar(parametros);
+            final String id = parametros.get("id");
+            final String nombreCompleto = parametros.get("nombreCompleto");
+            final String nombreUsuario = parametros.get("nombreUsuario");
+            final String rolId = parametros.get("rolId");
+            final String rolNombre = parametros.get("rolNombre");
+            final String tipo = parametros.get("tipo");
+            final String estado = parametros.get("estado");
+            
+            
+            ipClient = obtenerIp(ipClient);
+            
+            LoggerMain.printRequest(Stream.of(
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("id ", filterTexto(id)),
+                new AbstractMap.SimpleEntry<>("nombreCompleto ", filterTexto(nombreCompleto)),
+                new AbstractMap.SimpleEntry<>("nombreUsuario ", filterTexto(nombreUsuario)),
+                new AbstractMap.SimpleEntry<>("rolId ", filterTexto(rolId)),
+                new AbstractMap.SimpleEntry<>("rolNombre ", filterTexto(rolNombre)),
+                new AbstractMap.SimpleEntry<>("tipo ", filterTexto(tipo)),
+                new AbstractMap.SimpleEntry<>("estado ", filterTexto(estado)),
+                new AbstractMap.SimpleEntry<>("request ", pageRequest)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
+            
+            String tipoTemporal = "";
+            if (tipo != null && !tipo.isEmpty()) {
+                // OAC LDAP
+                /*if (UsuarioTipo.USUARIO_NORMAL_VALOR.equals(tipo)) {
+                    tipoTemporal = String.valueOf(UsuarioTipo.USUARIO_NORMAL);
+                } else if (UsuarioTipo.USUARIO_ACTIVE_DIRECTORY_VALOR.equals(tipo)) {
+                    tipoTemporal = String.valueOf(UsuarioTipo.USUARIO_ACTIVE_DIRECTORY);
+                }*/
+                if (TipoAutenticacion.LOCAL.getId().equals(tipo)) {
+                    tipoTemporal = String.valueOf(TipoAutenticacion.LOCAL.getId());
+                } else if (TipoAutenticacion.LDAP.getId().equals(tipo)) {
+                    tipoTemporal = String.valueOf(TipoAutenticacion.LDAP.getId());
                 }
-                
             }
-            //return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
-            throw new Exception("Demasiadas solicitudes, vuelva intentar mas tarde...");
+            
+            String estadoTemporal = "";
+            if (estado != null && !estado.isEmpty()) {
+                if (UsuarioEstado.HABILITADO_VALOR.equals(estado)) {
+                    estadoTemporal = String.valueOf(UsuarioEstado.HABILITADO);
+                } else if (UsuarioEstado.INHABILITADO_VALOR.equals(estado)) {
+                    estadoTemporal = String.valueOf(UsuarioEstado.INHABILITADO);
+                } else if (UsuarioEstado.BLOQUEADO_VALOR.equals(estado)) {
+                    estadoTemporal = String.valueOf(UsuarioEstado.BLOQUEADO);
+                }
+            }
+            
+            Page<UsuarioResponse> out = repository.filter(
+                    ((id == null || id.trim().isEmpty()) ? -1 : 0),
+                    ((id == null || id.trim().isEmpty()) ? "" : id.trim()),
+                    ((nombreUsuario == null || nombreUsuario.isEmpty()) ? -1 : 0),
+                    ((nombreUsuario == null || nombreUsuario.trim().isEmpty()) ? "" : "%" + nombreUsuario.trim().toUpperCase() + "%"),
+                    ((nombreCompleto == null || nombreCompleto.isEmpty()) ? -1 : 0),
+                    ((nombreCompleto == null || nombreCompleto.trim().isEmpty()) ? "" : "%" + nombreCompleto.trim().toUpperCase() + "%"),
+                    ((rolId == null || rolId.isEmpty()) ? -1 : 0),
+                    ((rolId == null || rolId.trim().isEmpty()) ? "" : rolNombre.trim().toUpperCase()),
+                    ((rolNombre == null || rolNombre.isEmpty()) ? -1 : 0),
+                    ((rolNombre == null || rolNombre.trim().isEmpty()) ? "" : rolNombre.trim().toUpperCase()),
+                    ((tipo == null || tipo.isEmpty()) ? -1 : 0),
+                    tipoTemporal,
+                    ((estado == null || estado.isEmpty()) ? -1 : 0),
+                    estadoTemporal,
+                    //UsuarioTipo.SUPER_USUARIO, // OAC LDAP
+                    TipoAutenticacion.SUPER.getId(),
+                    pageRequest)
+                    //.map(model -> ConvercionUtil.convertToObject(model, UsuarioResponse.class));
+                    .map(model -> {
+                        UsuarioResponse usuarioResponse = ConvercionUtil.convertToObject(model, UsuarioResponse.class);
+                        usuarioResponse.setRolId(model.getRolId().getId());
+                        usuarioResponse.setRolNombre(model.getRolId().getNombre());
+                        usuarioResponse.setEstado(model.getEstado() == UsuarioEstado.HABILITADO ? UsuarioEstado.HABILITADO_VALOR
+                                : model.getEstado() == UsuarioEstado.INHABILITADO ? UsuarioEstado.INHABILITADO_VALOR
+                                : model.getEstado() == UsuarioEstado.BLOQUEADO ? UsuarioEstado.BLOQUEADO_VALOR : "");
+                        return usuarioResponse;
+                    });
+            
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
+            
+            LoggerMain.printResponse(Stream.of(
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", new PageResponse<>(out)),
+                new AbstractMap.SimpleEntry<>("content ", out.getContent())).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
+            
+            return out;                                        
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar usuarios, " + e.getMessage();
             
@@ -280,14 +253,15 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             ipClient = obtenerIp(ipClient);
             
             LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("request ", request)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             validator.validate(request, null, result);
             
@@ -344,11 +318,12 @@ public class UsuarioControler extends GenericControler implements ICrudControler
                     .body(ConvercionUtil.convertToObject(model, UsuarioResponse.class));
             
             LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", out)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             return out;
         } catch (EncriptacionExcepcion | ApiException | URISyntaxException e) {
@@ -372,15 +347,16 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             ipClient = obtenerIp(ipClient);
             
             LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("id ", id),
+                new AbstractMap.SimpleEntry<>("request ", request)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
@@ -494,21 +470,22 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
             @PathVariable Long id) throws RuntimeException {
-        HashMap<String, String> map = new HashMap();
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> mapNuevo = new HashMap<>();
         
         try {
             ipClient = obtenerIp(ipClient);
             
             LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("id ", id)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             Optional<Usuario> optional = repository.findById(id);
             
@@ -530,11 +507,12 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             ResponseEntity<Object> out = ResponseEntity.ok().build();
             
             LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", out)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             return out;
         } catch (RuntimeException e) {
@@ -553,21 +531,22 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
             @RequestBody String id) {
-        HashMap<String, String> map = new HashMap();
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> mapNuevo = new HashMap<>();
         
         try {
             ipClient = obtenerIp(ipClient);
             
             LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("id ", id)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             Long idusuario = Long.valueOf(id);
             Optional<Usuario> optional = repository.findById(idusuario);
@@ -605,8 +584,8 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
             @RequestBody String id) {
-        HashMap<String, String> map = new HashMap();
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> mapNuevo = new HashMap<>();
         
         try {
             ipClient = obtenerIp(ipClient);
@@ -635,11 +614,12 @@ public class UsuarioControler extends GenericControler implements ICrudControler
             ResponseEntity<Object> out = ResponseEntity.ok().build();
             
             LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", out)).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            );
             
             return out;
         } catch (NumberFormatException e) {

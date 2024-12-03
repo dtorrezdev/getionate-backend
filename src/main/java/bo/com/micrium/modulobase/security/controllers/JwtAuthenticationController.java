@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.TiposComunes;
-import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.PrivilegioTipo;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 
@@ -52,7 +51,6 @@ import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import com.micrium.bd.access.jpa.models.dto.AccionResponse;
 import bo.com.micrium.modulobase.security.dto.AutenticacionRequest;
 import bo.com.micrium.modulobase.security.dto.AutenticacionResponse;
-import bo.com.micrium.modulobase.security.filters.JwtRequestFilter;
 import bo.com.micrium.modulobase.security.services.AuthenticationLdapManager;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import com.micrium.bd.access.jpa.models.dto.FormularioResponse;

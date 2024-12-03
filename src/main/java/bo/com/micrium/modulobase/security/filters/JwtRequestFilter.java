@@ -169,20 +169,6 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         res.close();
     }
 
-    /*public void printAllHeaders(HttpServletRequest request) {
-        Enumeration<String> headerNames = request.getHeaderNames();
-
-        if (headerNames != null) {
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                String headerValue = request.getHeader(headerName);
-                log.info(headerName + ": " + headerValue);
-            }
-        } else {
-            log.info("No headers found.");
-        }
-    }*/
-
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         //log.info("***dtn doFilterInternal URL " + request.getRequestURL());
@@ -216,7 +202,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
             // Aplicar control de tasa
             if (!bucket.tryConsume(1)) {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                response.getWriter().write("Too many requests - try again later desde Filter");
+                response.getWriter().write("Demasiadas solicitudes, vuelva intentar mas tarde...");
                 return;
             }
 
@@ -283,11 +269,25 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         // Aplicar control de tasa
         if (!bucket.tryConsume(1)) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.getWriter().write("Too many requests - try again later desde Filter");
+            response.getWriter().write("Demasiadas solicitudes, vuelva intentar mas tarde...");
             return;
         }
         
         chain.doFilter(request, response);
     }
+
+    /*private void printAllHeaders(HttpServletRequest request) {
+        Enumeration<String> headerNames = request.getHeaderNames();
+
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                String headerName = headerNames.nextElement();
+                String headerValue = request.getHeader(headerName);
+                log.info(headerName + ": " + headerValue);
+            }
+        } else {
+            log.info("No headers found.");
+        }
+    }*/
 
 }
