@@ -165,6 +165,12 @@
             <artifactId>bucket4j-core</artifactId>
             <version>4.10.0</version>
         </dependency>
+		<!-- migrar a esta Versio pronto -->
+		<!-- <dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j-core</artifactId>
+			<version>8.10.1</version>
+		</dependency> -->
 
 		<!-- Uso para menejo de Rate Limiter (Limitar la peticiones) para solucionar la vulnerabilidad de Negacion de Servicio
 		  https://mvnrepository.com/artifact/com.google.guava/guava-rate-limiter -->

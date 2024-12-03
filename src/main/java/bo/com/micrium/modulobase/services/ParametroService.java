@@ -3,12 +3,9 @@ package bo.com.micrium.modulobase.services;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.HashMap;
 
 import jakarta.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,23 +13,13 @@ import org.springframework.stereotype.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.micrium.bd.access.jpa.repositories.IParametroRepository;
-import bo.com.micrium.modulobase.commons.ParametroTipo;
-import com.micrium.bd.access.jpa.models.Parametro;
-import bo.com.micrium.modulobase.commons.ParametroID;
-import bo.com.micrium.cifrado.ConfigEncriptacion;
-
-import com.micrium.bd.access.natives.dao.ParametroDao;
-//import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.enuns.TipoParametro;
-import com.micrium.bd.access.exceptions.DaoException;
-import com.micrium.bd.access.exceptions.MapperException;
-import com.micrium.bd.access.exceptions.ParameterException;
-import com.micrium.bd.access.natives.model.MuParametro;
 import com.micrium.bd.access.natives.model.dto.ParametroDto;
-//import com.micrium.bd.access.natives.service.ParametroService;
+import com.micrium.bd.access.exceptions.ParameterException;
+import com.micrium.bd.access.exceptions.MapperException;
+import com.micrium.bd.access.exceptions.DaoException;
 
-import java.util.Optional;
+import bo.com.micrium.modulobase.commons.ParametroTipo;
+import bo.com.micrium.cifrado.ConfigEncriptacion;
 
 /**
  *
@@ -43,19 +30,12 @@ import java.util.Optional;
 @Order(2)
 @Scope("singleton")
 public class ParametroService {
-    private static final Logger log = LogManager.getLogger(ParametroService.class);
-    //@Autowired
-    //private IParametroRepository repository;
 
-    //private HashMap<Long, Parametro> listParametro;
+    private final Logger log = LogManager.getLogger(ParametroService.class);    
 
     private final SimpleDateFormat sdf = new SimpleDateFormat(ParametroTipo.FORMATO_FECHA_HORA);
     
     private com.micrium.bd.access.natives.service.ParametroService paramService;
-
-    public com.micrium.bd.access.natives.service.ParametroService getParametroService() {
-        return paramService;
-    };
 
     @PostConstruct
     public void init() {
@@ -73,7 +53,7 @@ public class ParametroService {
         try {
             return paramService.getParametroByName(nombreParametro);
         } catch (ParameterException | DaoException | MapperException e) {            
-            log.error(e);            
+            log.error(e);
         }
         return null;
     }
@@ -113,6 +93,12 @@ public class ParametroService {
     public void updateParameter(String nombre, String valor) throws DaoException {
         log.info("updateParameter");
         paramService.updateParametroByNombre(nombre, valor);
+        try {
+            // obtenemos un parametro cualquiera para q haga un resfresh de todo los parametros
+            paramService.getParametroByName("BLOQUEO_USUARIOS_DIAS");
+        } catch (Exception e) {
+            throw new DaoException(e);
+        }
     }
 
 }

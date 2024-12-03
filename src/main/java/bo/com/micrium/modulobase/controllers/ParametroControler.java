@@ -162,14 +162,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
                                 return parametroResponse;
                             });
                 }
-
-                /*sb = new StringBuilder();
-                sb.append("-------------------RESPONSE----------------------\n").
-                        append("token ").append(token).append(", \n").
-                        append("DATA ").append(out).append(", \n").
-                        append("CONTENT ").append(out.getContent()).append(", \n").
-                        append("------------------------------------------------\n");
-                log.info(sb.toString());*/
+        
                 bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
                 LoggerMain.printResponse(Stream.of(
                         new AbstractMap.SimpleEntry<>("token ", token),
@@ -210,17 +203,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
     public ResponseEntity<ParametroResponse> get(String token, String ipClient, String form, String id) throws ApiException {
         try {
             ipClient = obtenerIp(ipClient);
-
-            /*StringBuilder sb = new StringBuilder();
-            sb.append("-------------------REQUEST----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("form ").append(form).append(", \n").
-                    append("ipClient ").append(ipClient).append(", \n").
-                    append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                    append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                    append("id ").append(id).append(", \n").
-                    append("------------------------------------------------\n");
-            log.info(sb.toString());*/
+            
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -245,14 +228,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
                 parametroResponse.setEditable(false);
                 LoggerMain.info("OAC - DESPUES parametroResponse: " + parametroResponse);
                 ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(parametroResponse);
-
-                /*sb = new StringBuilder();
-                sb.append("-------------------RESPONSE----------------------\n").
-                        append("token ").append(token).append(", \n").
-                        append("DATA ").append(out).append(", \n").
-                        append("------------------------------------------------\n");
-
-                log.info(sb.toString());*/
+                
                 LoggerMain.printResponse(Stream.of(
                         new AbstractMap.SimpleEntry<>("token ", token),
                         new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
@@ -276,20 +252,10 @@ public class ParametroControler extends GenericControler implements ICrudControl
     public ResponseEntity<ParametroResponse> create(String token, String ipClient, String form,
             ParametroRequest request, BindingResult result) throws URISyntaxException, ApiException {
 
-        HashMap<String, String> map = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
-
-            /*StringBuilder sb = new StringBuilder();
-            sb.append("-------------------REQUEST----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("form ").append(form).append(", \n").
-                    append("ipClient ").append(ipClient).append(", \n").
-                    append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                    append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                    append("request ").append(request).append(", \n").
-                    append("------------------------------------------------\n");
-            log.info(sb.toString());*/
+           
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -352,23 +318,12 @@ public class ParametroControler extends GenericControler implements ICrudControl
     @Override
     public ResponseEntity<ParametroResponse> update(String token, String ipClient, String form,
             ParametroRequest request, String id, BindingResult result) throws ApiException {
-        HashMap<String, String> map = new HashMap();
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, String> mapNuevo = new HashMap<>();
 
         try {
             ipClient = obtenerIp(ipClient);
 
-            /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("id ").append(id).append(", \n").
-                append("------------------------------------------------\n");
-        log.info(sb.toString());*/
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -424,19 +379,13 @@ public class ParametroControler extends GenericControler implements ICrudControl
             parametroService.updateParameter(request.getNombre(), request.getValor());
 
             /*ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertir(model,
-        tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));*/
+            tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));*/
             TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
             ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
             parametroResponse.setTipoParametroNombre(tipoParametro.getNombre());
             parametroResponse.setEditable(false);
             ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(parametroResponse);
-
-            /*sb = new StringBuilder();
-            sb.append("-------------------RESPONSE----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("DATA ").append(out).append(", \n").
-                    append("------------------------------------------------\n");
-            log.info(sb.toString());*/
+            
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),

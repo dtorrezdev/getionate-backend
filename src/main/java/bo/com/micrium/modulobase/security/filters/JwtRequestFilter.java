@@ -15,7 +15,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.stereotype.Component;
 import org.apache.logging.log4j.LogManager;
@@ -23,11 +24,15 @@ import org.apache.logging.log4j.Logger;
 
 import bo.com.micrium.modulobase.security.controllers.JwtAuthenticationController;
 import bo.com.micrium.modulobase.security.services.JwtUserDetailsService;
+import bo.com.micrium.modulobase.security.services.RateLimiterService;
+
 import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
 import com.micrium.bd.access.jpa.repositories.IAccionRepository;
 import bo.com.micrium.modulobase.controllers.EtiquetaControler;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
+import io.github.bucket4j.Bucket;
+
 import com.micrium.bd.access.jpa.models.RolAccion;
 import com.micrium.bd.access.jpa.models.Accion;
 import com.micrium.bd.access.jpa.models.Rol;
@@ -40,9 +45,9 @@ import bo.com.micrium.logger.LoggerMain;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter implements Serializable {
 
-    private static final Logger log = LogManager.getLogger(JwtRequestFilter.class);
+    private final Logger log = LogManager.getLogger(JwtRequestFilter.class);
 
-    private static final long serialVersionUID = 1L;
+    private final long serialVersionUID = 1L;
 
     @Autowired
     private transient IRolRepository rolRepository;
@@ -55,11 +60,12 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
 
     @Autowired
     private transient JwtUserDetailsService jwtUserDetailsService;
-
-    //@Autowired
-    //private transient ParametroService parametroService;
+    
     @Autowired
     private transient JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private RateLimiterService rateLimiterService;
 
     private void peticionesOptionsCors(HttpServletRequest request, HttpServletResponse response) {
         //HttpServletRequest req = (HttpServletRequest) request;
@@ -185,6 +191,8 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
             return;
         }
 
+        Bucket bucket = rateLimiterService.resolveBucket("S/N"); // peticones sin token
+
                
         //printAllHeaders(request);
         if (!request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_AUTENTICACION)
@@ -201,7 +209,16 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 tokenInvalido(request, response);
                 return;
             }
-            //requestTokenHeader = requestTokenHeader.replace("Bearer ","");
+            
+            // Resolver el Bucket basado en el usuario
+            bucket = rateLimiterService.resolveBucket(jwtTokenUtil.getUsernameFromToken(requestTokenHeader));
+
+            // Aplicar control de tasa
+            if (!bucket.tryConsume(1)) {
+                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                response.getWriter().write("Too many requests - try again later desde Filter");
+                return;
+            }
 
             try {
                 rolNombre = jwtTokenUtil.getRolNombreFromToken(requestTokenHeader);
@@ -237,10 +254,10 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 String[] urls = accion.getUrl().split(",");
                 String[] metodos = accion.getMetodo().split(",");
                 int size = urls.length; 
-                log.info("req.url=" + request.getRequestURI() + "  " + request.getMethod());
+                //log.info("req.url=" + request.getRequestURI() + "  " + request.getMethod());
                 for (int i = 0; i < size; i++) {
                     String uri = request.getContextPath() + urls[i];
-                    log.info("uri="+ uri + "  metodo="+ metodos[i]);
+                    //log.info("uri="+ uri + "  metodo="+ metodos[i]);
                     if (request.getRequestURI().startsWith(uri) && metodos[i].equals(request.getMethod().toUpperCase())) {
                         flag = false;
                         break exito;
@@ -263,7 +280,12 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                             
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         }
-        //LoggerMain.info("***dtn URL " + request.getRequestURL()); 
+        // Aplicar control de tasa
+        if (!bucket.tryConsume(1)) {
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+            response.getWriter().write("Too many requests - try again later desde Filter");
+            return;
+        }
         
         chain.doFilter(request, response);
     }
