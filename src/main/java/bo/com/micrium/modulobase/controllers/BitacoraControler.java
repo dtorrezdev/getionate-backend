@@ -9,6 +9,9 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.HashMap;
+
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.micrium.bd.access.jpa.repositories.IBitacoraRespository;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
-import com.micrium.bd.access.jpa.models.dto.BitacoraResponse;
+import bo.com.micrium.modulobase.controllers.dto.BitacoraResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.commons.BaseDate;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
@@ -31,9 +34,6 @@ import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
 import bo.com.micrium.modulobase.commons.TiposComunes;
-import java.io.Serializable;
-import java.util.HashMap;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 /**
  *
@@ -43,7 +43,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @CrossOrigin
 @RequestMapping(value = "/bitacoras", produces = {MediaType.APPLICATION_JSON_VALUE})
 
-public class BitacoraControler extends GenericControler implements Serializable {
+public class BitacoraControler extends GenericControler {
 
     private static final long serialVersionUID = 5418078144608698561L;
 
@@ -112,7 +112,7 @@ public class BitacoraControler extends GenericControler implements Serializable 
             final String mensajeError = "Error al filtrar bitacora, " + ex.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, ex);
-            HashMap<String, String> map = new HashMap();
+            HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
 

@@ -16,8 +16,8 @@ import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
 import com.micrium.bd.access.jpa.models.TipoParametro;
-import com.micrium.bd.access.jpa.models.dto.TipoParametroRequest;
-import com.micrium.bd.access.jpa.models.dto.TipoParametroResponse;
+import bo.com.micrium.modulobase.controllers.dto.TipoParametroRequest;
+import bo.com.micrium.modulobase.controllers.dto.TipoParametroResponse;
 import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.validators.TipoParametroValidator;
 

@@ -48,13 +48,13 @@ import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
 import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
 import bo.com.micrium.modulobase.common.exceptions.ExceptionResponse;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
-import com.micrium.bd.access.jpa.models.dto.AccionResponse;
-import bo.com.micrium.modulobase.security.dto.AutenticacionRequest;
-import bo.com.micrium.modulobase.security.dto.AutenticacionResponse;
+import bo.com.micrium.modulobase.controllers.dto.AccionResponse;
+import bo.com.micrium.modulobase.security.controllers.dto.AutenticacionRequest;
+import bo.com.micrium.modulobase.security.controllers.dto.AutenticacionResponse;
 import bo.com.micrium.modulobase.security.services.AuthenticationLdapManager;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
-import com.micrium.bd.access.jpa.models.dto.FormularioResponse;
-import com.micrium.bd.access.jpa.models.dto.ModuloResponse;
+import bo.com.micrium.modulobase.controllers.dto.FormularioResponse;
+import bo.com.micrium.modulobase.controllers.dto.ModuloResponse;
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.exception.SerializeException;
 //import bo.com.micrium.logger.AbstractLogger;
@@ -117,7 +117,7 @@ public class JwtAuthenticationController extends GenericControler {
         try {
             // *** dtn cambios
             //authenticationRequest = new ObjectMapper().readValue(authenticationRequestString, AuteticacionRequest.class);
-            authenticationRequest = Serializador.convertStringJsonToObject(authenticationRequestString, bo.com.micrium.modulobase.security.dto.AutenticacionRequest.class);
+            authenticationRequest = Serializador.convertStringJsonToObject(authenticationRequestString, bo.com.micrium.modulobase.security.controllers.dto.AutenticacionRequest.class);
         } catch (SerializeException e) {
             LoggerMain.error("ERROR: ", e);
             return ResponseEntity.badRequest().body(new ExceptionResponse(

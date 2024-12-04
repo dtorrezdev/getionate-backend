@@ -45,12 +45,12 @@ import com.micrium.bd.access.jpa.models.Formulario;
 import com.micrium.bd.access.jpa.models.RolAccion;
 import com.micrium.bd.access.jpa.models.RolTipoParametroPermiso;
 import com.micrium.bd.access.jpa.models.TipoParametro;
-import com.micrium.bd.access.jpa.models.dto.AccionResponse;
-import com.micrium.bd.access.jpa.models.dto.FormularioResponse;
-import com.micrium.bd.access.jpa.models.dto.ModuloResponse;
-import com.micrium.bd.access.jpa.models.dto.PermisoRequest;
-import com.micrium.bd.access.jpa.models.dto.RolTipoParametroPermisoRequest;
-import com.micrium.bd.access.jpa.models.dto.RolTipoParametroPermisoResponse;
+import bo.com.micrium.modulobase.controllers.dto.AccionResponse;
+import bo.com.micrium.modulobase.controllers.dto.FormularioResponse;
+import bo.com.micrium.modulobase.controllers.dto.ModuloResponse;
+import bo.com.micrium.modulobase.controllers.dto.PermisoRequest;
+import bo.com.micrium.modulobase.controllers.dto.RolTipoParametroPermisoRequest;
+import bo.com.micrium.modulobase.controllers.dto.RolTipoParametroPermisoResponse;
 import com.micrium.bd.access.jpa.repositories.IAccionRepository;
 import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
 import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
@@ -107,16 +107,6 @@ public class PermisoController extends GenericControler implements Serializable 
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form) {
         ipClient = obtenerIp(ipClient);
 
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -164,13 +154,6 @@ public class PermisoController extends GenericControler implements Serializable 
                     formularios));
         }
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(modulos).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printResponse(Stream.of(
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
@@ -189,19 +172,7 @@ public class PermisoController extends GenericControler implements Serializable 
 
         LoggerMain.info("obtenerPlantillaPermisos ");
         ipClient = obtenerIp(ipClient);
-        //Integer descrp = Integer.parseInt("" +rolIdS);
-        //int rolId = Integer.parseInt(rolIdS);
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("rolId ").append(rolId).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -245,13 +216,6 @@ public class PermisoController extends GenericControler implements Serializable 
             }
         }
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(acciones).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printResponse(Stream.of(
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
@@ -269,17 +233,6 @@ public class PermisoController extends GenericControler implements Serializable 
             @Valid @RequestBody PermisoRequest request) throws URISyntaxException, ApiException {
         ipClient = obtenerIp(ipClient);
 
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -300,20 +253,13 @@ public class PermisoController extends GenericControler implements Serializable 
             rolAcciones.add(rolAccionRepository.save(new RolAccion(null, request.getRolId(), accionId)));
         });
 
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> mapNuevo = new HashMap<>();
         mapNuevo.put(TiposComunes.ModuloBase.PERMISOS, ConvercionUtil.toJson(rolAcciones));
         //bitacoraService.guardarBitacora(token, ipClient, form, "Actualizando permisos del rol " + request.getRolId() + ", " + rolAcciones);
         bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PERMISO_CREAR + " del rol " + request.getRolId(), null, mapNuevo);
 
         ResponseEntity<Object> out = ResponseEntity.ok().build();
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printResponse(Stream.of(
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
@@ -332,17 +278,7 @@ public class PermisoController extends GenericControler implements Serializable 
         ipClient = obtenerIp(ipClient);
         LoggerMain.info("VALOR DE ROL ID ANTES: " + rolId);
         Long descrp;
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("rolId ").append(rolId).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -382,7 +318,7 @@ public class PermisoController extends GenericControler implements Serializable 
                 }
                 model = rolTipoparametroRepository.save(model);
 
-                HashMap<String, String> mapNuevo = new HashMap();
+                HashMap<String, String> mapNuevo = new HashMap<>();
                 mapNuevo.put(TiposComunes.ModuloBase.PERMISOS, ConvercionUtil.toJson(model));
                 //bitacoraService.guardarBitacora(token, ipClient, form, "Se adiciono automaticamente al rol " + rolId + ", el rol tipo de paramaetro permiso " + model);
                 bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PERMISO_TIPO_PARAM_CREAR + " automaticamente al rol " + rolId, null, mapNuevo);
@@ -395,17 +331,10 @@ public class PermisoController extends GenericControler implements Serializable 
         }).collect(Collectors.toList());
 
         if (validacionActiveDirectory == TipoAutenticacion.LOCAL.getId()) {
-            temp = temp.stream().filter(pa -> !pa.getTipoParametroId().equals(TipoParametro.TIPO_PARAMETRO_LDAP)).
+            temp = temp.stream().filter(pa -> !pa.getTipoParametroId().equals(com.micrium.bd.access.enuns.TipoParametro.LDAP.getId().longValue())).
                     collect(Collectors.toList());
         }
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(temp).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printResponse(Stream.of(
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
@@ -423,17 +352,6 @@ public class PermisoController extends GenericControler implements Serializable 
             @Valid @RequestBody RolTipoParametroPermisoRequest request) {
         ipClient = obtenerIp(ipClient);
 
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -455,20 +373,13 @@ public class PermisoController extends GenericControler implements Serializable 
                     new RolTipoParametroPermiso(null, request.getRolId(), tipoParametro.getTipoParametroId(), tipoParametro.getTipoPermiso())));
         });
 
-        HashMap<String, String> mapNuevo = new HashMap();
+        HashMap<String, String> mapNuevo = new HashMap<>();
         mapNuevo.put(TiposComunes.ModuloBase.PERMISOS, ConvercionUtil.toJson(rolTipoParametroPermisos));
         //bitacoraService.guardarBitacora(token, ipClient, form, "Actualizando tipos de parametros permisos del rol " + request.getRolId() + ", " + rolTipoParametroPermisos);
         bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PERMISO_TIPO_PARAM_CREAR + " del rol " + request.getRolId(), null, mapNuevo);
 
         ResponseEntity<Object> out = ResponseEntity.ok().build();
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
         LoggerMain.printResponse(Stream.of(
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),

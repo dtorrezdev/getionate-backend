@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 
@@ -30,7 +29,7 @@ public class RateLimiterService {
         return buckets.computeIfAbsent(key, k -> {
             Bandwidth limit = Bandwidth.classic(limitPeticiones,
                     Refill.greedy(limitPeticiones, Duration.ofMinutes(duracion)));
-            return Bucket4j.builder()
+            return Bucket.builder()
                     .addLimit(limit)
                     .build();
         });

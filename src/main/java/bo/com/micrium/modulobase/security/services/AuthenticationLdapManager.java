@@ -19,7 +19,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.TipoAutenticacion;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import bo.com.micrium.modulobase.commons.UsuarioTipo;

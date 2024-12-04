@@ -37,18 +37,20 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.commons.PermisoTipo;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
+
+import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.models.RolTipoParametroPermiso;
 import com.micrium.bd.access.jpa.models.TipoParametro;
-import com.micrium.bd.access.jpa.models.dto.RolRequest;
-import com.micrium.bd.access.jpa.models.dto.RolResponse;
+import bo.com.micrium.modulobase.controllers.dto.RolRequest;
+import bo.com.micrium.modulobase.controllers.dto.RolResponse;
 import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
 import com.micrium.bd.access.jpa.repositories.IParametroRepository;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
@@ -408,7 +410,8 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             }            
 
             List<Rol> roles = ConvercionUtil.convertToListObject(request, Rol.class);
-            Integer batchSize = Integer.valueOf(parametroRepository.findByNombre(ParametroID.BATCH_SIZE).getValor());
+            Integer batchSize = Integer.valueOf(parametroRepository.findByNombre(
+                Parametro.DelSistema.BATCH_SIZE.name()).getValor());
             for (int i = 0; i < roles.size(); i += batchSize) {
                 List<Rol> batch = roles.subList(i, Math.min(i + batchSize, roles.size()));
                 repository.saveAll(batch);

@@ -12,9 +12,8 @@ import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
 import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Grupo;
 import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
-import com.micrium.bd.access.jpa.models.dto.GrupoRequest;
+import bo.com.micrium.modulobase.controllers.dto.GrupoRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.commons.ParametroID;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;

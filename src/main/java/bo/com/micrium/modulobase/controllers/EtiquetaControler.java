@@ -16,7 +16,6 @@ import java.util.AbstractMap;
 
 import jakarta.validation.Valid;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import bo.com.micrium.modulobase.commons.Acciones;
 import bo.com.micrium.modulobase.commons.Apps;
 import bo.com.micrium.modulobase.commons.ConvercionUtil;
@@ -37,8 +35,8 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 //import bo.com.micrium.modulobase.commons.ConvercionUtil;
 import com.micrium.bd.access.jpa.models.Etiqueta;
 import com.micrium.bd.access.jpa.repositories.IEtiquetaRepository;
-import com.micrium.bd.access.jpa.models.dto.EtiquetaRequest;
-import com.micrium.bd.access.jpa.models.dto.EtiquetaResponse;
+import bo.com.micrium.modulobase.controllers.dto.EtiquetaRequest;
+import bo.com.micrium.modulobase.controllers.dto.EtiquetaResponse;
 // import bo.com.micrium.modulobase.security.utils.JWTTokenUtil;
 import bo.com.micrium.modulobase.validators.EtiquetaValidator;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
@@ -147,23 +145,13 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
 
         try {
             
-            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            Map<String, String> parametros = getParametersMap(httpServletRequest);
+            validator.page(parametros);
+            validator.validateListar(parametros);            
 
-            final String llave = this.httpServletRequest.getParameter("llave");
-            final String grupo = this.httpServletRequest.getParameter("grupo");
-            final String valor = this.httpServletRequest.getParameter("valor");
-            if (!isBlanck(llave) && (llave.length() > 255)) {
-                throw new Exception("La longitud del llave no debe ser mayor a 255.");
-            }
-
-            if (!isBlanck(grupo) && (grupo.length() > 255)) {
-                throw new Exception("La longitud del grupo no debe ser mayor a 255.");
-            }
-
-            if (!isBlanck(valor) && (valor.length() > 255)) {
-                throw new Exception("La longitud del valor no debe ser mayor a 255.");
-            }
-
+            final String llave = parametros.get("llave");
+            final String grupo = parametros.get("grupo");
+            final String valor = parametros.get("valor");
             
             ipClient = obtenerIp(ipClient);
             LoggerMain.printRequest(Stream.of(
@@ -178,9 +166,9 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
             );
 
             Page<EtiquetaResponse> out = repository.filter(
-                    ((llave == null || llave.isEmpty()) ? -1 : 0), ((llave == null || llave.trim().isEmpty()) ? "" : "%" + llave.trim().toUpperCase() + "%"),
-                    ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
-                    ((grupo == null || grupo.isEmpty()) ? -1 : 0), ((grupo == null || grupo.trim().isEmpty()) ? "" : "%" + grupo.trim().toUpperCase() + "%"),
+                    (isBlanck(llave) ? -1 : 0), (isBlanck(llave) ? "" : "%" + llave.trim().toUpperCase() + "%"),
+                    (isBlanck(valor) ? -1 : 0), (isBlanck(valor) ? "" : "%" + valor.trim().toUpperCase() + "%"),
+                    (isBlanck(grupo) ? -1 : 0), (isBlanck(grupo) ? "" : "%" + grupo.trim().toUpperCase() + "%"),
                     pageRequest)
                     .map(model -> ConvercionUtil.convertToObject(model, EtiquetaResponse.class));
             
@@ -196,10 +184,11 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar etiquetas, " + e.getMessage();
 
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
 
-            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map);
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
             throw e;
         }
     }

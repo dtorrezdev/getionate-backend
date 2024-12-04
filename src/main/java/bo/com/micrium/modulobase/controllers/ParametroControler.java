@@ -29,7 +29,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import bo.com.micrium.modulobase.commons.TiposComunes;
 //import bo.com.micrium.modulobase.commons.ConvercionUtil;
-import bo.com.micrium.modulobase.commons.ParametroID;
 import bo.com.micrium.modulobase.commons.ParametroTipo;
 import bo.com.micrium.modulobase.commons.PermisoTipo;
 
@@ -41,8 +40,8 @@ import com.micrium.bd.access.jpa.repositories.IParametroRepository;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import com.micrium.bd.access.jpa.repositories.IRolTipoparametroRepository;
 import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
-import com.micrium.bd.access.jpa.models.dto.ParametroRequest;
-import com.micrium.bd.access.jpa.models.dto.ParametroResponse;
+import bo.com.micrium.modulobase.controllers.dto.ParametroRequest;
+import bo.com.micrium.modulobase.controllers.dto.ParametroResponse;
 import bo.com.micrium.modulobase.services.ParametroService;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
@@ -87,13 +86,14 @@ public class ParametroControler extends GenericControler implements ICrudControl
     @Override
     public Page<ParametroResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
         try {
-            
-            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+                        
+            Map<String, String> parametros = getParametersMap(httpServletRequest);
+            validator.page(parametros);
 
-            final String nombre = this.httpServletRequest.getParameter("nombre");
-            final String valor = this.httpServletRequest.getParameter("valor");
-            final String descripcion = this.httpServletRequest.getParameter("descripcion");
-            final String idtipoparametro = this.httpServletRequest.getParameter("idtipoparametro");
+            final String nombre = parametros.get("nombre");
+            final String valor = parametros.get("valor");
+            final String descripcion = parametros.get("descripcion");
+            final String idtipoparametro = parametros.get("idtipoparametro");
 
             ipClient = obtenerIp(ipClient);
 
@@ -327,8 +327,8 @@ public class ParametroControler extends GenericControler implements ICrudControl
             }
 
             Parametro model = repository.findById(idDesencriptado).get();
-            Long modelId = model.getId();
-            if (modelId.equals(ParametroID.VALIDACION_ACTIVE_DIRECTORY)) {
+            //Long modelId = model.getId();
+            if (model.getNombre().equals(com.micrium.bd.access.enuns.Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())) {
                 int valor = Integer.parseInt(request.getValor().trim());
                 //if (request.getValor().trim().equals(ParametroID.LDAP) || request.getValor().trim().equals(ParametroID.HIBRIDO)) {
                 if ((valor == TipoAutenticacion.LDAP.getId()) || (valor == TipoAutenticacion.HIBRIDO.getId())) {

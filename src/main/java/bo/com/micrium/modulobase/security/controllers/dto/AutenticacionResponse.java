@@ -1,11 +1,11 @@
-package bo.com.micrium.modulobase.security.dto;
+package bo.com.micrium.modulobase.security.controllers.dto;
 
 import java.util.List;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import com.micrium.bd.access.jpa.models.dto.ModuloResponse;
+import bo.com.micrium.modulobase.controllers.dto.ModuloResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

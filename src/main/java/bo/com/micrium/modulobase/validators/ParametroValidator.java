@@ -9,9 +9,9 @@ import bo.com.micrium.modulobase.commons.GlobalValidator;
 import com.micrium.bd.access.jpa.models.Parametro;
 import com.micrium.bd.access.jpa.repositories.IParametroRepository;
 import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
-import com.micrium.bd.access.jpa.models.dto.ParametroRequest;
+import bo.com.micrium.modulobase.controllers.dto.ParametroRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import bo.com.micrium.modulobase.commons.ParametroTipo;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;

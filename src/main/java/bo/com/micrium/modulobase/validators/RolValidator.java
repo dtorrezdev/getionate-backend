@@ -10,9 +10,9 @@ import bo.com.micrium.modulobase.commons.GlobalValidator;
 import com.micrium.bd.access.enuns.Parametro;
 import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
-import com.micrium.bd.access.jpa.models.dto.RolRequest;
+import bo.com.micrium.modulobase.controllers.dto.RolRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

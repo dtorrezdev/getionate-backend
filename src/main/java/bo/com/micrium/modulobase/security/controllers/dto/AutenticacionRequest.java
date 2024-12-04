@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.security.dto;
+package bo.com.micrium.modulobase.security.controllers.dto;
 
 import java.io.Serializable;
 import jakarta.validation.constraints.NotNull;

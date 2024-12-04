@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import com.micrium.bd.access.enuns.Parametro;
 
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Claims;

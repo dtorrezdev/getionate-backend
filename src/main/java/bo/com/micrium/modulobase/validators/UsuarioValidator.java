@@ -14,11 +14,11 @@ import com.micrium.bd.access.jpa.models.Rol;
 import com.micrium.bd.access.jpa.models.Usuario;
 import com.micrium.bd.access.jpa.repositories.IRolRepository;
 import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
-import com.micrium.bd.access.jpa.models.dto.CambioContrasenaRequest;
-import com.micrium.bd.access.jpa.models.dto.CambioContrasenaRequestLogin;
-import com.micrium.bd.access.jpa.models.dto.UsuarioRequest;
+import bo.com.micrium.modulobase.controllers.dto.CambioContrasenaRequest;
+import bo.com.micrium.modulobase.controllers.dto.CambioContrasenaRequestLogin;
+import bo.com.micrium.modulobase.controllers.dto.UsuarioRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import bo.com.micrium.modulobase.commons.TipoAutenticacion;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import java.util.Map;

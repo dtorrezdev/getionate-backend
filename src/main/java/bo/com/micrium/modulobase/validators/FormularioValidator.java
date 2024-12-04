@@ -1,11 +1,13 @@
 package bo.com.micrium.modulobase.validators;
 
 import bo.com.micrium.modulobase.commons.GlobalValidator;
-import com.micrium.bd.access.jpa.models.Formulario;
+
+import com.micrium.bd.access.enuns.Parametro;
+// import com.micrium.bd.access.jpa.models.Formulario;
 import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
-import com.micrium.bd.access.jpa.models.dto.FormularioRequest2;
+import bo.com.micrium.modulobase.controllers.dto.FormularioRequest2;
 import bo.com.micrium.modulobase.services.ParametroService;
-import bo.com.micrium.modulobase.commons.ParametroID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +30,7 @@ public class FormularioValidator extends GlobalValidator {
     ParametroService parametroService;
 
     public void validate(FormularioRequest2 input, Long id, Errors errors) {
-       /*  if (isBlanck(input.getNombre())) {
+        /* if (isBlanck(input.getNombre())) {
             errors.rejectValue("nombre", "field.nombre", "El nombre del formulario es requerido.");
             return;
         }
@@ -38,8 +40,8 @@ public class FormularioValidator extends GlobalValidator {
             return;
         }
 
-        if (!input.getNombre().matches(parametroService.getParametro(ParametroID.EXPRESION_REGULAR_GENERAL).getValor())) {
-            errors.rejectValue("nombre", "field.nombre", parametroService.getParametro(ParametroID.MENSAJE_VALIDACION_GENERAL).getValor());
+        if (!input.getNombre().matches(parametroService.getParametroByNombre(Parametro.DelSistema.EXPRESION_REGULAR_GENERAL.name()).getValor())) {
+            errors.rejectValue("nombre", "field.nombre", parametroService.getParametroByNombre(Parametro.DelSistema.MENSAJE_VALIDACION_GENERAL.name()).getValor());
             return;
         }
 
