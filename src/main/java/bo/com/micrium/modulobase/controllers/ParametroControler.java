@@ -317,6 +317,8 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     new AbstractMap.SimpleEntry<>("id ", id),
                     new AbstractMap.SimpleEntry<>("request ", request)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
 

@@ -210,6 +210,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("request ", request)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
 
@@ -268,6 +269,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("id ", id)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             Optional<Grupo> temp = repository.findById(idDesencriptado);
 

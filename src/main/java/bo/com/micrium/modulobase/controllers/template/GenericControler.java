@@ -78,6 +78,15 @@ public class GenericControler extends GlobalValidator {
         return dato == null || dato.trim().isEmpty();
     }
 
+    /**
+     * Limpia caracter especial '%' por '/'
+     * @param dato
+     * @return
+     */
+    public String limpiarCaracterEspecialEncriptacion(String dato) {
+        return dato.replace(".", "/");
+    }
+
     public static boolean isInteger(String s) {
         try {
             Integer.valueOf(s);

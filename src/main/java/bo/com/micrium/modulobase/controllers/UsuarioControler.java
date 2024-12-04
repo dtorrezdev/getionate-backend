@@ -358,6 +358,7 @@ public class UsuarioControler extends GenericControler implements ICrudControler
                 collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
             );
             
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
             if (result.hasErrors()) {

@@ -132,9 +132,10 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
                         new AbstractMap.SimpleEntry<>("form ", form),
                         new AbstractMap.SimpleEntry<>("id ", id)).
                         collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
                     
-
             Optional<TipoParametro> model = repository.findById(idDesencriptado);
             if (model.isPresent()) {
                 ResponseEntity<TipoParametroResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertToObject(model.get(), TipoParametroResponse.class));
@@ -248,6 +249,8 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
                         new AbstractMap.SimpleEntry<>("request ", request),
                         new AbstractMap.SimpleEntry<>("id ", id)).
                         collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
 
@@ -323,6 +326,7 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
                         new AbstractMap.SimpleEntry<>("form ", form),
                         new AbstractMap.SimpleEntry<>("id ", id)).
                         collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             Optional<TipoParametro> temp = repository.findById(idDesencriptado);
 

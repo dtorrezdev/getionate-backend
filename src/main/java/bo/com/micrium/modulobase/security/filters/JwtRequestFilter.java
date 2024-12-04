@@ -180,7 +180,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         Bucket bucket = rateLimiterService.resolveBucket("S/N"); // peticones sin token
 
                
-        //printAllHeaders(request);
+        // printAllHeaders(request);
         if (!request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_AUTENTICACION)
                 && !request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_VERSION)
                 && !request.getRequestURI().equals(request.getContextPath() + EtiquetaControler.RESOURCE_BY_LLAVE)
@@ -240,11 +240,13 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 String[] urls = accion.getUrl().split(",");
                 String[] metodos = accion.getMetodo().split(",");
                 int size = urls.length; 
-                //log.info("req.url=" + request.getRequestURI() + "  " + request.getMethod());
+                // log.info("req.url=" + request.getRequestURI() + "  metodo=" + request.getMethod());
                 for (int i = 0; i < size; i++) {
                     String uri = request.getContextPath() + urls[i];
-                    //log.info("uri="+ uri + "  metodo="+ metodos[i]);
+                    // log.info("uri="+ uri + "  metodo="+ metodos[i]);
                     if (request.getRequestURI().startsWith(uri) && metodos[i].equals(request.getMethod().toUpperCase())) {
+                    //if (request.getRequestURI().startsWith(uri) && metodos[i].equals(request.getMethod().toUpperCase())) {    
+                        log.info("entro 1");
                         flag = false;
                         break exito;
                     }
@@ -276,7 +278,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         chain.doFilter(request, response);
     }
 
-    /*private void printAllHeaders(HttpServletRequest request) {
+    private void printAllHeaders(HttpServletRequest request) {
         Enumeration<String> headerNames = request.getHeaderNames();
 
         if (headerNames != null) {
@@ -288,6 +290,6 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         } else {
             log.info("No headers found.");
         }
-    }*/
+    }
 
 }

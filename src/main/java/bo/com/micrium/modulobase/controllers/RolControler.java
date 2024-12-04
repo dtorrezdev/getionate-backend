@@ -268,7 +268,7 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                 new AbstractMap.SimpleEntry<>("request ", request)).
                 collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
             );
-
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
 
             validator.validate(request, idDesencriptado, result);
@@ -329,7 +329,8 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                     new AbstractMap.SimpleEntry<>("form ", form),
                     new AbstractMap.SimpleEntry<>("id ", id)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
+            
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
 
             Optional<Rol> temp = repository.findById(idDesencriptado);

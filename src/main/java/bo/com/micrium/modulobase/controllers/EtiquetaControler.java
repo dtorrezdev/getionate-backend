@@ -302,7 +302,7 @@ public class EtiquetaControler extends GenericControler implements ICrudControle
                 new AbstractMap.SimpleEntry<>("request ", request)).
                 collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
             );
-
+            id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesenciptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesenciptado, result);
 
