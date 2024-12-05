@@ -5,6 +5,8 @@
  */
 package bo.com.micrium.modulobase.validators;
 
+import bo.com.micrium.exception.ValidateException;
+import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.commons.GlobalValidator;
 
 import com.micrium.bd.access.enuns.Parametro;
@@ -15,6 +17,7 @@ import bo.com.micrium.modulobase.services.ParametroService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,21 @@ public class RolValidator extends GlobalValidator {
 
     @Autowired
     ParametroService parametroService;
+
+    public void validateListar(Map<String, String> parametros) throws ValidateException {
+
+        // LoggerMain.info("***dtn validateListar " + parametros.size());
+        final String nombre = parametros.get("nombre");
+        final String descripcion = parametros.get("descripcion");
+
+        if (!isBlanck(nombre) && (nombre.length() > 50)) {
+            throw new ValidateException("La longitud del nombre no debe ser mayor a 50.");
+        }
+
+        if (!isBlanck(descripcion) && (descripcion.length() > 200)) {
+            throw new ValidateException("La longitud del descripcion no debe ser mayor a 200.");
+        }
+    }
 
     public void validate(RolRequest input, Long id, Errors errors) {
         if (isBlanck(input.getNombre())) {

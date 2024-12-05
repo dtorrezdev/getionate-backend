@@ -171,14 +171,13 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        //log.info("***dtn doFilterInternal URL " + request.getRequestURL());
+        // log.info("***dtn doFilterInternal URL " + request.getRequestURL());
         if (request.getMethod().equals("OPTIONS")) {
             peticionesOptionsCors(request, response);
             return;
         }
 
         Bucket bucket = rateLimiterService.resolveBucket("S/N"); // peticones sin token
-
                
         // printAllHeaders(request);
         if (!request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_AUTENTICACION)
@@ -245,8 +244,6 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                     String uri = request.getContextPath() + urls[i];
                     // log.info("uri="+ uri + "  metodo="+ metodos[i]);
                     if (request.getRequestURI().startsWith(uri) && metodos[i].equals(request.getMethod().toUpperCase())) {
-                    //if (request.getRequestURI().startsWith(uri) && metodos[i].equals(request.getMethod().toUpperCase())) {    
-                        log.info("entro 1");
                         flag = false;
                         break exito;
                     }
@@ -275,21 +272,21 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
             return;
         }
         
-        chain.doFilter(request, response);
+        chain.doFilter(request, response);        
     }
 
-    private void printAllHeaders(HttpServletRequest request) {
-        Enumeration<String> headerNames = request.getHeaderNames();
+    // private void printAllHeaders(HttpServletRequest request) {
+    //     Enumeration<String> headerNames = request.getHeaderNames();
 
-        if (headerNames != null) {
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                String headerValue = request.getHeader(headerName);
-                log.info(headerName + ": " + headerValue);
-            }
-        } else {
-            log.info("No headers found.");
-        }
-    }
+    //     if (headerNames != null) {
+    //         while (headerNames.hasMoreElements()) {
+    //             String headerName = headerNames.nextElement();
+    //             String headerValue = request.getHeader(headerName);
+    //             log.info(headerName + ": " + headerValue);
+    //         }
+    //     } else {
+    //         log.info("No headers found.");
+    //     }
+    // }
 
 }

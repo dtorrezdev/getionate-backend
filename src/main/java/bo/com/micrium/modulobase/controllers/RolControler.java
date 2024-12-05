@@ -59,6 +59,8 @@ import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.validators.RolValidator;
 import bo.com.micrium.exception.EncriptacionExcepcion;
+import bo.com.micrium.exception.PageException;
+import bo.com.micrium.exception.ValidateException;
 import bo.com.micrium.modulobase.commons.RolEstado;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 import bo.com.micrium.logger.LoggerMain;
@@ -92,22 +94,21 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
     @Autowired
     private transient IParametroRepository parametroRepository;
 
-
     @Override
-    public Page<RolResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
+    public Page<RolResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws ApiException {
+        
+        try {
+            Map<String, String> parametros = getParametersMap(httpServletRequest);
+            validator.page(parametros);    
+            validator.validateListar(parametros);        
+        
+            final String nombre = filterTextoQueryUpper(parametros.get("nombre"));
+            final String descripcion = filterTextoQueryUpper(parametros.get("descripcion"));
 
-        try {            
-            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
-
-            final String nombre = filterTextoQueryUpper(this.httpServletRequest.getParameter("nombre"));
-            final String descripcion = filterTextoQueryUpper(this.httpServletRequest.getParameter("descripcion"));
-            if (!isBlanck(nombre) && (nombre.length() > 50)) {
-                throw new Exception("La longitud del nombre no debe ser mayor a 50.");
-            }
-
-            if (!isBlanck(descripcion) && (descripcion.length() > 200)) {
-                throw new Exception("La longitud del descripcion no debe ser mayor a 200.");
-            }
+            parametros.forEach((key,value) -> {
+                LoggerMain.info("key={},  value={}", key,value);                
+            });
+            
             ipClient = obtenerIp(ipClient);
 
             LoggerMain.printRequest(Stream.of(
@@ -130,7 +131,7 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             ).map(model -> {
                 RolResponse convertToObject = ConvercionUtil.convertToObject(model, RolResponse.class);
                 return convertToObject;
-            });            
+            });
 
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
             LoggerMain.printResponse(Stream.of(
@@ -143,7 +144,7 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             );
 
             return out;            
-        } catch (Exception e) {
+        } catch (PageException | ValidateException  e) {
             final String mensajeError = "Error al filtrar roles, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
@@ -151,7 +152,7 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
 
-            throw e;
+            throw new ApiException( mensajeError, e);
         }
 
     }

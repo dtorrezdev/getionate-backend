@@ -43,7 +43,7 @@ public class UsuarioValidator extends GlobalValidator {
     BCryptPasswordEncoder passwordEncoder;
 
     public void validateListar(Map<String, String> parametros) throws Exception {
-        LoggerMain.info("***dtn validateListar " + parametros.size());
+        //LoggerMain.info("***dtn validateListar " + parametros.size());
         final String id = parametros.get("id");
         final String nombreCompleto = parametros.get("nombreCompleto");
         final String nombreUsuario = parametros.get("nombreUsuario");
