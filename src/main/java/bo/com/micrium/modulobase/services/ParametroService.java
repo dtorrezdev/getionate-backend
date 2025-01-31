@@ -43,7 +43,7 @@ public class ParametroService {
         try {
             paramService = new com.micrium.bd.access.natives.service.ParametroService();
             paramService.getParametroByName("BLOQUEO_USUARIOS_DIAS");
-        } catch (Exception e) {
+        } catch (DaoException | MapperException | ParameterException e) {
             log.error(e.getMessage(),e);
             System.exit(1);
         }
@@ -62,42 +62,50 @@ public class ParametroService {
         ParametroDto p = this.getParametroByNombre(nombre);
         log.debug("idParametro: " + nombre + ", parametro encontrado: " + p);
         switch (p.getTipo()) {
-            case ParametroTipo.TIPO_CADENA:
+            case ParametroTipo.TIPO_CADENA -> {
                 return p.getValor();
+            }
 
-            case ParametroTipo.TIPO_COLOR:
+            case ParametroTipo.TIPO_COLOR -> {
                 return p.getValor();
+            }
 
-            case ParametroTipo.TIPO_FECHA:
+            case ParametroTipo.TIPO_FECHA -> {
                 try {
                     return sdf.parse(p.getValor());
                 } catch (ParseException e) {
                     log.error("Erro de parse fecha, " + e.getMessage(), e);
                     return null;
                 }
-            case ParametroTipo.TIPO_NUMERICO:
+            }
+            case ParametroTipo.TIPO_NUMERICO -> {
                 return new BigDecimal(p.getValor());
-            case ParametroTipo.TIPO_BOOLEANO:
-                return Boolean.parseBoolean(p.getValor());
-            case ParametroTipo.TIPO_LISTADO_VALORES_NUMERICOS:
+            }
+            case ParametroTipo.TIPO_BOOLEANO -> {
+                return Boolean.valueOf(p.getValor());
+            }
+            case ParametroTipo.TIPO_LISTADO_VALORES_NUMERICOS -> {
                 return p.getValor();
-            case ParametroTipo.TIPO_LISTADO_VALORES_TEXTO:
+            }
+            case ParametroTipo.TIPO_LISTADO_VALORES_TEXTO -> {
                 return p.getValor();
-            case ParametroTipo.TIPO_PASSWORD:
+            }
+            case ParametroTipo.TIPO_PASSWORD -> {
                 return ConfigEncriptacion.decryptSinExcepcion(p.getValor());
+            }
         }
 
         return null;
     }
 
     public void updateParameter(String nombre, String valor) throws DaoException {
-        log.info("updateParameter");
+        log.info("***dtn updateParameter");
         paramService.updateParametroByNombre(nombre, valor);
         try {
             // obtenemos un parametro cualquiera para q haga un resfresh de todo los parametros
             paramService.getParametroByName("BLOQUEO_USUARIOS_DIAS");
-        } catch (Exception e) {
-            throw new DaoException(e);
+        } catch (DaoException | MapperException | ParameterException e) {
+            throw new DaoException(e.getMessage());
         }
     }
 
