@@ -113,6 +113,16 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
 
         <!-- Incluir dependencia de Servlet API para servidores externos -->
@@ -121,7 +131,7 @@
             <artifactId>jakarta.servlet-api</artifactId>			
             <scope>provided</scope>
         </dependency>
-
+        
         <!-- Manejo de Entidades ORM -->
         <!-- <dependency> 
         <groupId>org.springframework.boot</groupId>
