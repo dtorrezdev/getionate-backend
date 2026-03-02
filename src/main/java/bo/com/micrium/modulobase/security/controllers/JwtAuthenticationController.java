@@ -37,15 +37,15 @@ import bo.com.micrium.modulobase.commons.PrivilegioTipo;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.models.Accion;
-import com.micrium.bd.access.jpa.models.Formulario;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Accion;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Formulario;
 import com.micrium.bd.access.natives.model.dto.ParametroDto;
-import com.micrium.bd.access.jpa.models.Rol;
-import com.micrium.bd.access.jpa.models.RolAccion;
-import com.micrium.bd.access.jpa.models.Usuario;
-import com.micrium.bd.access.jpa.repositories.IAccionRepository;
-import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
-import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Rol;
+import com.micrium.bd.access.jpa.modulo.administracion.models.RolAccion;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Usuario;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IAccionRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IFormularioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolAccionRepository;
 import bo.com.micrium.modulobase.common.exceptions.ExceptionResponse;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.dto.AccionResponse;
@@ -99,9 +99,9 @@ public class JwtAuthenticationController extends GenericControler {
 
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("Version", "Version 1.0");
-        map.put("Modo del sistema", modoSistema.getValor());
+        map.put("ModoDelSistema", modoSistema.getValor());
 
-        return ResponseEntity.ok(map.toString());
+        return ResponseEntity.ok(map);
     }
 
     @RequestMapping(value = METODO_AUTENTICACION, method = RequestMethod.POST)

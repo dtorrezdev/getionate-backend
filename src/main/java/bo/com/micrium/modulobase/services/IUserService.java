@@ -2,7 +2,7 @@ package bo.com.micrium.modulobase.services;
 
 import java.util.List;
 
-import com.micrium.bd.access.jpa.models.Usuario;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Usuario;
 
 public interface IUserService {
 

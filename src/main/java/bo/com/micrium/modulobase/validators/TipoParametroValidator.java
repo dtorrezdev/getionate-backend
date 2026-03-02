@@ -8,8 +8,8 @@ package bo.com.micrium.modulobase.validators;
 import bo.com.micrium.modulobase.commons.GlobalValidator;
 
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.models.TipoParametro;
-import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.models.TipoParametro;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.controllers.dto.TipoParametroRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
 

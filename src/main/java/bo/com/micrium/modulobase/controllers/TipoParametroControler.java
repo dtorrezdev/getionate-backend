@@ -15,10 +15,10 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import com.micrium.bd.access.jpa.models.TipoParametro;
+import com.micrium.bd.access.jpa.modulo.administracion.models.TipoParametro;
 import bo.com.micrium.modulobase.controllers.dto.TipoParametroRequest;
 import bo.com.micrium.modulobase.controllers.dto.TipoParametroResponse;
-import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.validators.TipoParametroValidator;
 
 import java.net.URI;
@@ -48,8 +48,9 @@ import java.util.stream.Stream;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/tipos/parametros", produces = {MediaType.APPLICATION_JSON_VALUE})
-public class TipoParametroControler extends GenericControler implements ICrudControler<TipoParametroRequest, TipoParametroResponse, String> {
+@RequestMapping(value = "/tipos/parametros", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class TipoParametroControler extends GenericControler
+        implements ICrudControler<TipoParametroRequest, TipoParametroResponse, String> {
 
     private static final long serialVersionUID = 2546243156433770443L;
 
@@ -57,107 +58,117 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
     private transient ITipoParametroRepository repository;
 
     @Autowired
-    private transient TipoParametroValidator validator;     //  37334 coverity
+    private transient TipoParametroValidator validator; // 37334 coverity
 
     @Override
     public Page<TipoParametroResponse> list(String token, String ipClient, String form, Pageable pageRequest) {
         ipClient = obtenerIp(ipClient);
 
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("pageRequest ").append(pageRequest).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        /*
+         * StringBuilder sb = new StringBuilder();
+         * sb.append("-------------------REQUEST----------------------\n").
+         * append("token ").append(token).append(", \n").
+         * append("form ").append(form).append(", \n").
+         * append("ipClient ").append(ipClient).append(", \n").
+         * append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
+         * append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
+         * append("pageRequest ").append(pageRequest).append(", \n").
+         * append("------------------------------------------------\n");
+         * 
+         * log.info(sb.toString());
+         */
         LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-        Page<TipoParametroResponse> out = repository.findAll(pageRequest).map(model -> ConvercionUtil.convertToObject(model, TipoParametroResponse.class));
+        Page<TipoParametroResponse> out = repository.findAll(pageRequest)
+                .map(model -> ConvercionUtil.convertToObject(model, TipoParametroResponse.class));
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("CONTENT ").append(out.getContent()).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        /*
+         * sb = new StringBuilder();
+         * sb.append("-------------------RESPONSE----------------------\n").
+         * append("token ").append(token).append(", \n").
+         * append("DATA ").append(out).append(", \n").
+         * append("CONTENT ").append(out.getContent()).append(", \n").
+         * append("------------------------------------------------\n");
+         * 
+         * log.info(sb.toString());
+         */
         LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out),
-                        new AbstractMap.SimpleEntry<>("Content ", out.getContent())).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", out),
+                new AbstractMap.SimpleEntry<>("Content ", out.getContent()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return out;
     }
 
     @Override
-    public ResponseEntity<TipoParametroResponse> get(String token, String ipClient, 
+    public ResponseEntity<TipoParametroResponse> get(String token, String ipClient,
             String form, String id) throws ApiException {
 
         try {
             ipClient = obtenerIp(ipClient);
 
-            /*StringBuilder sb = new StringBuilder();
-            sb.append("-------------------REQUEST----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("form ").append(form).append(", \n").
-                    append("ipClient ").append(ipClient).append(", \n").
-                    append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                    append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                    append("id ").append(id).append(", \n").
-                    append("------------------------------------------------\n");
-            
-            log.info(sb.toString());*/
+            /*
+             * StringBuilder sb = new StringBuilder();
+             * sb.append("-------------------REQUEST----------------------\n").
+             * append("token ").append(token).append(", \n").
+             * append("form ").append(form).append(", \n").
+             * append("ipClient ").append(ipClient).append(", \n").
+             * append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
+             * append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
+             * append("id ").append(id).append(", \n").
+             * append("------------------------------------------------\n");
+             * 
+             * log.info(sb.toString());
+             */
             LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("id ", id)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("id ", id))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
-                    
+
             Optional<TipoParametro> model = repository.findById(idDesencriptado);
             if (model.isPresent()) {
-                ResponseEntity<TipoParametroResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertToObject(model.get(), TipoParametroResponse.class));
+                ResponseEntity<TipoParametroResponse> out = ResponseEntity.ok()
+                        .body(ConvercionUtil.convertToObject(model.get(), TipoParametroResponse.class));
 
-                /*sb = new StringBuilder();
-                sb.append("-------------------RESPONSE----------------------\n").
-                        append("token ").append(token).append(", \n").
-                        append("DATA ").append(out).append(", \n").
-                        append("------------------------------------------------\n");
-
-                log.info(sb.toString());*/
+                /*
+                 * sb = new StringBuilder();
+                 * sb.append("-------------------RESPONSE----------------------\n").
+                 * append("token ").append(token).append(", \n").
+                 * append("DATA ").append(out).append(", \n").
+                 * append("------------------------------------------------\n");
+                 * 
+                 * log.info(sb.toString());
+                 */
                 LoggerMain.printResponse(Stream.of(
                         new AbstractMap.SimpleEntry<>("token ", token),
                         new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                         new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                        new AbstractMap.SimpleEntry<>("response ", out))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
                 return out;
             }
         } catch (EncriptacionExcepcion e) {
-            
+
             throw new ApiException(e.getMessage(), e);
         }
         return null;
@@ -168,26 +179,28 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
             TipoParametroRequest request, BindingResult result) throws URISyntaxException, ApiException {
         ipClient = obtenerIp(ipClient);
 
-        /*StringBuilder sb = new StringBuilder();
-        sb.append("-------------------REQUEST----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("form ").append(form).append(", \n").
-                append("ipClient ").append(ipClient).append(", \n").
-                append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                append("request ").append(request).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        /*
+         * StringBuilder sb = new StringBuilder();
+         * sb.append("-------------------REQUEST----------------------\n").
+         * append("token ").append(token).append(", \n").
+         * append("form ").append(form).append(", \n").
+         * append("ipClient ").append(ipClient).append(", \n").
+         * append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
+         * append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
+         * append("request ").append(request).append(", \n").
+         * append("------------------------------------------------\n");
+         * 
+         * log.info(sb.toString());
+         */
         LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("request ", request)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("form ", form),
+                new AbstractMap.SimpleEntry<>("request ", request))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         validator.validate(request, null, result);
 
@@ -202,19 +215,21 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
         ResponseEntity<TipoParametroResponse> out = ResponseEntity.created(new URI("/usuarios/" + model.getId()))
                 .body(ConvercionUtil.convertToObject(model, TipoParametroResponse.class));
 
-        /*sb = new StringBuilder();
-        sb.append("-------------------RESPONSE----------------------\n").
-                append("token ").append(token).append(", \n").
-                append("DATA ").append(out).append(", \n").
-                append("------------------------------------------------\n");
-
-        log.info(sb.toString());*/
+        /*
+         * sb = new StringBuilder();
+         * sb.append("-------------------RESPONSE----------------------\n").
+         * append("token ").append(token).append(", \n").
+         * append("DATA ").append(out).append(", \n").
+         * append("------------------------------------------------\n");
+         * 
+         * log.info(sb.toString());
+         */
         LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("token ", token),
+                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                new AbstractMap.SimpleEntry<>("response ", out))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return out;
     }
@@ -227,29 +242,31 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
         try {
             ipClient = obtenerIp(ipClient);
 
-            /*StringBuilder sb = new StringBuilder();
-            sb.append("-------------------REQUEST----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("form ").append(form).append(", \n").
-                    append("ipClient ").append(ipClient).append(", \n").
-                    append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                    append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                    append("request ").append(request).append(", \n").
-                    append("id ").append(id).append(", \n").
-                    append("------------------------------------------------\n");
-
-            log.info(sb.toString());*/
+            /*
+             * StringBuilder sb = new StringBuilder();
+             * sb.append("-------------------REQUEST----------------------\n").
+             * append("token ").append(token).append(", \n").
+             * append("form ").append(form).append(", \n").
+             * append("ipClient ").append(ipClient).append(", \n").
+             * append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
+             * append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
+             * append("request ").append(request).append(", \n").
+             * append("id ").append(id).append(", \n").
+             * append("------------------------------------------------\n");
+             * 
+             * log.info(sb.toString());
+             */
             LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("request ", request),
-                        new AbstractMap.SimpleEntry<>("id ", id)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("request ", request),
+                    new AbstractMap.SimpleEntry<>("id ", id))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
@@ -270,27 +287,31 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
 
             bitacoraService.guardarBitacora(token, ipClient, form, "Se modifico:" + model);
 
-            ResponseEntity<TipoParametroResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertToObject(model, TipoParametroResponse.class));
+            ResponseEntity<TipoParametroResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(model, TipoParametroResponse.class));
 
-            /*sb = new StringBuilder();
-            sb.append("-------------------RESPONSE----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("DATA ").append(out).append(", \n").
-                    append("------------------------------------------------\n");
-
-            log.info(sb.toString());*/
+            /*
+             * sb = new StringBuilder();
+             * sb.append("-------------------RESPONSE----------------------\n").
+             * append("token ").append(token).append(", \n").
+             * append("DATA ").append(out).append(", \n").
+             * append("------------------------------------------------\n");
+             * 
+             * log.info(sb.toString());
+             */
             LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (EncriptacionExcepcion | ApiException e) {
             final String mensajeError = "Error al modificar un tipo_parametro, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.ROL_MODIFICAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.ROL_MODIFICAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.ROL_MODIFICAR, map, mapNuevo, logSistemaId);
 
@@ -306,26 +327,28 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
         try {
             ipClient = obtenerIp(ipClient);
 
-            /*StringBuilder sb = new StringBuilder();
-            sb.append("-------------------REQUEST----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("form ").append(form).append(", \n").
-                    append("ipClient ").append(ipClient).append(", \n").
-                    append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
-                    append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
-                    append("id ").append(id).append(", \n").
-                    append("------------------------------------------------\n");
-
-            log.info(sb.toString());*/
+            /*
+             * StringBuilder sb = new StringBuilder();
+             * sb.append("-------------------REQUEST----------------------\n").
+             * append("token ").append(token).append(", \n").
+             * append("form ").append(form).append(", \n").
+             * append("ipClient ").append(ipClient).append(", \n").
+             * append("url ").append(httpServletRequest.getRequestURL()).append(", \n").
+             * append("metodo ").append(httpServletRequest.getMethod()).append(", \n").
+             * append("id ").append(id).append(", \n").
+             * append("------------------------------------------------\n");
+             * 
+             * log.info(sb.toString());
+             */
             LoggerMain.printRequest(Stream.of(
-                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("form ", form),
-                        new AbstractMap.SimpleEntry<>("id ", id)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("id ", id))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             Optional<TipoParametro> temp = repository.findById(idDesencriptado);
@@ -342,25 +365,29 @@ public class TipoParametroControler extends GenericControler implements ICrudCon
 
             ResponseEntity<Object> out = ResponseEntity.ok().build();
 
-            /*sb = new StringBuilder();
-            sb.append("-------------------RESPONSE----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("DATA ").append(out).append(", \n").
-                    append("------------------------------------------------\n");
-
-            log.info(sb.toString());*/
+            /*
+             * sb = new StringBuilder();
+             * sb.append("-------------------RESPONSE----------------------\n").
+             * append("token ").append(token).append(", \n").
+             * append("DATA ").append(out).append(", \n").
+             * append("------------------------------------------------\n");
+             * 
+             * log.info(sb.toString());
+             */
             LoggerMain.printResponse(Stream.of(
-                        new AbstractMap.SimpleEntry<>("token ", token),
-                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (EncriptacionExcepcion | NoHandlerFoundException e) {
-            final String mensajeError = "Error al eliminar un " + TiposComunes.ModuloBase.ROL_TIPOS_PARAMETROS + ", " + e.getMessage();
+            final String mensajeError = "Error al eliminar un " + TiposComunes.ModuloBase.ROL_TIPOS_PARAMETROS + ", "
+                    + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.ROL_ELIMINAR,
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.ROL_ELIMINAR,
                     mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.ROL_ELIMINAR, map, mapNuevo, logSistemaId);

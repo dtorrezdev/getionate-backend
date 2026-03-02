@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.models.Rol;
-import com.micrium.bd.access.jpa.models.Usuario;
-import com.micrium.bd.access.jpa.repositories.IRolRepository;
-import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Rol;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Usuario;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IUsuarioRepository;
 import bo.com.micrium.modulobase.controllers.dto.CambioContrasenaRequest;
 import bo.com.micrium.modulobase.controllers.dto.CambioContrasenaRequestLogin;
 import bo.com.micrium.modulobase.controllers.dto.UsuarioRequest;

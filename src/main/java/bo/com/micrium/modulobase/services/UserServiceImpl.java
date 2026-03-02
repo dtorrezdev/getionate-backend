@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.micrium.bd.access.jpa.models.Usuario;
-import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Usuario;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IUsuarioRepository;
 
 @Service
 public class UserServiceImpl implements IUserService {

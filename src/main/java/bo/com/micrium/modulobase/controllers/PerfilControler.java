@@ -33,10 +33,10 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
-import com.micrium.bd.access.jpa.models.Usuario;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Usuario;
 import bo.com.micrium.modulobase.controllers.dto.CambioContrasenaRequest;
 import bo.com.micrium.modulobase.controllers.dto.CambioContrasenaRequestLogin;
-import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IUsuarioRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.validators.UsuarioValidator;
 
@@ -46,121 +46,123 @@ import bo.com.micrium.modulobase.validators.UsuarioValidator;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/perfiles", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/perfiles", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class PerfilControler extends GenericControler {
 
-    public static final String RESOURCE_CAMBIOLOGIN = "/perfiles" + "/contrasena/cambioLogin";
+        public static final String RESOURCE_CAMBIOLOGIN = "/perfiles" + "/contrasena/cambioLogin";
 
-    private static final long serialVersionUID = -6548357999333579666L;
+        private static final long serialVersionUID = -6548357999333579666L;
 
-    @Autowired
-    protected transient IUsuarioRepository repository;
+        @Autowired
+        protected transient IUsuarioRepository repository;
 
-    @Autowired
-    protected transient UsuarioValidator validator;
+        @Autowired
+        protected transient UsuarioValidator validator;
 
-    //@Autowired
-    //protected transient ILogSistemaService logSistemaService;   //  37310 coverity
-    
-    //@Autowired
-    //private transient BCryptPasswordEncoder passwordEncoder;
+        // @Autowired
+        // protected transient ILogSistemaService logSistemaService; // 37310 coverity
 
-    @PostMapping("/contrasena/cambioLogin")
-    public ResponseEntity<?> cambiarContrasenaLogin(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
-            @Valid @RequestBody CambioContrasenaRequestLogin request,
-            BindingResult result) throws ApiException {
-        ipClient = obtenerIp(ipClient);
+        // @Autowired
+        // private transient BCryptPasswordEncoder passwordEncoder;
 
-        Usuario model = repository.findByNombreUsuarioAndEstadoIn(request.getUserName(),
-                Arrays.asList(UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO));
+        @PostMapping("/contrasena/cambioLogin")
+        public ResponseEntity<?> cambiarContrasenaLogin(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
+                        @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
+                        @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
+                        @Valid @RequestBody CambioContrasenaRequestLogin request,
+                        BindingResult result) throws ApiException {
+                ipClient = obtenerIp(ipClient);
 
-        validator.validate(model, request, result);
+                Usuario model = repository.findByNombreUsuarioAndEstadoIn(request.getUserName(),
+                                Arrays.asList(UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO));
 
-        if (result.hasErrors()) {
-            throw new ApiException(result, "Errores en la validacion");
+                validator.validate(model, request, result);
+
+                if (result.hasErrors()) {
+                        throw new ApiException(result, "Errores en la validacion");
+                }
+
+                // model.setContrasena(this.passwordEncoder.encode(request.getContrasenaNueva()));
+
+                // model = repository.save(model);
+
+                bitacoraService.guardarBitacoraSinToken(request.getUserName(), ipClient, form,
+                                "Se cambio la contraseña:" + model);
+
+                ResponseEntity<Object> out = ResponseEntity.ok().build();
+
+                return out;
         }
 
-       // model.setContrasena(this.passwordEncoder.encode(request.getContrasenaNueva()));
+        @PostMapping("/contrasena/cambio")
+        public ResponseEntity<?> cambiarContrasena(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
+                        @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
+                        @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
+                        @Valid @RequestBody CambioContrasenaRequest request,
+                        BindingResult result) throws ApiException {
+                HashMap<String, String> map = new HashMap();
 
-        //model = repository.save(model);
+                try {
+                        ipClient = obtenerIp(ipClient);
 
-        bitacoraService.guardarBitacoraSinToken(request.getUserName(), ipClient, form, "Se cambio la contraseña:" + model);
+                        LoggerMain.printRequest(Stream.of(
+                                        new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                                        new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                                        new AbstractMap.SimpleEntry<>("token ", token),
+                                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                                        new AbstractMap.SimpleEntry<>("form ", form),
+                                        new AbstractMap.SimpleEntry<>("request ", request))
+                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-        ResponseEntity<Object> out = ResponseEntity.ok().build();
+                        Usuario model = repository.findByNombreUsuarioAndEstadoIn(
+                                        this.jwtTokenUtil.getUsernameFromToken(token),
+                                        Arrays.asList(UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO));
 
-        return out;
-    }
+                        validator.validate(model, request, result);
 
-    @PostMapping("/contrasena/cambio")
-    public ResponseEntity<?> cambiarContrasena(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
-            @Valid @RequestBody CambioContrasenaRequest request,
-            BindingResult result) throws ApiException {
-        HashMap<String, String> map = new HashMap();
+                        if (result.hasErrors()) {
+                                map.put(TiposComunes.MENSAJE_ERROR, obtenerErrores(result));
 
-        try {
-            ipClient = obtenerIp(ipClient);
+                                bitacoraService.guardarBitacora(token, ipClient, form,
+                                                Acciones.PERFIL_CAMBIAR_CONTRASENA, new HashMap(), map);
 
-            LoggerMain.printRequest(Stream.of(
-                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                                throw new ApiException(result, "Errores en la validacion");
+                        }
 
-            Usuario model = repository.findByNombreUsuarioAndEstadoIn(
-                    this.jwtTokenUtil.getUsernameFromToken(token),
-                    Arrays.asList(UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO));
+                        // model.setContrasena(this.passwordEncoder.encode(request.getContrasenaNueva()));
 
-            validator.validate(model, request, result);
+                        // repository.save(model);
 
-            if (result.hasErrors()) {
-                map.put(TiposComunes.MENSAJE_ERROR, obtenerErrores(result));
+                        map.put(TiposComunes.MENSAJE, "Cambio de contraseña exitoso.");
 
-                bitacoraService.guardarBitacora(token, ipClient, form,
-                        Acciones.PERFIL_CAMBIAR_CONTRASENA, new HashMap(), map);
+                        bitacoraService.guardarBitacora(token, ipClient, form,
+                                        Acciones.PERFIL_CAMBIAR_CONTRASENA, new HashMap(), map);
 
-                throw new ApiException(result, "Errores en la validacion");
-            }
+                        ResponseEntity<Object> out = ResponseEntity.ok().build();
 
-           // model.setContrasena(this.passwordEncoder.encode(request.getContrasenaNueva()));
+                        LoggerMain.printResponse(Stream.of(
+                                        new AbstractMap.SimpleEntry<>("token ", token),
+                                        new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                                        new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                                        new AbstractMap.SimpleEntry<>("response ", out))
+                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-           // repository.save(model);
+                        return out;
+                } catch (Exception e) {
+                        final String mensajeError = "Error al cambiar la contraseña, " + e.getMessage();
 
-            map.put(TiposComunes.MENSAJE, "Cambio de contraseña exitoso.");
+                        logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                                        Acciones.PERFIL_CAMBIAR_CONTRASENA,
+                                        mensajeError, e);
 
-            bitacoraService.guardarBitacora(token, ipClient, form,
-                    Acciones.PERFIL_CAMBIAR_CONTRASENA, new HashMap(), map);
+                        map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
 
-            ResponseEntity<Object> out = ResponseEntity.ok().build();
+                        bitacoraService.guardarBitacora(token, ipClient, form,
+                                        Acciones.PERFIL_CAMBIAR_CONTRASENA, new HashMap(), map);
 
-            LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("token ", token),
-                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-            return out;
-        } catch (Exception e) {
-            final String mensajeError = "Error al cambiar la contraseña, " + e.getMessage();
-            
-            logWeb.error(obtenerNombreUsuario(),Apps.TRAZABILIDAD_SISTEMA, Acciones.PERFIL_CAMBIAR_CONTRASENA,
-                    mensajeError, e);
-
-            map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-
-            bitacoraService.guardarBitacora(token, ipClient, form,
-                    Acciones.PERFIL_CAMBIAR_CONTRASENA, new HashMap(), map);
-
-            throw e;
+                        throw e;
+                }
         }
-    }
 
 }

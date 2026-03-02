@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.micrium.bd.access.jpa.repositories.IBitacoraRespository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IBitacoraRespository;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.dto.BitacoraResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
@@ -41,7 +41,7 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/bitacoras", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/bitacoras", produces = { MediaType.APPLICATION_JSON_VALUE })
 
 public class BitacoraControler extends GenericControler {
 
@@ -82,8 +82,8 @@ public class BitacoraControler extends GenericControler {
                     new AbstractMap.SimpleEntry<>("direccionIp ", direccionIp),
                     new AbstractMap.SimpleEntry<>("formulario ", formulario),
                     new AbstractMap.SimpleEntry<>("usuario ", usuario),
-                    new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", pageRequest))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             LoggerMain.info("***dtn accion 1 " + accion);
             Page<BitacoraResponse> out = respository.filter(queryfilterTexto(fi), fi, queryfilterTexto(ff), ff,
                     queryfilterTexto(fecha), filterTextoQueryUpperLike(fecha),
@@ -93,7 +93,9 @@ public class BitacoraControler extends GenericControler {
                     queryfilterTexto(usuario), filterTextoQueryUpperLike(usuario),
                     pageRequest).map(b -> {
                         BitacoraResponse bitacoraResponse = ConvercionUtil.convertToObject(b, BitacoraResponse.class);
-                        String aux = isBlanck(bitacoraResponse.getFecha()) ? "" : BaseDate.convertLongToStringDefault(Long.valueOf(bitacoraResponse.getFecha()), BaseDate.FORMAT_DMY_HMS_SLASH);
+                        String aux = isBlanck(bitacoraResponse.getFecha()) ? ""
+                                : BaseDate.convertLongToStringDefault(Long.valueOf(bitacoraResponse.getFecha()),
+                                        BaseDate.FORMAT_DMY_HMS_SLASH);
                         bitacoraResponse.setFecha(aux);
                         return bitacoraResponse;
                     });
@@ -104,14 +106,15 @@ public class BitacoraControler extends GenericControler {
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("response ", out),
-                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (EncriptacionExcepcion ex) {
             final String mensajeError = "Error al filtrar bitacora, " + ex.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, ex);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    mensajeError, ex);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);

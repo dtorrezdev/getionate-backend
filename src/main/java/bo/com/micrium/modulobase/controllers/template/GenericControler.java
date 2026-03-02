@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
-import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IUsuarioRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.services.BitacoraService;
 import bo.com.micrium.modulobase.commons.GlobalValidator;
@@ -29,9 +29,9 @@ public class GenericControler extends GlobalValidator {
     @Autowired
     protected transient BitacoraService bitacoraService;
 
-    //@Autowired
-    //protected transient ILogSistemaService logSistemaService;
-    
+    // @Autowired
+    // protected transient ILogSistemaService logSistemaService;
+
     @Autowired
     protected transient LoggerWeb logWeb;
 
@@ -61,7 +61,7 @@ public class GenericControler extends GlobalValidator {
 
         return ipClient;
     }
-    
+
     public Map<String, String> getParametersMap(HttpServletRequest request) {
         Map<String, String> parametersMap = new HashMap<>();
 
@@ -73,13 +73,14 @@ public class GenericControler extends GlobalValidator {
         }
         return parametersMap;
     }
-    
+
     public boolean isBlanck(String dato) {
         return dato == null || dato.trim().isEmpty();
     }
 
     /**
      * Limpia caracter especial '%' por '/'
+     * 
      * @param dato
      * @return
      */
@@ -114,7 +115,7 @@ public class GenericControler extends GlobalValidator {
 
     protected String obtenerNombreCompletoUsuario() {
         String nombre = jwtTokenUtil.getUsernameFromToken(this.httpServletRequest.getHeader(JwtTokenUtil.KEY_TOKEN));
-        //   return userService.findBynombreUsuario(nombre).getNombreCompleto();
+        // return userService.findBynombreUsuario(nombre).getNombreCompleto();
         return usuarioRepository.findBynombreUsuario(nombre).getNombreCompleto();
     }
 }

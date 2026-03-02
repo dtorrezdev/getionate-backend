@@ -5,8 +5,8 @@
  */
 package bo.com.micrium.modulobase.controllers;
 
-import bo.com.micrium.modulobase.commons.Acciones;
-import bo.com.micrium.modulobase.commons.ConvercionUtil;
+import bo.com.micrium.modulobase.commons.*;
+
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
@@ -27,19 +27,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import bo.com.micrium.modulobase.commons.TiposComunes;
 //import bo.com.micrium.modulobase.commons.ConvercionUtil;
-import bo.com.micrium.modulobase.commons.ParametroTipo;
-import bo.com.micrium.modulobase.commons.PermisoTipo;
 
 import com.micrium.bd.access.exceptions.DaoException;
-import com.micrium.bd.access.jpa.models.Parametro;
-import com.micrium.bd.access.jpa.models.RolTipoParametroPermiso;
-import com.micrium.bd.access.jpa.models.TipoParametro;
-import com.micrium.bd.access.jpa.repositories.IParametroRepository;
-import com.micrium.bd.access.jpa.repositories.IRolRepository;
-import com.micrium.bd.access.jpa.repositories.IRolTipoparametroRepository;
-import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Parametro;
+import com.micrium.bd.access.jpa.modulo.administracion.models.RolTipoParametroPermiso;
+import com.micrium.bd.access.jpa.modulo.administracion.models.TipoParametro;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolTipoparametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.controllers.dto.ParametroRequest;
 import bo.com.micrium.modulobase.controllers.dto.ParametroResponse;
 import bo.com.micrium.modulobase.services.ParametroService;
@@ -50,9 +47,6 @@ import bo.com.micrium.modulobase.validators.ParametroValidator;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;
-import bo.com.micrium.modulobase.commons.Apps;
-import bo.com.micrium.modulobase.commons.TipoAutenticacion;
-
 
 /**
  *
@@ -60,8 +54,9 @@ import bo.com.micrium.modulobase.commons.TipoAutenticacion;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/parametros", produces = {MediaType.APPLICATION_JSON_VALUE})
-public class ParametroControler extends GenericControler implements ICrudControler<ParametroRequest, ParametroResponse, String> {
+@RequestMapping(value = "/parametros", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class ParametroControler extends GenericControler
+        implements ICrudControler<ParametroRequest, ParametroResponse, String> {
 
     private static final long serialVersionUID = 647183600973224741L;
 
@@ -84,9 +79,10 @@ public class ParametroControler extends GenericControler implements ICrudControl
     private transient ParametroService parametroService;
 
     @Override
-    public Page<ParametroResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
+    public Page<ParametroResponse> list(String token, String ipClient, String form, Pageable pageRequest)
+            throws Exception {
         try {
-                        
+
             Map<String, String> parametros = getParametersMap(httpServletRequest);
             validator.page(parametros);
 
@@ -104,65 +100,92 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", pageRequest))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             Page<ParametroResponse> out = null;
             if (idtipoparametro == null || idtipoparametro.isEmpty()) {
-                List<RolTipoParametroPermiso> tiposparametrosIds = rolTipoparametroRepository.
-                        findAllByRolId(rolRepository.findByNombreAndEstadoTrue(obtenerRol()).getId()).
-                        stream().filter(p -> p.getTipoPermiso() != PermisoTipo.PERMISO_NINGUNO).collect(Collectors.toList());
+                List<RolTipoParametroPermiso> tiposparametrosIds = rolTipoparametroRepository
+                        .findAllByRolId(rolRepository.findByNombreAndEstado(obtenerRol(), RolEstado.HABILITADO).getId())
+                        .stream().filter(p -> p.getTipoPermiso() != PermisoTipo.PERMISO_NINGUNO)
+                        .collect(Collectors.toList());
 
-                /*out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
-                        map(model -> ConvercionUtil.convertir(model,
-                        tipoParametroRepository.findById(model.getTipoParametroId()).get(),
-                        tiposparametrosIds.stream().filter(
-                                o -> o.getTipoParametroId() == model.getTipoParametroId()).findFirst().get().getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA));*/
-                out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
-                        map(model -> {
-                            TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
-                            ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
+                /*
+                 * out = repository.findAllByTipoParametroIdIn(tiposparametrosIds.stream().map(t
+                 * -> t.getTipoParametroId()).collect(Collectors.toList()), pageRequest).
+                 * map(model -> ConvercionUtil.convertir(model,
+                 * tipoParametroRepository.findById(model.getTipoParametroId()).get(),
+                 * tiposparametrosIds.stream().filter(
+                 * o -> o.getTipoParametroId() ==
+                 * model.getTipoParametroId()).findFirst().get().getTipoPermiso() ==
+                 * PermisoTipo.PERMISO_LECTURA_ESCRITURA));
+                 */
+                out = repository.findAllByTipoParametroIdIn(
+                        tiposparametrosIds.stream().map(t -> t.getTipoParametroId()).collect(Collectors.toList()),
+                        pageRequest).map(model -> {
+                            TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId())
+                                    .get();
+                            ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model,
+                                    ParametroResponse.class);
                             parametroResponse.setTipoParametroNombre(tipoParametro.getNombre());
                             parametroResponse.setEditable(tiposparametrosIds.stream().filter(
-                                    o -> o.getTipoParametroId().equals(model.getTipoParametroId())).findFirst().get().getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA);
+                                    o -> o.getTipoParametroId().equals(model.getTipoParametroId())).findFirst().get()
+                                    .getTipoPermiso() == PermisoTipo.PERMISO_LECTURA_ESCRITURA);
                             return parametroResponse;
                         });
             } else {
-                Optional<TipoParametro> tiposparametro = tipoParametroRepository.findById(Long.valueOf(idtipoparametro.trim()));
+                Optional<TipoParametro> tiposparametro = tipoParametroRepository
+                        .findById(Long.valueOf(idtipoparametro.trim()));
                 TipoParametro tipoParametroValue = tiposparametro.get();
 
-                /*out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                        ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
-                        ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
-                        pageRequest)
-                        .map(model -> ConvercionUtil.convertir(model, tipoParametroValue, true));*/
-                out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                        ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null || valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
-                        ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
-                        pageRequest)
+                /*
+                 * out = repository.filter(Long.valueOf(idtipoparametro.trim()), ((nombre ==
+                 * null || nombre.isEmpty()) ? -1 : 0), ((nombre == null ||
+                 * nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                 * ((valor == null || valor.isEmpty()) ? -1 : 0), ((valor == null ||
+                 * valor.trim().isEmpty()) ? "" : "%" + valor.trim().toUpperCase() + "%"),
+                 * ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion ==
+                 * null || descripcion.trim().isEmpty()) ? "" : "%" +
+                 * descripcion.trim().toUpperCase() + "%"),
+                 * pageRequest)
+                 * .map(model -> ConvercionUtil.convertir(model, tipoParametroValue, true));
+                 */
+                out = repository
+                        .filter(Long.valueOf(idtipoparametro.trim()), ((nombre == null || nombre.isEmpty()) ? -1 : 0),
+                                ((nombre == null || nombre.trim().isEmpty()) ? ""
+                                        : "%" + nombre.trim().toUpperCase() + "%"),
+                                ((valor == null || valor.isEmpty()) ? -1 : 0),
+                                ((valor == null || valor.trim().isEmpty()) ? ""
+                                        : "%" + valor.trim().toUpperCase() + "%"),
+                                ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
+                                ((descripcion == null || descripcion.trim().isEmpty()) ? ""
+                                        : "%" + descripcion.trim().toUpperCase() + "%"),
+                                pageRequest)
                         .map(model -> {
-                            ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
+                            ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model,
+                                    ParametroResponse.class);
                             parametroResponse.setTipoParametroNombre(tipoParametroValue.getNombre());
                             parametroResponse.setEditable(false);
                             return parametroResponse;
                         });
             }
-    
+
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("response ", out),
-                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            return out;            
+            return out;
 
         } catch (Exception e) {
             final String mensajeError = "Error al obtener Parametro, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    mensajeError, e);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
@@ -183,10 +206,11 @@ public class ParametroControler extends GenericControler implements ICrudControl
      * @throws NoHandlerFoundException
      */
     @Override
-    public ResponseEntity<ParametroResponse> get(String token, String ipClient, String form, String id) throws ApiException {
+    public ResponseEntity<ParametroResponse> get(String token, String ipClient, String form, String id)
+            throws ApiException {
         try {
             ipClient = obtenerIp(ipClient);
-            
+
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -194,14 +218,14 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("id ", id))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             String desencriptadoId = ConfigEncriptacion.decrypt(id);
             LoggerMain.info("desencriptadoId " + desencriptadoId);
 
-            //Optional<Parametro> model = repository.findById(id);
-            //Optional<Parametro> model = repository.findById(descrp);
+            // Optional<Parametro> model = repository.findById(id);
+            // Optional<Parametro> model = repository.findById(descrp);
             Parametro model = repository.findByNombre(desencriptadoId);
             if (model != null) {
                 TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
@@ -211,18 +235,19 @@ public class ParametroControler extends GenericControler implements ICrudControl
                 parametroResponse.setEditable(false);
                 LoggerMain.info("OAC - DESPUES parametroResponse: " + parametroResponse);
                 ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(parametroResponse);
-                
+
                 LoggerMain.printResponse(Stream.of(
                         new AbstractMap.SimpleEntry<>("token ", token),
                         new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                         new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                        new AbstractMap.SimpleEntry<>("response ", out)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                        new AbstractMap.SimpleEntry<>("response ", out))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
                 return out;
             }
         } catch (EncriptacionExcepcion e) {
             final String mensajeError = "Error al obtener Parametro, " + e.getMessage();
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    mensajeError, e);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
@@ -238,7 +263,7 @@ public class ParametroControler extends GenericControler implements ICrudControl
         HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
-           
+
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -246,14 +271,15 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             validator.validate(request, null, result);
 
             if (result.hasErrors()) {
                 map.put(TiposComunes.ERROR, obtenerErrores(result));
-                //bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_CREAR, null, map);
+                // bitacoraService.guardarBitacora(token, ipClient, form,
+                // Acciones.PARAMETRO_CREAR, null, map);
                 throw new ApiException(result, "Errores en la validacion");
             }
 
@@ -262,35 +288,43 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     request.getTipoParametroId()));
 
             map.put(TiposComunes.ModuloBase.PARAMETRO, ConvercionUtil.toJson(model));
-            //bitacoraService.guardarBitacora(token, ipClient, form, "Se adiciono:" + model);
-            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_CREAR, null, map);            
+            // bitacoraService.guardarBitacora(token, ipClient, form, "Se adiciono:" +
+            // model);
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_CREAR, null, map);
 
-            /*ResponseEntity<ParametroResponse> out = ResponseEntity.created(new URI("/parametros/" + model.getId()))
-                .body(ConvercionUtil.convertir(model, tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));*/
+            /*
+             * ResponseEntity<ParametroResponse> out = ResponseEntity.created(new
+             * URI("/parametros/" + model.getId()))
+             * .body(ConvercionUtil.convertir(model,
+             * tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));
+             */
             TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
             ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
             parametroResponse.setTipoParametroNombre(tipoParametro.getNombre());
             parametroResponse.setEditable(false);
             ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(parametroResponse);
 
-            /*sb = new StringBuilder();
-            sb.append("-------------------RESPONSE----------------------\n").
-                    append("token ").append(token).append(", \n").
-                    append("DATA ").append(out).append(", \n").
-                    append("------------------------------------------------\n");
-            log.info(sb.toString());*/
+            /*
+             * sb = new StringBuilder();
+             * sb.append("-------------------RESPONSE----------------------\n").
+             * append("token ").append(token).append(", \n").
+             * append("DATA ").append(out).append(", \n").
+             * append("------------------------------------------------\n");
+             * log.info(sb.toString());
+             */
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (ApiException e) {
             final String mensajeError = "Error al crear un parametro, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.PARAMETRO_CREAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.PARAMETRO_CREAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_CREAR, null, map, logSistemaId);
 
@@ -315,26 +349,29 @@ public class ParametroControler extends GenericControler implements ICrudControl
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
                     new AbstractMap.SimpleEntry<>("id ", id),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
 
             if (result.hasErrors()) {
                 map.put(TiposComunes.ERROR, obtenerErrores(result));
-                //bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_MODIFICAR, null, map);
+                // bitacoraService.guardarBitacora(token, ipClient, form,
+                // Acciones.PARAMETRO_MODIFICAR, null, map);
                 throw new ApiException(result, "Errores en la validacion");
             }
 
             Parametro model = repository.findById(idDesencriptado).get();
-            //Long modelId = model.getId();
-            if (model.getNombre().equals(com.micrium.bd.access.enuns.Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())) {
+            // Long modelId = model.getId();
+            if (model.getNombre()
+                    .equals(com.micrium.bd.access.enuns.Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())) {
                 int valor = Integer.parseInt(request.getValor().trim());
-                //if (request.getValor().trim().equals(ParametroID.LDAP) || request.getValor().trim().equals(ParametroID.HIBRIDO)) {
+                // if (request.getValor().trim().equals(ParametroID.LDAP) ||
+                // request.getValor().trim().equals(ParametroID.HIBRIDO)) {
                 if ((valor == TipoAutenticacion.LDAP.getId()) || (valor == TipoAutenticacion.HIBRIDO.getId())) {
-                    //etiquetaRepository.updateByEstado("grupo",false);
+                    // etiquetaRepository.updateByEstado("grupo",false);
                 }
             }
 
@@ -360,31 +397,36 @@ public class ParametroControler extends GenericControler implements ICrudControl
             mapNuevo.put(TiposComunes.ModuloBase.PARAMETRO, model.toString());
 
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_MODIFICAR, map, mapNuevo);
-            
+
             parametroService.updateParameter(request.getNombre(), request.getValor());
 
-            /*ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertir(model,
-            tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));*/
+            /*
+             * ResponseEntity<ParametroResponse> out =
+             * ResponseEntity.ok().body(ConvercionUtil.convertir(model,
+             * tipoParametroRepository.findById(model.getTipoParametroId()).get(), false));
+             */
             TipoParametro tipoParametro = tipoParametroRepository.findById(model.getTipoParametroId()).get();
             ParametroResponse parametroResponse = ConvercionUtil.convertToObject(model, ParametroResponse.class);
             parametroResponse.setTipoParametroNombre(tipoParametro.getNombre());
             parametroResponse.setEditable(false);
             ResponseEntity<ParametroResponse> out = ResponseEntity.ok().body(parametroResponse);
-            
+
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (DaoException | EncriptacionExcepcion | ApiException e) {
             final String mensajeError = "Error al modificar un parametro, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.PARAMETRO_MODIFICAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.PARAMETRO_MODIFICAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_MODIFICAR, map, mapNuevo, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PARAMETRO_MODIFICAR, map, mapNuevo,
+                    logSistemaId);
 
             throw new ApiException(result, mensajeError, e);
         }

@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import bo.com.micrium.modulobase.commons.GrupoEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,16 +24,16 @@ import bo.com.micrium.modulobase.commons.TipoAutenticacion;
 import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import bo.com.micrium.modulobase.commons.UsuarioTipo;
 import bo.com.micrium.modulobase.security.services.ActiveDirectoryService;
-import com.micrium.bd.access.jpa.repositories.IUsuarioRepository;
-import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
-import com.micrium.bd.access.jpa.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IUsuarioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IGrupoRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolRepository;
 import bo.com.micrium.modulobase.services.ParametroService;
-import com.micrium.bd.access.jpa.models.Usuario;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Usuario;
 import bo.com.micrium.modulobase.common.exceptions.LdapContextException;
 
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.models.Grupo;
-import com.micrium.bd.access.jpa.models.Rol;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Grupo;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Rol;
 import bo.com.micrium.logger.AbstractLogger;
 import bo.com.micrium.logger.LoggerMain;
 import org.apache.logging.log4j.LogManager;
@@ -162,7 +163,7 @@ public class AuthenticationLdapManager implements AuthenticationManager, Seriali
 
                 List<Grupo> gruposAD = new ArrayList<>();
                 for (String grupoAD : new ActiveDirectoryService(parametroService).getListaGrupos(nombreUsuario)) {
-                    Grupo grupo = grupoRepository.findByNombreAndEstadoTrue(grupoAD);
+                    Grupo grupo = grupoRepository.findByNombreAndEstado(grupoAD, GrupoEstado.HABILITADO);
                     if (grupo != null) {
                         gruposAD.add(grupo);
                     }

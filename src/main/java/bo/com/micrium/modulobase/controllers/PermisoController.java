@@ -40,22 +40,22 @@ import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.models.Accion;
-import com.micrium.bd.access.jpa.models.Formulario;
-import com.micrium.bd.access.jpa.models.RolAccion;
-import com.micrium.bd.access.jpa.models.RolTipoParametroPermiso;
-import com.micrium.bd.access.jpa.models.TipoParametro;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Accion;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Formulario;
+import com.micrium.bd.access.jpa.modulo.administracion.models.RolAccion;
+import com.micrium.bd.access.jpa.modulo.administracion.models.RolTipoParametroPermiso;
+import com.micrium.bd.access.jpa.modulo.administracion.models.TipoParametro;
 import bo.com.micrium.modulobase.controllers.dto.AccionResponse;
 import bo.com.micrium.modulobase.controllers.dto.FormularioResponse;
 import bo.com.micrium.modulobase.controllers.dto.ModuloResponse;
 import bo.com.micrium.modulobase.controllers.dto.PermisoRequest;
 import bo.com.micrium.modulobase.controllers.dto.RolTipoParametroPermisoRequest;
 import bo.com.micrium.modulobase.controllers.dto.RolTipoParametroPermisoResponse;
-import com.micrium.bd.access.jpa.repositories.IAccionRepository;
-import com.micrium.bd.access.jpa.repositories.IFormularioRepository;
-import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
-import com.micrium.bd.access.jpa.repositories.IRolTipoparametroRepository;
-import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IAccionRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IFormularioRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolAccionRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolTipoparametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.services.ParametroService;
 
@@ -73,9 +73,9 @@ import org.springframework.web.servlet.NoHandlerFoundException;
  * @author alepaco.maton
  */
 @RestController
-//@Service
+// @Service
 @CrossOrigin
-@RequestMapping(value = "/permisos", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/permisos", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class PermisoController extends GenericControler implements Serializable {
 
     /**
@@ -113,38 +113,44 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("form ", form)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("form ", form))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         List<ModuloResponse> modulos = new ArrayList<>();
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
-        //Boolean validacionGrupoLDAP=(Boolean) parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
+        int validacionActiveDirectory = ((BigDecimal) parametroService
+                .getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
+        // Boolean validacionGrupoLDAP=(Boolean)
+        // parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
 
         for (Formulario modulo : formularioRepository.findByModuloIdIsNull(Sort.by(Sort.Direction.ASC, "orden"))) {
             List<FormularioResponse> formularios = new ArrayList<>();
 
-            for (Formulario formulario : formularioRepository.findByModuloId(modulo.getId(), Sort.by(Sort.Direction.ASC, "orden"))) {
+            for (Formulario formulario : formularioRepository.findByModuloId(modulo.getId(),
+                    Sort.by(Sort.Direction.ASC, "orden"))) {
                 List<AccionResponse> acciones = new ArrayList<>();
 
                 for (Accion accion : accionRepository.findByFormularioId(formulario.getId())) {
 
-                    acciones.add(new AccionResponse(accion.getId(), accion.getNombre(), PrivilegioTipo.PERMISO_TIPO_ACCION));
+                    acciones.add(
+                            new AccionResponse(accion.getId(), accion.getNombre(), PrivilegioTipo.PERMISO_TIPO_ACCION));
                 }
 
                 if (validacionActiveDirectory == TipoAutenticacion.LOCAL.getId()) {
-                    //*** dtn se comento "if (formulario.getId() != ParametroID.FORMULARIO_GRUPO)" esto para habilitar el formulario grupo para los usuario Locales
-                    //if (formulario.getId() != ParametroID.FORMULARIO_GRUPO) {
-                    //LoggerMain.info("----------- formularioId " + formulario.getId() +" FORMULARIO_GRUPO: "+ ParametroID.FORMULARIO_GRUPO);
+                    // *** dtn se comento "if (formulario.getId() != ParametroID.FORMULARIO_GRUPO)"
+                    // esto para habilitar el formulario grupo para los usuario Locales
+                    // if (formulario.getId() != ParametroID.FORMULARIO_GRUPO) {
+                    // LoggerMain.info("----------- formularioId " + formulario.getId() +"
+                    // FORMULARIO_GRUPO: "+ ParametroID.FORMULARIO_GRUPO);
                     formularios.add(new FormularioResponse(formulario.getId(), formulario.getNombre(),
                             formulario.getOrden(), PrivilegioTipo.PERMISO_TIPO_FORMULARIO,
                             formulario.getUrl(), formulario.getIcono(), acciones));
-                    //}
+                    // }
                 } else {
-                    //if (!validacionGrupoLDAP){
+                    // if (!validacionGrupoLDAP){
                     formularios.add(new FormularioResponse(formulario.getId(), formulario.getNombre(),
                             formulario.getOrden(), PrivilegioTipo.PERMISO_TIPO_FORMULARIO,
                             formulario.getUrl(), formulario.getIcono(), acciones));
-                    //}  
+                    // }
                 }
 
             }
@@ -158,8 +164,8 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", modulos)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("response ", modulos))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return modulos;
     }
@@ -172,7 +178,7 @@ public class PermisoController extends GenericControler implements Serializable 
 
         LoggerMain.info("obtenerPlantillaPermisos ");
         ipClient = obtenerIp(ipClient);
-        
+
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -180,14 +186,15 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("rolId ", rolId)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("rolId ", rolId))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         Long rolIdInt = 0L;
         String desencriptadoId = "";
         try {
+            rolId = rolId.replace('.', '/');
             desencriptadoId = ConfigEncriptacion.decrypt(rolId);
-            //log.info("desencriptadoId " + desencriptadoId); 
+            // log.info("desencriptadoId " + desencriptadoId);
             rolIdInt = Long.parseLong(desencriptadoId);
 
         } catch (EncriptacionExcepcion | NumberFormatException e) {
@@ -196,22 +203,27 @@ public class PermisoController extends GenericControler implements Serializable 
         }
 
         List<AccionResponse> acciones = new ArrayList<>();
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
-        //Boolean validacionGrupoLDAP=(Boolean) parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
+        int validacionActiveDirectory = ((BigDecimal) parametroService
+                .getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
+        // Boolean validacionGrupoLDAP=(Boolean)
+        // parametroService.getParamVal(ParametroID.ACTIVE_DIRECTORY_GRUPOLDAP);
 
         for (RolAccion rolAccion : rolAccionRepository.findAllByRolId(rolIdInt)) {
             Optional<Accion> optinal = accionRepository.findById(rolAccion.getAccionId());
 
             if (optinal.isPresent()) {
                 Accion accion = optinal.get();
-                //quitar la visibilidad en parametro 1 ldap, 2 local, 3 hibrido
+                // quitar la visibilidad en parametro 1 ldap, 2 local, 3 hibrido
                 if (validacionActiveDirectory == TipoAutenticacion.LOCAL.getId()) {
-                    //** dtn se quito para q poder acceder Permisos de Formulario GRUPO para usuario LOCAL
-                    //if (accion.getFormularioId() != ParametroID.FORMULARIO_GRUPO) {
-                    acciones.add(new AccionResponse(accion.getId(), accion.getNombre(), PrivilegioTipo.PERMISO_TIPO_ACCION));
-                    //}
+                    // ** dtn se quito para q poder acceder Permisos de Formulario GRUPO para
+                    // usuario LOCAL
+                    // if (accion.getFormularioId() != ParametroID.FORMULARIO_GRUPO) {
+                    acciones.add(
+                            new AccionResponse(accion.getId(), accion.getNombre(), PrivilegioTipo.PERMISO_TIPO_ACCION));
+                    // }
                 } else {
-                    acciones.add(new AccionResponse(accion.getId(), accion.getNombre(), PrivilegioTipo.PERMISO_TIPO_ACCION));
+                    acciones.add(
+                            new AccionResponse(accion.getId(), accion.getNombre(), PrivilegioTipo.PERMISO_TIPO_ACCION));
                 }
             }
         }
@@ -220,8 +232,8 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", acciones)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("response ", acciones))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return acciones;
     }
@@ -240,8 +252,8 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("request ", request)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("request ", request))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         rolAccionRepository.findAllByRolId(request.getRolId()).stream().forEach(ra -> {
             rolAccionRepository.delete(ra);
@@ -255,8 +267,10 @@ public class PermisoController extends GenericControler implements Serializable 
 
         HashMap<String, String> mapNuevo = new HashMap<>();
         mapNuevo.put(TiposComunes.ModuloBase.PERMISOS, ConvercionUtil.toJson(rolAcciones));
-        //bitacoraService.guardarBitacora(token, ipClient, form, "Actualizando permisos del rol " + request.getRolId() + ", " + rolAcciones);
-        bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PERMISO_CREAR + " del rol " + request.getRolId(), null, mapNuevo);
+        // bitacoraService.guardarBitacora(token, ipClient, form, "Actualizando permisos
+        // del rol " + request.getRolId() + ", " + rolAcciones);
+        bitacoraService.guardarBitacora(token, ipClient, form,
+                Acciones.PERMISO_CREAR + " del rol " + request.getRolId(), null, mapNuevo);
 
         ResponseEntity<Object> out = ResponseEntity.ok().build();
 
@@ -264,21 +278,22 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", out)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("response ", out))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return out;
     }
 
     @GetMapping("/tipos/parametros/rol/{rolId}")
-    List<RolTipoParametroPermisoResponse> obtenerTiposParametrosPermisos(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
+    List<RolTipoParametroPermisoResponse> obtenerTiposParametrosPermisos(
+            @RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
             @PathVariable String rolId) throws NoHandlerFoundException {
         ipClient = obtenerIp(ipClient);
         LoggerMain.info("VALOR DE ROL ID ANTES: " + rolId);
         Long descrp;
-        
+
         LoggerMain.printRequest(Stream.of(
                 new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                 new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -286,11 +301,12 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("rolId ", rolId)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("rolId ", rolId))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         String desencriptadoId = rolId;
         try {
+            rolId = rolId.replace('.', '/');
             desencriptadoId = ConfigEncriptacion.decrypt(rolId);
             LoggerMain.debug("desencriptadoId " + desencriptadoId);
             descrp = Long.valueOf(desencriptadoId);
@@ -300,28 +316,36 @@ public class PermisoController extends GenericControler implements Serializable 
             throw new NoHandlerFoundException("GET", "/{id} " + e.getMessage() + desencriptadoId, HttpHeaders.EMPTY);
         }
 
-        List<RolTipoParametroPermisoResponse> temp = rolTipoparametroRepository.findAllByRolId(descrp).stream().map(m -> {
-            return new RolTipoParametroPermisoResponse(m.getId(), m.getRolId(), m.getTipoParametroId(),
-                    tipoparametroRepository.findById(m.getTipoParametroId()).get().getNombre(), m.getTipoPermiso());
-        }).collect(Collectors.toList());
+        List<RolTipoParametroPermisoResponse> temp = rolTipoparametroRepository.findAllByRolId(descrp).stream()
+                .map(m -> {
+                    return new RolTipoParametroPermisoResponse(m.getId(), m.getRolId(), m.getTipoParametroId(),
+                            tipoparametroRepository.findById(m.getTipoParametroId()).get().getNombre(),
+                            m.getTipoPermiso());
+                }).collect(Collectors.toList());
 
-        int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
+        int validacionActiveDirectory = ((BigDecimal) parametroService
+                .getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
         LoggerMain.info("VALOR DE ROL ID Despues: " + rolId + " desencriptado= " + desencriptadoId);
         for (TipoParametro tipoParametro : tipoparametroRepository.findAll()) {
             if (!temp.stream().anyMatch(t -> t.getTipoParametroId().equals(tipoParametro.getId()))) {
                 // agregar condicion si es Admin (PermisoTipo.2)
                 RolTipoParametroPermiso model;
                 if (desencriptadoId.trim().equals("1")) {
-                    model = new RolTipoParametroPermiso(null, descrp, tipoParametro.getId(), PermisoTipo.PERMISO_LECTURA_ESCRITURA);
+                    model = new RolTipoParametroPermiso(null, descrp, tipoParametro.getId(),
+                            PermisoTipo.PERMISO_LECTURA_ESCRITURA);
                 } else {
-                    model = new RolTipoParametroPermiso(null, descrp, tipoParametro.getId(), PermisoTipo.PERMISO_NINGUNO);
+                    model = new RolTipoParametroPermiso(null, descrp, tipoParametro.getId(),
+                            PermisoTipo.PERMISO_NINGUNO);
                 }
                 model = rolTipoparametroRepository.save(model);
 
                 HashMap<String, String> mapNuevo = new HashMap<>();
                 mapNuevo.put(TiposComunes.ModuloBase.PERMISOS, ConvercionUtil.toJson(model));
-                //bitacoraService.guardarBitacora(token, ipClient, form, "Se adiciono automaticamente al rol " + rolId + ", el rol tipo de paramaetro permiso " + model);
-                bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PERMISO_TIPO_PARAM_CREAR + " automaticamente al rol " + rolId, null, mapNuevo);
+                // bitacoraService.guardarBitacora(token, ipClient, form, "Se adiciono
+                // automaticamente al rol " + rolId + ", el rol tipo de paramaetro permiso " +
+                // model);
+                bitacoraService.guardarBitacora(token, ipClient, form,
+                        Acciones.PERMISO_TIPO_PARAM_CREAR + " automaticamente al rol " + rolId, null, mapNuevo);
             }
         }
 
@@ -331,16 +355,18 @@ public class PermisoController extends GenericControler implements Serializable 
         }).collect(Collectors.toList());
 
         if (validacionActiveDirectory == TipoAutenticacion.LOCAL.getId()) {
-            temp = temp.stream().filter(pa -> !pa.getTipoParametroId().equals(com.micrium.bd.access.enuns.TipoParametro.LDAP.getId().longValue())).
-                    collect(Collectors.toList());
+            temp = temp.stream()
+                    .filter(pa -> !pa.getTipoParametroId()
+                            .equals(com.micrium.bd.access.enuns.TipoParametro.LDAP.getId().longValue()))
+                    .collect(Collectors.toList());
         }
 
         LoggerMain.printResponse(Stream.of(
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", temp)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("response ", temp))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return temp;
     }
@@ -359,8 +385,8 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("request ", request)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("request ", request))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         rolTipoparametroRepository.findAllByRolId(request.getRolId()).stream().forEach(ra -> {
             rolTipoparametroRepository.delete(ra);
@@ -370,13 +396,17 @@ public class PermisoController extends GenericControler implements Serializable 
 
         request.getTiposParametrosPermisos().forEach((tipoParametro) -> {
             rolTipoParametroPermisos.add(rolTipoparametroRepository.save(
-                    new RolTipoParametroPermiso(null, request.getRolId(), tipoParametro.getTipoParametroId(), tipoParametro.getTipoPermiso())));
+                    new RolTipoParametroPermiso(null, request.getRolId(), tipoParametro.getTipoParametroId(),
+                            tipoParametro.getTipoPermiso())));
         });
 
         HashMap<String, String> mapNuevo = new HashMap<>();
         mapNuevo.put(TiposComunes.ModuloBase.PERMISOS, ConvercionUtil.toJson(rolTipoParametroPermisos));
-        //bitacoraService.guardarBitacora(token, ipClient, form, "Actualizando tipos de parametros permisos del rol " + request.getRolId() + ", " + rolTipoParametroPermisos);
-        bitacoraService.guardarBitacora(token, ipClient, form, Acciones.PERMISO_TIPO_PARAM_CREAR + " del rol " + request.getRolId(), null, mapNuevo);
+        // bitacoraService.guardarBitacora(token, ipClient, form, "Actualizando tipos de
+        // parametros permisos del rol " + request.getRolId() + ", " +
+        // rolTipoParametroPermisos);
+        bitacoraService.guardarBitacora(token, ipClient, form,
+                Acciones.PERMISO_TIPO_PARAM_CREAR + " del rol " + request.getRolId(), null, mapNuevo);
 
         ResponseEntity<Object> out = ResponseEntity.ok().build();
 
@@ -384,8 +414,8 @@ public class PermisoController extends GenericControler implements Serializable 
                 new AbstractMap.SimpleEntry<>("token ", token),
                 new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                 new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", out)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                new AbstractMap.SimpleEntry<>("response ", out))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         return out;
     }

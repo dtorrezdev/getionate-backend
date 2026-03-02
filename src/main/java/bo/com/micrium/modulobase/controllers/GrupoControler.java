@@ -33,11 +33,11 @@ import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import com.micrium.bd.access.jpa.models.Grupo;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Grupo;
 import bo.com.micrium.modulobase.controllers.dto.GrupoRequest;
 import bo.com.micrium.modulobase.controllers.dto.GrupoResponse;
-import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
-import com.micrium.bd.access.jpa.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IGrupoRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolRepository;
 import bo.com.micrium.modulobase.validators.GrupoValidator;
 import bo.com.micrium.modulobase.commons.GrupoEstado;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
@@ -50,7 +50,7 @@ import bo.com.micrium.logger.LoggerMain;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/grupos", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/grupos", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class GrupoControler extends GenericControler implements ICrudControler<GrupoRequest, GrupoResponse, String> {
 
     private static final long serialVersionUID = -69171311878619585L;
@@ -63,13 +63,13 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
 
     @Autowired
     private transient GrupoValidator validator;
-    
 
     @Override
     public Page<GrupoResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws Exception {
 
         try {
-            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"), this.httpServletRequest.getParameter("sort"));
+            validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"),
+                    this.httpServletRequest.getParameter("sort"));
 
             final String nombre = this.httpServletRequest.getParameter("nombre");
             final String descripcion = this.httpServletRequest.getParameter("descripcion");
@@ -88,7 +88,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
             }
 
             ipClient = obtenerIp(ipClient);
-        
+
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -99,33 +99,39 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<GrupoResponse> out = repository.filter(((nombre == null || nombre.isEmpty()) ? -1 : 0), ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
-                    ((descripcion == null || descripcion.isEmpty()) ? -1 : 0), ((descripcion == null || descripcion.trim().isEmpty()) ? "" : "%" + descripcion.trim().toUpperCase() + "%"),
-                    ((rolNombre == null || rolNombre.isEmpty()) ? -1 : 0), ((rolNombre == null || rolNombre.trim().isEmpty()) ? "" : "%" + rolNombre.trim().toUpperCase() + "%"),
+            Page<GrupoResponse> out = repository.filter(((nombre == null || nombre.isEmpty()) ? -1 : 0),
+                    ((nombre == null || nombre.trim().isEmpty()) ? "" : "%" + nombre.trim().toUpperCase() + "%"),
+                    ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
+                    ((descripcion == null || descripcion.trim().isEmpty()) ? ""
+                            : "%" + descripcion.trim().toUpperCase() + "%"),
+                    ((rolNombre == null || rolNombre.isEmpty()) ? -1 : 0),
+                    ((rolNombre == null || rolNombre.trim().isEmpty()) ? ""
+                            : "%" + rolNombre.trim().toUpperCase() + "%"),
                     pageRequest).map(model -> {
                         GrupoResponse grupoResponse = ConvercionUtil.convertToObject(model, GrupoResponse.class);
                         grupoResponse.setRolId(model.getRolId().getId());
                         grupoResponse.setRolNombre(model.getRolId().getNombre());
                         return grupoResponse;
                     });
-            
+
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("response ", out),
-                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
 
         } catch (Exception e) {
             final String mensajeError = "Error al filtrar grupo, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    mensajeError, e);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
@@ -135,7 +141,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
 
     @Override
     public ResponseEntity<GrupoResponse> get(String token, String ipClient, String form,
-            String id) throws ApiException {        
+            String id) throws ApiException {
         throw new ApiException("GET not support method /{id}" + id);
     }
 
@@ -145,7 +151,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
         HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
-            
+
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -153,8 +159,8 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             validator.validate(request, null, result);
             if (result.hasErrors()) {
@@ -170,19 +176,20 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
 
             ResponseEntity<GrupoResponse> out = ResponseEntity.created(new URI("/grupos/" + model.getId()))
                     .body(ConvercionUtil.convertToObject(model, GrupoResponse.class));
-  
+
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (ApiException | URISyntaxException e) {
             final String mensajeError = "Error al crear un grupo. " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.GRUPO_CREAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.GRUPO_CREAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.GRUPO_CREAR, null, map, logSistemaId);
 
@@ -198,7 +205,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
 
         try {
             ipClient = obtenerIp(ipClient);
-            
+
             LoggerMain.printRequest(Stream.of(
                     new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                     new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -207,8 +214,8 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
                     new AbstractMap.SimpleEntry<>("id ", id),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
@@ -230,20 +237,22 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
             mapNuevo.put(TiposComunes.ModuloBase.GRUPO, ConvercionUtil.toJson(model));
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.GRUPO_MODIFICAR, map, mapNuevo);
 
-            ResponseEntity<GrupoResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertToObject(model, GrupoResponse.class));
+            ResponseEntity<GrupoResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(model, GrupoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (EncriptacionExcepcion | ApiException e) {
             final String mensajeError = "Error al actualizar un grupo, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.GRUPO_MODIFICAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.GRUPO_MODIFICAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.GRUPO_MODIFICAR, map, null, logSistemaId);
 
@@ -266,8 +275,8 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("id ", id))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
@@ -295,16 +304,18 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
             final String mensajeError = "Error al eliminar un grupo, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.GRUPO_ELIMINAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.GRUPO_ELIMINAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.GRUPO_ELIMINAR, map, mapNuevo, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.GRUPO_ELIMINAR, map, mapNuevo,
+                    logSistemaId);
 
             throw new ApiException(mensajeError, e);
         }

@@ -17,6 +17,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import bo.com.micrium.modulobase.commons.*;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,34 +35,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import bo.com.micrium.modulobase.commons.Acciones;
-import bo.com.micrium.modulobase.commons.Apps;
-import bo.com.micrium.modulobase.commons.ConvercionUtil;
-
-import bo.com.micrium.modulobase.commons.TiposComunes;
-import bo.com.micrium.modulobase.commons.PermisoTipo;
-import bo.com.micrium.modulobase.commons.UsuarioEstado;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
 
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.models.Rol;
-import com.micrium.bd.access.jpa.models.RolTipoParametroPermiso;
-import com.micrium.bd.access.jpa.models.TipoParametro;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Rol;
+import com.micrium.bd.access.jpa.modulo.administracion.models.RolTipoParametroPermiso;
+import com.micrium.bd.access.jpa.modulo.administracion.models.TipoParametro;
 import bo.com.micrium.modulobase.controllers.dto.RolRequest;
 import bo.com.micrium.modulobase.controllers.dto.RolResponse;
-import com.micrium.bd.access.jpa.repositories.IGrupoRepository;
-import com.micrium.bd.access.jpa.repositories.IParametroRepository;
-import com.micrium.bd.access.jpa.repositories.IRolRepository;
-import com.micrium.bd.access.jpa.repositories.IRolTipoparametroRepository;
-import com.micrium.bd.access.jpa.repositories.ITipoParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IGrupoRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IParametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolTipoparametroRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ITipoParametroRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import bo.com.micrium.modulobase.validators.RolValidator;
 import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.exception.PageException;
 import bo.com.micrium.exception.ValidateException;
-import bo.com.micrium.modulobase.commons.RolEstado;
 import bo.com.micrium.cifrado.ConfigEncriptacion;
 import bo.com.micrium.logger.LoggerMain;
 
@@ -71,7 +64,7 @@ import bo.com.micrium.logger.LoggerMain;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/roles", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/roles", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class RolControler extends GenericControler implements ICrudControler<RolRequest, RolResponse, String> {
 
     private static final long serialVersionUID = 9081953002167441022L;
@@ -95,64 +88,63 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
     private transient IParametroRepository parametroRepository;
 
     @Override
-    public Page<RolResponse> list(String token, String ipClient, String form, Pageable pageRequest) throws ApiException {
-        
+    public Page<RolResponse> list(String token, String ipClient, String form, Pageable pageRequest)
+            throws ApiException {
+
         try {
             Map<String, String> parametros = getParametersMap(httpServletRequest);
-            validator.page(parametros);    
-            validator.validateListar(parametros);        
-        
+            validator.page(parametros);
+            validator.validateListar(parametros);
+
             final String nombre = filterTextoQueryUpper(parametros.get("nombre"));
             final String descripcion = filterTextoQueryUpper(parametros.get("descripcion"));
 
-            parametros.forEach((key,value) -> {
-                LoggerMain.info("key={},  value={}", key,value);                
+            parametros.forEach((key, value) -> {
+                LoggerMain.info("key={},  value={}", key, value);
             });
-            
+
             ipClient = obtenerIp(ipClient);
 
             LoggerMain.printRequest(Stream.of(
-                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                new AbstractMap.SimpleEntry<>("token ", token),
-                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("nombre ", filterTexto(nombre)),
-                new AbstractMap.SimpleEntry<>("descripcion ", filterTexto(descripcion)),
-                new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            );
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("nombre ", filterTexto(nombre)),
+                    new AbstractMap.SimpleEntry<>("descripcion ", filterTexto(descripcion)),
+                    new AbstractMap.SimpleEntry<>("request ", pageRequest))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             Page<RolResponse> out = repository.filter(
-                queryfilterTexto(nombre), filterTextoQueryUpperLike(nombre),
-                queryfilterTexto(descripcion), filterTextoQueryUpperLike(descripcion),
-                Rol.SUPER_ADMINISTRADOR, pageRequest
-            ).map(model -> {
-                RolResponse convertToObject = ConvercionUtil.convertToObject(model, RolResponse.class);
-                return convertToObject;
-            });
+                    queryfilterTexto(nombre), filterTextoQueryUpperLike(nombre),
+                    queryfilterTexto(descripcion), filterTextoQueryUpperLike(descripcion),
+                    Rol.SUPER_ADMINISTRADOR, pageRequest).map(model -> {
+                        RolResponse convertToObject = ConvercionUtil.convertToObject(model, RolResponse.class);
+                        return convertToObject;
+                    });
 
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, null);
             LoggerMain.printResponse(Stream.of(
-                new AbstractMap.SimpleEntry<>("token ", token),
-                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", out),
-                new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            );
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("response ", out),
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            return out;            
-        } catch (PageException | ValidateException  e) {
+            return out;
+        } catch (PageException | ValidateException e) {
             final String mensajeError = "Error al filtrar roles, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    mensajeError, e);
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);
 
-            throw new ApiException( mensajeError, e);
+            throw new ApiException(mensajeError, e);
         }
 
     }
@@ -160,27 +152,30 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
     @Override
     public ResponseEntity<RolResponse> get(String token, String ipClient,
             String form, String id) throws ApiException {
-        /*ipClient = obtenerIp(ipClient);
-
-        LoggerMain.printRequest(Stream.of(
-                new AbstractMap.SimpleEntry<>("token ", token),
-                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("id ", (id == null) ? "" : id)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-        Optional<Rol> model = repository.findById(id);
-        if (model.isPresent()) {
-            ResponseEntity<RolResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertir(model.get()));
-
-            LoggerMain.printResponse(Stream.of(
-                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-            return out;
-        }*/
+        /*
+         * ipClient = obtenerIp(ipClient);
+         * 
+         * LoggerMain.printRequest(Stream.of(
+         * new AbstractMap.SimpleEntry<>("token ", token),
+         * new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+         * new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+         * new AbstractMap.SimpleEntry<>("form ", form),
+         * new AbstractMap.SimpleEntry<>("id ", (id == null) ? "" : id)).
+         * collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+         * 
+         * Optional<Rol> model = repository.findById(id);
+         * if (model.isPresent()) {
+         * ResponseEntity<RolResponse> out =
+         * ResponseEntity.ok().body(ConvercionUtil.convertir(model.get()));
+         * 
+         * LoggerMain.printResponse(Stream.of(
+         * new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+         * new AbstractMap.SimpleEntry<>("response ", out)).
+         * collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+         * 
+         * return out;
+         * }
+         */
 
         throw new ApiException("GET not support method /{id}" + id);
     }
@@ -194,15 +189,14 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             ipClient = obtenerIp(ipClient);
 
             LoggerMain.printRequest(Stream.of(
-                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                new AbstractMap.SimpleEntry<>("token ", token),
-                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("request ", request)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            );
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             validator.validate(request, null, result);
 
@@ -211,12 +205,14 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Rol model = repository.save(new Rol(null, request.getNombre(), request.getDescripcion(), RolEstado.HABILITADO));
+            Rol model = repository
+                    .save(new Rol(null, request.getNombre(), request.getDescripcion(), RolEstado.HABILITADO));
             map.put(TiposComunes.ModuloBase.ROL, ConvercionUtil.toJson(model));
             List<RolTipoParametroPermiso> temp = new ArrayList<>();
 
             for (TipoParametro tipoParametro : tipoParametroRepository.findAll()) {
-                RolTipoParametroPermiso modelRTP = new RolTipoParametroPermiso(null, model.getId(), tipoParametro.getId(), PermisoTipo.PERMISO_NINGUNO);
+                RolTipoParametroPermiso modelRTP = new RolTipoParametroPermiso(null, model.getId(),
+                        tipoParametro.getId(), PermisoTipo.PERMISO_NINGUNO);
                 modelRTP = rolTipoparametroRepository.save(modelRTP);
                 temp.add(modelRTP);
             }
@@ -228,20 +224,21 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             ResponseEntity<RolResponse> out = ResponseEntity.created(
                     new URI("/roles/" + model.getId()))
                     .body(ConvercionUtil.convertToObject(model, RolResponse.class));
-            //.body(ConvercionUtil.convertir(model));
+            // .body(ConvercionUtil.convertir(model));
 
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (ApiException | URISyntaxException e) {
             final String mensajeError = "Error al crear un rol, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.ROL_CREAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.ROL_CREAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.ROL_CREAR, null, map, logSistemaId);
 
@@ -259,16 +256,15 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             ipClient = obtenerIp(ipClient);
 
             LoggerMain.printRequest(Stream.of(
-                new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
-                new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                new AbstractMap.SimpleEntry<>("token ", token),
-                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("form ", form),
-                new AbstractMap.SimpleEntry<>("id ", id),
-                new AbstractMap.SimpleEntry<>("request ", request)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            );
+                    new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
+                    new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("form ", form),
+                    new AbstractMap.SimpleEntry<>("id ", id),
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
 
@@ -289,24 +285,26 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             mapNuevo.put(TiposComunes.ModuloBase.ROL, ConvercionUtil.toJson(model));
 
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.ROL_MODIFICAR, map, mapNuevo);
-            
-            ResponseEntity<RolResponse> out = ResponseEntity.ok().body(ConvercionUtil.convertToObject(model, RolResponse.class));
+
+            ResponseEntity<RolResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(model, RolResponse.class));
 
             LoggerMain.printResponse(Stream.of(
-                new AbstractMap.SimpleEntry<>("token ", token),
-                new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
-                new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                new AbstractMap.SimpleEntry<>("response ", out)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            );
+                    new AbstractMap.SimpleEntry<>("token ", token),
+                    new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
+                    new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (ApiException | EncriptacionExcepcion e) {
             final String mensajeError = "Error al modificar un rol, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.USUARIO_MODIFICAR, mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.USUARIO_MODIFICAR, mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.USUARIO_MODIFICAR, map, mapNuevo, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, Acciones.USUARIO_MODIFICAR, map, mapNuevo,
+                    logSistemaId);
 
             throw new ApiException(e.getMessage(), e);
         }
@@ -328,9 +326,9 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("id ", id)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            
+                    new AbstractMap.SimpleEntry<>("id ", id))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
             id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = ConfigEncriptacion.desencryptIdToConvertLong(id);
 
@@ -348,15 +346,14 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                 return ResponseEntity.noContent().build();
             }
 
-            long numeroUsuariosConRol = usuarioRepository.
-                    countByEstadoInAndRolIdId(Arrays.asList(
-                            UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO), idDesencriptado);
+            long numeroUsuariosConRol = usuarioRepository.countByEstadoInAndRolIdId(Arrays.asList(
+                    UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO), idDesencriptado);
 
             if (numeroUsuariosConRol > 0) {
                 throw new RuntimeException("No puede ser eliminado porque esta en uso por almenos un usuario");
             }
 
-            long numeroGruposConRol = grupoRepository.countByEstadoTrueAndRolId(model);
+            long numeroGruposConRol = grupoRepository.countByEstadoAndRolId(GrupoEstado.HABILITADO, model);
 
             if (numeroGruposConRol > 0) {
                 throw new RuntimeException("No puede ser eliminado porque esta en uso por almenos un grupo");
@@ -373,14 +370,15 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                     new AbstractMap.SimpleEntry<>("token ", token),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", out)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", out))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
         } catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
             final String mensajeError = "Error al eliminar un rol, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.ROL_ELIMINAR,
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    Acciones.ROL_ELIMINAR,
                     mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.ROL_ELIMINAR, map, mapNuevo, logSistemaId);
@@ -393,7 +391,8 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
     public ResponseEntity<?> upload(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
-            @Valid @RequestBody RolRequest[] request, BindingResult result) throws NoHandlerFoundException, ApiException, Exception {
+            @Valid @RequestBody RolRequest[] request, BindingResult result)
+            throws NoHandlerFoundException, ApiException, Exception {
         HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
@@ -402,18 +401,18 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("form ", form),
-                    new AbstractMap.SimpleEntry<>("request ", request)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", request))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             validator.validatePlus(request, result);
             if (result.hasErrors()) {
                 map.put(TiposComunes.ERROR, obtenerErrores(result));
                 throw new ApiException(result, "Errores en la validacion");
-            }            
+            }
 
             List<Rol> roles = ConvercionUtil.convertToListObject(request, Rol.class);
             Integer batchSize = Integer.valueOf(parametroRepository.findByNombre(
-                Parametro.DelSistema.BATCH_SIZE.name()).getValor());
+                    Parametro.DelSistema.BATCH_SIZE.name()).getValor());
             for (int i = 0; i < roles.size(); i += batchSize) {
                 List<Rol> batch = roles.subList(i, Math.min(i + batchSize, roles.size()));
                 repository.saveAll(batch);
@@ -423,12 +422,13 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             ResponseEntity<Object> out = ResponseEntity.ok().build();
             LoggerMain.printResponse(Stream.of(
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
-                    new AbstractMap.SimpleEntry<>("response ", "Registro completo")).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("response ", "Registro completo"))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             return out;
         } catch (ApiException e) {
             final String mensajeError = "Error al cargar registros de roles, " + e.getMessage();
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "ROL_CARGA_MASIVA", mensajeError, e);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
+                    "ROL_CARGA_MASIVA", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, "ROL_CARGA_MASIVA", null, map, logSistemaId);
             throw e;

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import bo.com.micrium.modulobase.commons.LogNivel;
-import com.micrium.bd.access.jpa.models.LogSistema;
-import com.micrium.bd.access.jpa.repositories.ILogSistemaRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.models.LogSistema;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ILogSistemaRepository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,29 +24,29 @@ import org.apache.logging.log4j.Logger;
  */
 @Service
 @Component
-public class LogSistemaService implements ILogSistemaService{
+public class LogSistemaService implements ILogSistemaService {
 
     private static final Logger log = LogManager.getLogger(LogSistemaService.class);
-    
+
     @Autowired
     ILogSistemaRepository repository;
-    
+
     /**
      * 
      * @param trazabilidad = usuario logueado
-     * @param componente= DemOrques, DemPersonal
-     * @param proceso = accion realizada
+     * @param componente=  DemOrques, DemPersonal
+     * @param proceso      = accion realizada
      * @param detalle
-     * @return 
+     * @return
      */
     @Override
     public Long debug(String trazabilidad, String componente, String proceso, String detalle) {
-        return debug(trazabilidad,componente, proceso, detalle, true);
+        return debug(trazabilidad, componente, proceso, detalle, true);
     }
 
     @Override
-    public Long debug(String trazabilidad,String componente, String proceso, String detalle, Exception ex) {
-        return debug(trazabilidad,componente, proceso, detalle, ex, true);
+    public Long debug(String trazabilidad, String componente, String proceso, String detalle, Exception ex) {
+        return debug(trazabilidad, componente, proceso, detalle, ex, true);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class LogSistemaService implements ILogSistemaService{
 
     @Override
     public Long error(String trazabilidad, String componente, String proceso, String detalle) {
-        return error(trazabilidad,componente, proceso, detalle, true);
+        return error(trazabilidad, componente, proceso, detalle, true);
     }
 
     @Override
@@ -80,22 +80,23 @@ public class LogSistemaService implements ILogSistemaService{
     }
 
     @Override
-    public Long debug(String trazabilidad,String componente, String proceso, String detalle, boolean persistente) {
-        return debug(trazabilidad,componente, proceso, detalle, null, persistente);
+    public Long debug(String trazabilidad, String componente, String proceso, String detalle, boolean persistente) {
+        return debug(trazabilidad, componente, proceso, detalle, null, persistente);
     }
 
     /**
      * 
      * @param trazabilidad: usuario
-     * @param componente: orquestador, DemPersonal, DemCargo,etc
-     * @param proceso: accion realizada
-     * @param detalle: 
-     * @param ex: mensaje excepcion
+     * @param componente:   orquestador, DemPersonal, DemCargo,etc
+     * @param proceso:      accion realizada
+     * @param detalle:
+     * @param ex:           mensaje excepcion
      * @param persistente
-     * @return 
+     * @return
      */
     @Override
-    public Long debug(String trazabilidad,String componente, String proceso, String detalle, Exception ex, boolean persistente) {
+    public Long debug(String trazabilidad, String componente, String proceso, String detalle, Exception ex,
+            boolean persistente) {
         if (ex == null) {
             log.info(trazabilidad + " - " + proceso + " - " + detalle);
         } else {
@@ -103,7 +104,9 @@ public class LogSistemaService implements ILogSistemaService{
         }
 
         if (persistente) {
-            return repository.save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.DEBUG, trazabilidad)).getId();
+            return repository
+                    .save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.DEBUG, trazabilidad))
+                    .getId();
         } else {
             return null;
         }
@@ -115,7 +118,8 @@ public class LogSistemaService implements ILogSistemaService{
     }
 
     @Override
-    public Long info(String trazabilidad, String componente, String proceso, String detalle, Exception ex, boolean persistente) {
+    public Long info(String trazabilidad, String componente, String proceso, String detalle, Exception ex,
+            boolean persistente) {
         if (ex == null) {
             log.info(trazabilidad + " - " + proceso + " - " + detalle);
         } else {
@@ -123,7 +127,9 @@ public class LogSistemaService implements ILogSistemaService{
         }
 
         if (persistente) {
-            return repository.save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.INFO, trazabilidad)).getId();
+            return repository
+                    .save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.INFO, trazabilidad))
+                    .getId();
         } else {
             return null;
         }
@@ -131,11 +137,12 @@ public class LogSistemaService implements ILogSistemaService{
 
     @Override
     public Long warn(String trazabilidad, String componente, String proceso, String detalle, boolean persistente) {
-        return warn(trazabilidad,componente, proceso, detalle, null, persistente);
+        return warn(trazabilidad, componente, proceso, detalle, null, persistente);
     }
 
     @Override
-    public Long warn(String trazabilidad, String componente, String proceso, String detalle, Exception ex, boolean persistente) {
+    public Long warn(String trazabilidad, String componente, String proceso, String detalle, Exception ex,
+            boolean persistente) {
         if (ex == null) {
             log.warn(trazabilidad + " - " + proceso + " - " + detalle);
         } else {
@@ -143,19 +150,22 @@ public class LogSistemaService implements ILogSistemaService{
         }
 
         if (persistente) {
-            return repository.save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.WARN, trazabilidad)).getId();
+            return repository
+                    .save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.WARN, trazabilidad))
+                    .getId();
         } else {
             return null;
         }
     }
 
     @Override
-    public Long error(String trazabilidad,String componente, String proceso, String detalle, boolean persistente) {
+    public Long error(String trazabilidad, String componente, String proceso, String detalle, boolean persistente) {
         return error(trazabilidad, componente, proceso, detalle, null, persistente);
     }
 
     @Override
-    public Long error(String trazabilidad,String componente, String proceso, String detalle, Exception ex, boolean persistente) {
+    public Long error(String trazabilidad, String componente, String proceso, String detalle, Exception ex,
+            boolean persistente) {
         if (ex == null) {
             log.error(trazabilidad + " - " + proceso + " - " + detalle);
         } else {
@@ -163,9 +173,11 @@ public class LogSistemaService implements ILogSistemaService{
         }
 
         if (persistente) {
-            return repository.save(new LogSistema(null, new Date(),componente, proceso, detalle, LogNivel.WARN, trazabilidad)).getId();
+            return repository
+                    .save(new LogSistema(null, new Date(), componente, proceso, detalle, LogNivel.WARN, trazabilidad))
+                    .getId();
         } else {
             return null;
         }
-    }	
+    }
 }

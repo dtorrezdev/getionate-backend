@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.micrium.bd.access.jpa.repositories.ILogSistemaRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.ILogSistemaRepository;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.dto.LogSistemaResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
  */
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/logs/sistema", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/logs/sistema", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class LogSistemaControler extends GenericControler {
 
     private static final long serialVersionUID = 5418078144608698561L;
@@ -86,22 +86,24 @@ public class LogSistemaControler extends GenericControler {
                     new AbstractMap.SimpleEntry<>("detalle ", String.valueOf(detalle)),
                     new AbstractMap.SimpleEntry<>("nivel ", String.valueOf(nivel)),
                     new AbstractMap.SimpleEntry<>("trazabilidad_log ", String.valueOf(trazabilidad)),
-                    new AbstractMap.SimpleEntry<>("request ", pageRequest)).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    new AbstractMap.SimpleEntry<>("request ", pageRequest))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<LogSistemaResponse> out = repository.
-                    filtrar(queryfilterTexto(fi), fi, queryfilterTexto(ff), ff,
-                            queryfilterTexto(id), filterTextoQueryUpper(id),
-                            queryfilterTexto(fechaRegistro), filterTextoQueryUpperLike(fechaRegistro),
-                            queryfilterTexto(app), filterTextoQueryUpperLike(app),
-                            queryfilterTexto(proceso), filterTextoQueryUpperLike(proceso),
-                            queryfilterTexto(detalle), filterTextoQueryUpperLike(detalle),
-                            queryfilterTexto(nivel), filterTextoQueryUpperLike(nivel),
-                            queryfilterTexto(trazabilidad), filterTextoQueryUpperLike(trazabilidad),
-                            pageRequest).
-                    map(b -> {
-                        LogSistemaResponse logSistemaResponse = ConvercionUtil.convertToObject(b, LogSistemaResponse.class);
-                        String aux = isBlanck(logSistemaResponse.getFechaRegistro()) ? "" : BaseDate.convertLongToStringDefault(Long.valueOf(logSistemaResponse.getFechaRegistro()), BaseDate.FORMAT_DMY_HMS_SLASH);
+            Page<LogSistemaResponse> out = repository.filtrar(queryfilterTexto(fi), fi, queryfilterTexto(ff), ff,
+                    queryfilterTexto(id), filterTextoQueryUpper(id),
+                    queryfilterTexto(fechaRegistro), filterTextoQueryUpperLike(fechaRegistro),
+                    queryfilterTexto(app), filterTextoQueryUpperLike(app),
+                    queryfilterTexto(proceso), filterTextoQueryUpperLike(proceso),
+                    queryfilterTexto(detalle), filterTextoQueryUpperLike(detalle),
+                    queryfilterTexto(nivel), filterTextoQueryUpperLike(nivel),
+                    queryfilterTexto(trazabilidad), filterTextoQueryUpperLike(trazabilidad),
+                    pageRequest).map(b -> {
+                        LogSistemaResponse logSistemaResponse = ConvercionUtil.convertToObject(b,
+                                LogSistemaResponse.class);
+                        String aux = isBlanck(logSistemaResponse.getFechaRegistro()) ? ""
+                                : BaseDate.convertLongToStringDefault(
+                                        Long.valueOf(logSistemaResponse.getFechaRegistro()),
+                                        BaseDate.FORMAT_DMY_HMS_SLASH);
                         logSistemaResponse.setFechaRegistro(aux);
                         return logSistemaResponse;
                     });
@@ -113,19 +115,24 @@ public class LogSistemaControler extends GenericControler {
                     new AbstractMap.SimpleEntry<>("ipClient ", ipClient),
                     new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
                     new AbstractMap.SimpleEntry<>("response ", out),
-                    new AbstractMap.SimpleEntry<>("content ", out.getContent())).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            
-            logWeb.info(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, "*** info Se ha listado todo");
-            logWeb.debug(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, "*** debug Se ha listado todo");
-            logWeb.warn(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, "*** warn Se ha listado todo");
-            
+                    new AbstractMap.SimpleEntry<>("content ", out.getContent()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            logWeb.info(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    "*** info Se ha listado todo");
+            logWeb.debug(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    "*** debug Se ha listado todo");
+            logWeb.warn(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    "*** warn Se ha listado todo");
+
             return out;
         } catch (EncriptacionExcepcion ex) {
             final String mensajeError = "Error al filtrar log sistema, " + ex.getMessage();
 
-            //final Long logSistemaId = logSistemaService.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, ex);
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, ex);
+            // final Long logSistemaId = logSistemaService.error(obtenerNombreUsuario(),
+            // Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR, mensajeError, ex);
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, Acciones.FILTRAR,
+                    mensajeError, ex);
             HashMap<String, String> map = new HashMap();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FILTRAR, null, map, logSistemaId);

@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Enumeration;
 
+import bo.com.micrium.modulobase.commons.RolEstado;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,16 +27,16 @@ import bo.com.micrium.modulobase.security.controllers.JwtAuthenticationControlle
 import bo.com.micrium.modulobase.security.services.JwtUserDetailsService;
 import bo.com.micrium.modulobase.security.services.RateLimiterService;
 
-import com.micrium.bd.access.jpa.repositories.IRolAccionRepository;
-import com.micrium.bd.access.jpa.repositories.IAccionRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolAccionRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IAccionRepository;
 import bo.com.micrium.modulobase.controllers.EtiquetaControler;
-import com.micrium.bd.access.jpa.repositories.IRolRepository;
+import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolRepository;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import io.github.bucket4j.Bucket;
 
-import com.micrium.bd.access.jpa.models.RolAccion;
-import com.micrium.bd.access.jpa.models.Accion;
-import com.micrium.bd.access.jpa.models.Rol;
+import com.micrium.bd.access.jpa.modulo.administracion.models.RolAccion;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Accion;
+import com.micrium.bd.access.jpa.modulo.administracion.models.Rol;
 import bo.com.micrium.logger.LoggerMain;
 
 /**
@@ -219,7 +220,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 tokenInvalido(request, response);
                 return;
             }
-            Rol rol = rolRepository.findByNombreAndEstadoTrue(rolNombre);
+            Rol rol = rolRepository.findByNombreAndEstado(rolNombre, RolEstado.HABILITADO);
 
             if (rol == null) {
                 tokenInvalido(request, response);
