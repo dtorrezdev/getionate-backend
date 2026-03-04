@@ -1,19 +1,19 @@
 package bo.com.micrium.modulobase.modulos.producto.controllers;
 
-import bo.com.micrium.cifrado.ConfigEncriptacion;
-import bo.com.micrium.exception.EncriptacionExcepcion;
 import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.commons.*;
 import bo.com.micrium.modulobase.controllers.dto.GrupoResponse;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
-import bo.com.micrium.modulobase.modulos.producto.validators.ProductoValidator;
+import bo.com.micrium.modulobase.modulos.producto.validators.MarcaValidator;
 import com.micrium.bd.access.jpa.modulo.administracion.models.Grupo;
+import com.micrium.bd.access.jpa.modulo.productos.models.Marca;
 import com.micrium.bd.access.jpa.modulo.productos.models.Producto;
-import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoRepository;
+import com.micrium.bd.access.jpa.modulo.productos.repository.IMarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +21,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -36,21 +35,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping(value = "/productos", produces = { MediaType.APPLICATION_JSON_VALUE })
-public class ProductoController extends GenericControler
-    implements ICrudControler<ProductoRequest, ProductoResponse, String>
-{
+@RequestMapping(value = "/marcas", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class MarcaController extends GenericControler
+    implements ICrudControler<MarcaRequest, MarcaResponse, String> {
 
     @Autowired
-    private IProductoRepository repository;
+    private IMarcaRepository repository;
 
     @Autowired
-    private ProductoValidator validator;
+    private MarcaValidator validator;
 
 
     @Override
-    public Page<ProductoResponse> list(String token, String ipClient, String form,
-                                       Pageable pageRequest
+    public Page<MarcaResponse> list(String token, String ipClient, String form, Pageable pageRequest
     ) throws Exception {
         try {
             validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"),
@@ -59,12 +56,12 @@ public class ProductoController extends GenericControler
             final String nombre = this.httpServletRequest.getParameter("nombre");
             final String descripcion = this.httpServletRequest.getParameter("descripcion");
 
-            if (!isBlanck(codigo) && (codigo.length() > 100)) {
-                throw new Exception("La longitud del nombre no debe ser mayor a 100.");
+            if (!isBlanck(codigo) && (codigo.length() > 20)) {
+                throw new Exception("La longitud del nombre no debe ser mayor a 20.");
             }
 
-            if (!isBlanck(nombre) && (nombre.length() > 100)) {
-                throw new Exception("La longitud del nombre no debe ser mayor a 100.");
+            if (!isBlanck(nombre) && (nombre.length() > 60)) {
+                throw new Exception("La longitud del nombre no debe ser mayor a 60.");
             }
 
             if (!isBlanck(descripcion) && (descripcion.length() > 255)) {
@@ -86,7 +83,7 @@ public class ProductoController extends GenericControler
                             new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<ProductoResponse> out = repository.filter(
+            Page<MarcaResponse> out = repository.filter(
                     ((codigo == null || codigo.isEmpty()) ? -1 : 0),
                     ((codigo == null || codigo.trim().isEmpty()) ? ""
                             : "%" + codigo.trim().toUpperCase() + "%"),
@@ -96,7 +93,7 @@ public class ProductoController extends GenericControler
                     ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
                     ((descripcion == null || descripcion.trim().isEmpty()) ? ""
                             : "%" + descripcion.trim().toUpperCase() + "%"),
-                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, ProductoResponse.class));
+                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, MarcaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -109,31 +106,30 @@ public class ProductoController extends GenericControler
             return out;
 
         } catch (Exception e) {
-            final String mensajeError = "Error al filtrar producto, " + e.getMessage();
+            final String mensajeError = "Error al filtrar marcas, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "Filtrar producto",
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "Filtrar marcas",
                     mensajeError, e);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Filtrar producto", null, map, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Filtrar marcas", null, map, logSistemaId);
             throw e;
         }
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> get(String token, String ipClient, String form,
-                                                String id) throws ApiException {
+    public ResponseEntity<MarcaResponse> get(String token, String ipClient, String form, String id) throws ApiException {
         throw new ApiException("GET not support method /{id}" + id);
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> create(String token, String ipClient, String form,
-                                                   ProductoRequest request, BindingResult result
+    public ResponseEntity<MarcaResponse> create(String token, String ipClient, String form,
+                                                MarcaRequest request, BindingResult result
     ) throws URISyntaxException, ApiException {
-        HashMap<String, String> map = new HashMap<String, String>();
-        LoggerMain.info("Llego aqui controlador");
+        HashMap<String, String> map = new HashMap<>();
         try {
             ipClient = obtenerIp(ipClient);
+
             LoggerMain.printRequest(Stream.of(
                             new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                             new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
@@ -143,25 +139,23 @@ public class ProductoController extends GenericControler
                             new AbstractMap.SimpleEntry<>("form ", form),
                             new AbstractMap.SimpleEntry<>("request ", request))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
             validator.validate(request, null, result);
             if (result.hasErrors()) {
                 map.put(TiposComunes.ERROR, obtenerErrores(result));
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            final Producto newProduct = new Producto(
-                    null, request.getCodigo(),
-                    request.getNombre(),
-                    request.getDescripcion()
+            final Marca newMarca = repository.save(
+                    new Marca(null, request.getCodigo(),
+                            request.getNombre(),
+                            request.getDescripcion())
             );
+            map.put("Producto", ConvercionUtil.toJson(newMarca));
+            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Marca", null, map);
 
-            final Producto producto = repository.save(newProduct);
-
-            map.put("Producto", ConvercionUtil.toJson(producto));
-            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map);
-
-            ResponseEntity<ProductoResponse> out = ResponseEntity.created(new URI("/productos/" + producto.getProductoId()))
-                    .body(ConvercionUtil.convertToObject(newProduct, ProductoResponse.class));
+            ResponseEntity<MarcaResponse> out = ResponseEntity.created(new URI("/marcas/" + newMarca.getMarcaId()))
+                    .body(ConvercionUtil.convertToObject(newMarca, MarcaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -170,22 +164,22 @@ public class ProductoController extends GenericControler
                             new AbstractMap.SimpleEntry<>("response ", out))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             return  out;
+
+
         } catch (ApiException | URISyntaxException e) {
-            final String mensajeError = "Error al crear un grupo. " + e.getMessage();
+            final String mensajeError = "Error al crear un marca. " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "CREAR Producto", mensajeError, e);
+                    "CREAR Marca", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Marca", null, map, logSistemaId);
 
             throw e;
         }
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> update(String token, String ipClient, String form,
-                                                   ProductoRequest request, String id, BindingResult result
-    ) throws ApiException {
+    public ResponseEntity<MarcaResponse> update(String token, String ipClient, String form, MarcaRequest request, String id, BindingResult result) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> mapNuevo = new HashMap<>();
         try {
@@ -211,19 +205,19 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Producto updateProducto = repository.findById(idDesencriptado).orElseThrow();
-            map.put("Producto", ConvercionUtil.toJson(updateProducto));
+            Marca updateMarca = repository.findById(idDesencriptado).orElseThrow();
+            map.put("Marca", ConvercionUtil.toJson(updateMarca));
 
-            updateProducto.setNombre(request.getNombre());
-            updateProducto.setCodigo(request.getCodigo());
-            updateProducto.setDescripcion(request.getDescripcion());
+            updateMarca.setNombre(request.getNombre());
+            updateMarca.setCodigo(request.getCodigo());
+            updateMarca.setDescripcion(request.getDescripcion());
 
-            updateProducto = repository.save(updateProducto);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(updateProducto));
-            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, mapNuevo);
+            updateMarca = repository.save(updateMarca);
+            mapNuevo.put("Marca", ConvercionUtil.toJson(updateMarca));
+            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Marca", map, mapNuevo);
 
-            ResponseEntity<ProductoResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updateProducto, ProductoResponse.class));
+            ResponseEntity<MarcaResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(updateMarca, MarcaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
@@ -232,22 +226,21 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        //} catch (EncriptacionExcepcion | ApiException e) {
+            //} catch (EncriptacionExcepcion | ApiException e) {
         } catch (ApiException e) {
-            final String mensajeError = "Error al modificar un grupo, " + e.getMessage();
+            final String mensajeError = "Error al modificar un marca, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Modificar Producto", mensajeError, e);
+                    "Modificar Marca", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, null, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Marca", map, null, logSistemaId);
 
             throw new ApiException(result, mensajeError, e);
         }
     }
 
     @Override
-    public ResponseEntity<?> delete(String token, String ipClient, String form, String id
-    ) throws ApiException {
+    public ResponseEntity<?> delete(String token, String ipClient, String form, String id) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> mapNuevo = new HashMap<>();
 
@@ -265,21 +258,21 @@ public class ProductoController extends GenericControler
 
             //id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
-            Optional<Producto> temp = repository.findById(idDesencriptado);
+            Optional<Marca> temp = repository.findById(idDesencriptado);
 
             if (temp.isEmpty()) {
                 map.put(TiposComunes.ERROR, "El objeto buscado no se encuentra en la BD");
                 throw new NoHandlerFoundException("DELETE", "/{id}" + id, HttpHeaders.EMPTY);
             }
 
-            Producto model = temp.get();
-            map.put(TiposComunes.ModuloBase.GRUPO, ConvercionUtil.toJson(model));
+            Marca model = temp.get();
+            map.put("Marca", ConvercionUtil.toJson(model));
 
             //model.setEstado(GrupoEstado.INHABILITADO);
             repository.delete(model);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(model));
+            mapNuevo.put("Marca", ConvercionUtil.toJson(model));
 
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto", map, mapNuevo);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Marca", map, mapNuevo);
             ResponseEntity<Object> out = ResponseEntity.ok().build();
 
             LoggerMain.printResponse(Stream.of(
@@ -290,14 +283,14 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
+            //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
         } catch (RuntimeException | NoHandlerFoundException e) {
-            final String mensajeError = "Error al eliminar un producto, " + e.getMessage();
+            final String mensajeError = "Error al eliminar un marca, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Eliminar Producto", mensajeError, e);
+                    "Eliminar Marca", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto", map, mapNuevo,
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Marca", map, mapNuevo,
                     logSistemaId);
 
             throw new ApiException(mensajeError, e);
