@@ -33,25 +33,25 @@ public interface ICrudControler<R extends Serializable, T extends Serializable, 
 
     @GetMapping
     Page<T> list(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form, Pageable pageRequest)throws Exception;
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form, Pageable pageRequest)throws Exception;
             //@RequestHeader(value = JWTTokenUtil.ROUTE) String form, @Valid @RequestBody @Size(max = 1000) Pageable pageRequest)throws Exception;
 
     @GetMapping("/{id}")
     ResponseEntity<T> get(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form, @PathVariable P id) throws ApiException;
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form, @PathVariable P id) throws ApiException;
 
     @PostMapping
     ResponseEntity<T> create(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
             @Valid @RequestBody R request, BindingResult result) throws URISyntaxException, ApiException;
 
     @PutMapping("/{id}")
     ResponseEntity<T> update(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
             @Valid @RequestBody R request,
             //@PathVariable @Min(value = 1, message = "Identificador invalido, no puede ser menor a 1") @Max(value = 999999999, message = "Identificador invalido") P id,
             @PathVariable P id,
@@ -59,7 +59,7 @@ public interface ICrudControler<R extends Serializable, T extends Serializable, 
 
     @DeleteMapping("/{id}")
     ResponseEntity<?> delete(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
             //@PathVariable @Min(value = 1, message = "Identificador invalido, no puede ser menor a 1") @Max(value = 999999999, message = "Identificador invalido") P id
             @PathVariable P id
