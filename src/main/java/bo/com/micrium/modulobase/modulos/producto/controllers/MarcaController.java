@@ -3,16 +3,12 @@ package bo.com.micrium.modulobase.modulos.producto.controllers;
 import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.commons.*;
-import bo.com.micrium.modulobase.controllers.dto.GrupoResponse;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
 import bo.com.micrium.modulobase.modulos.producto.validators.MarcaValidator;
-import com.micrium.bd.access.jpa.modulo.administracion.models.Grupo;
 import com.micrium.bd.access.jpa.modulo.productos.models.Marca;
-import com.micrium.bd.access.jpa.modulo.productos.models.Producto;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IMarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -151,7 +147,7 @@ public class MarcaController extends GenericControler
                             request.getNombre(),
                             request.getDescripcion())
             );
-            map.put("Producto", ConvercionUtil.toJson(newMarca));
+            map.put("marca", ConvercionUtil.toJson(newMarca));
             bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Marca", null, map);
 
             ResponseEntity<MarcaResponse> out = ResponseEntity.created(new URI("/marcas/" + newMarca.getMarcaId()))
@@ -164,8 +160,6 @@ public class MarcaController extends GenericControler
                             new AbstractMap.SimpleEntry<>("response ", out))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             return  out;
-
-
         } catch (ApiException | URISyntaxException e) {
             final String mensajeError = "Error al crear un marca. " + e.getMessage();
 

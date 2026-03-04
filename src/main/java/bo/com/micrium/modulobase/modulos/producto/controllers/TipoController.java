@@ -2,14 +2,16 @@ package bo.com.micrium.modulobase.modulos.producto.controllers;
 
 import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
-import bo.com.micrium.modulobase.commons.*;
+import bo.com.micrium.modulobase.commons.Apps;
+import bo.com.micrium.modulobase.commons.ConvercionUtil;
+import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
-import bo.com.micrium.modulobase.modulos.producto.validators.ProductoValidator;
-import com.micrium.bd.access.jpa.modulo.productos.models.Producto;
-import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoRepository;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo.TipoRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo.TipoResponse;
+import bo.com.micrium.modulobase.modulos.producto.validators.TipoValidator;
+import com.micrium.bd.access.jpa.modulo.productos.models.Tipo;
+import com.micrium.bd.access.jpa.modulo.productos.repository.ITipoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,19 +32,24 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Buscar otro nombre: este controlador Gestina los Tipo De Presentaciones
+ * del productos
+ * Pueden ser: SOLIDO, LIQUIDO: GASEOSO, INYECTABLE,etc
+ * */
 @RestController
-@RequestMapping(value = "/productos", produces = { MediaType.APPLICATION_JSON_VALUE })
-public class ProductoController extends GenericControler
-    implements ICrudControler<ProductoRequest, ProductoResponse, String>
-{
-    @Autowired
-    private IProductoRepository repository;
+@RequestMapping(value = "/tipos", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class TipoController extends GenericControler
+    implements ICrudControler<TipoRequest, TipoResponse, String> {
 
     @Autowired
-    private ProductoValidator validator;
+    private ITipoRepository repository;
+
+    @Autowired
+    private TipoValidator validator;
 
     @Override
-    public Page<ProductoResponse> list(String token, String ipClient, String form,
+    public Page<TipoResponse> list(String token, String ipClient, String form,
                                        Pageable pageRequest
     ) throws Exception {
         try {
@@ -79,7 +86,7 @@ public class ProductoController extends GenericControler
                             new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<ProductoResponse> out = repository.filter(
+            Page<TipoResponse> out = repository.filter(
                     ((codigo == null || codigo.isEmpty()) ? -1 : 0),
                     ((codigo == null || codigo.trim().isEmpty()) ? ""
                             : "%" + codigo.trim().toUpperCase() + "%"),
@@ -89,7 +96,7 @@ public class ProductoController extends GenericControler
                     ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
                     ((descripcion == null || descripcion.trim().isEmpty()) ? ""
                             : "%" + descripcion.trim().toUpperCase() + "%"),
-                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, ProductoResponse.class));
+                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, TipoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -102,26 +109,26 @@ public class ProductoController extends GenericControler
             return out;
 
         } catch (Exception e) {
-            final String mensajeError = "Error al filtrar producto, " + e.getMessage();
+            final String mensajeError = "Error al filtrar tipo, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "Filtrar producto",
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "Filtrar tipo",
                     mensajeError, e);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Filtrar producto", null, map, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Filtrar tipo", null, map, logSistemaId);
             throw e;
         }
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> get(String token, String ipClient, String form,
+    public ResponseEntity<TipoResponse> get(String token, String ipClient, String form,
                                                 String id) throws ApiException {
         throw new ApiException("GET not support method /{id}" + id);
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> create(String token, String ipClient, String form,
-                                                   ProductoRequest request, BindingResult result
+    public ResponseEntity<TipoResponse> create(String token, String ipClient, String form,
+                                               TipoRequest request, BindingResult result
     ) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
         LoggerMain.info("Llego aqui controlador");
@@ -142,19 +149,19 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            final Producto newProduct = new Producto(
-                    null, request.getCodigo(),
-                    request.getNombre(),
-                    request.getDescripcion()
+            final Tipo newTipo = repository.save(
+                    new Tipo(
+                            null, request.getCodigo(),
+                            request.getNombre(),
+                            request.getDescripcion()
+                    )
             );
 
-            final Producto producto = repository.save(newProduct);
+            map.put("tipo", ConvercionUtil.toJson(newTipo));
+            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Tipo", null, map);
 
-            map.put("Producto", ConvercionUtil.toJson(producto));
-            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map);
-
-            ResponseEntity<ProductoResponse> out = ResponseEntity.created(new URI("/productos/" + producto.getProductoId()))
-                    .body(ConvercionUtil.convertToObject(newProduct, ProductoResponse.class));
+            ResponseEntity<TipoResponse> out = ResponseEntity.created(new URI("/tipos/" + newTipo.getTipoId()))
+                    .body(ConvercionUtil.convertToObject(newTipo, TipoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -164,20 +171,20 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             return  out;
         } catch (ApiException | URISyntaxException e) {
-            final String mensajeError = "Error al crear un producto. " + e.getMessage();
+            final String mensajeError = "Error al crear un tipo. " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "CREAR Producto", mensajeError, e);
+                    "CREAR Tipo", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Tipo", null, map, logSistemaId);
 
             throw e;
         }
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> update(String token, String ipClient, String form,
-                                                   ProductoRequest request, String id, BindingResult result
+    public ResponseEntity<TipoResponse> update(String token, String ipClient, String form,
+                                                   TipoRequest request, String id, BindingResult result
     ) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> mapNuevo = new HashMap<>();
@@ -204,19 +211,19 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Producto updateProducto = repository.findById(idDesencriptado).orElseThrow();
-            map.put("Producto", ConvercionUtil.toJson(updateProducto));
+            Tipo updateTipo = repository.findById(idDesencriptado).orElseThrow();
+            map.put("tipo", ConvercionUtil.toJson(updateTipo));
 
-            updateProducto.setNombre(request.getNombre());
-            updateProducto.setCodigo(request.getCodigo());
-            updateProducto.setDescripcion(request.getDescripcion());
+            updateTipo.setNombre(request.getNombre());
+            updateTipo.setCodigo(request.getCodigo());
+            updateTipo.setDescripcion(request.getDescripcion());
 
-            updateProducto = repository.save(updateProducto);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(updateProducto));
-            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, mapNuevo);
+            updateTipo = repository.save(updateTipo);
+            mapNuevo.put("tipo", ConvercionUtil.toJson(updateTipo));
+            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Tipo", map, mapNuevo);
 
-            ResponseEntity<ProductoResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updateProducto, ProductoResponse.class));
+            ResponseEntity<TipoResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(updateTipo, TipoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
@@ -225,14 +232,14 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        //} catch (EncriptacionExcepcion | ApiException e) {
+            //} catch (EncriptacionExcepcion | ApiException e) {
         } catch (ApiException e) {
-            final String mensajeError = "Error al modificar un producto, " + e.getMessage();
+            final String mensajeError = "Error al modificar un tipo, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Modificar Producto", mensajeError, e);
+                    "Modificar Tipo", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, null, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Tipo", map, null, logSistemaId);
 
             throw new ApiException(result, mensajeError, e);
         }
@@ -258,21 +265,21 @@ public class ProductoController extends GenericControler
 
             //id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
-            Optional<Producto> temp = repository.findById(idDesencriptado);
+            Optional<Tipo> temp = repository.findById(idDesencriptado);
 
             if (temp.isEmpty()) {
                 map.put(TiposComunes.ERROR, "El objeto buscado no se encuentra en la BD");
                 throw new NoHandlerFoundException("DELETE", "/{id}" + id, HttpHeaders.EMPTY);
             }
 
-            Producto model = temp.get();
-            map.put("producto", ConvercionUtil.toJson(model));
+            Tipo model = temp.get();
+            map.put("tipo", ConvercionUtil.toJson(model));
 
             //model.setEstado(GrupoEstado.INHABILITADO);
             repository.delete(model);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(model));
+            mapNuevo.put("tipo", ConvercionUtil.toJson(model));
 
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto", map, mapNuevo);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Tipo", map, mapNuevo);
             ResponseEntity<Object> out = ResponseEntity.ok().build();
 
             LoggerMain.printResponse(Stream.of(
@@ -283,14 +290,14 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
+            //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
         } catch (RuntimeException | NoHandlerFoundException e) {
-            final String mensajeError = "Error al eliminar un producto, " + e.getMessage();
+            final String mensajeError = "Error al eliminar un tipo, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Eliminar Producto", mensajeError, e);
+                    "Eliminar Tipo", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto", map, mapNuevo,
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Tipo", map, mapNuevo,
                     logSistemaId);
 
             throw new ApiException(mensajeError, e);

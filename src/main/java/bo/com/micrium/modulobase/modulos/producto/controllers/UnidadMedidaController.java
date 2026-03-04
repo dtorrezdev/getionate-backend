@@ -2,14 +2,16 @@ package bo.com.micrium.modulobase.modulos.producto.controllers;
 
 import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
-import bo.com.micrium.modulobase.commons.*;
+import bo.com.micrium.modulobase.commons.Apps;
+import bo.com.micrium.modulobase.commons.ConvercionUtil;
+import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
-import bo.com.micrium.modulobase.modulos.producto.validators.ProductoValidator;
-import com.micrium.bd.access.jpa.modulo.productos.models.Producto;
-import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoRepository;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
+import bo.com.micrium.modulobase.modulos.producto.validators.UnidadMedidaValidator;
+import com.micrium.bd.access.jpa.modulo.productos.models.UnidadMedida;
+import com.micrium.bd.access.jpa.modulo.productos.repository.IUnidadMedidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,18 +33,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping(value = "/productos", produces = { MediaType.APPLICATION_JSON_VALUE })
-public class ProductoController extends GenericControler
-    implements ICrudControler<ProductoRequest, ProductoResponse, String>
-{
-    @Autowired
-    private IProductoRepository repository;
+@RequestMapping(value = "unidades_medidas", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class UnidadMedidaController extends GenericControler
+    implements ICrudControler<UnidadMedidaRequest, UnidadMedidaResponse, String> {
 
     @Autowired
-    private ProductoValidator validator;
+    private IUnidadMedidaRepository repository;
+
+    @Autowired
+    private UnidadMedidaValidator validator;
 
     @Override
-    public Page<ProductoResponse> list(String token, String ipClient, String form,
+    public Page<UnidadMedidaResponse> list(String token, String ipClient, String form,
                                        Pageable pageRequest
     ) throws Exception {
         try {
@@ -79,7 +81,7 @@ public class ProductoController extends GenericControler
                             new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<ProductoResponse> out = repository.filter(
+            Page<UnidadMedidaResponse> out = repository.filter(
                     ((codigo == null || codigo.isEmpty()) ? -1 : 0),
                     ((codigo == null || codigo.trim().isEmpty()) ? ""
                             : "%" + codigo.trim().toUpperCase() + "%"),
@@ -89,7 +91,7 @@ public class ProductoController extends GenericControler
                     ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
                     ((descripcion == null || descripcion.trim().isEmpty()) ? ""
                             : "%" + descripcion.trim().toUpperCase() + "%"),
-                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, ProductoResponse.class));
+                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, UnidadMedidaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -100,28 +102,27 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-
         } catch (Exception e) {
-            final String mensajeError = "Error al filtrar producto, " + e.getMessage();
+            final String mensajeError = "Error al filtrar unidad_medida, " + e.getMessage();
 
-            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "Filtrar producto",
+            final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA, "Filtrar unidad_medida",
                     mensajeError, e);
             HashMap<String, String> map = new HashMap<>();
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Filtrar producto", null, map, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Filtrar unidad_medida", null, map, logSistemaId);
             throw e;
         }
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> get(String token, String ipClient, String form,
+    public ResponseEntity<UnidadMedidaResponse> get(String token, String ipClient, String form,
                                                 String id) throws ApiException {
         throw new ApiException("GET not support method /{id}" + id);
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> create(String token, String ipClient, String form,
-                                                   ProductoRequest request, BindingResult result
+    public ResponseEntity<UnidadMedidaResponse> create(String token, String ipClient, String form,
+                                                       UnidadMedidaRequest request, BindingResult result
     ) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
         LoggerMain.info("Llego aqui controlador");
@@ -142,19 +143,19 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            final Producto newProduct = new Producto(
-                    null, request.getCodigo(),
-                    request.getNombre(),
-                    request.getDescripcion()
+            final UnidadMedida newUnidadMedida = repository.save(
+                    new UnidadMedida(
+                            null, request.getCodigo(),
+                            request.getNombre(),
+                            request.getDescripcion()
+                    )
             );
 
-            final Producto producto = repository.save(newProduct);
+            map.put("unidad_medida", ConvercionUtil.toJson(newUnidadMedida));
+            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR UndiadMedida", null, map);
 
-            map.put("Producto", ConvercionUtil.toJson(producto));
-            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map);
-
-            ResponseEntity<ProductoResponse> out = ResponseEntity.created(new URI("/productos/" + producto.getProductoId()))
-                    .body(ConvercionUtil.convertToObject(newProduct, ProductoResponse.class));
+            ResponseEntity<UnidadMedidaResponse> out = ResponseEntity.created(new URI("/unidades_medidas/" + newUnidadMedida.getUnidadMedidaId()))
+                    .body(ConvercionUtil.convertToObject(newUnidadMedida, UnidadMedidaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -164,20 +165,20 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             return  out;
         } catch (ApiException | URISyntaxException e) {
-            final String mensajeError = "Error al crear un producto. " + e.getMessage();
+            final String mensajeError = "Error al crear un unidad medida. " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "CREAR Producto", mensajeError, e);
+                    "CREAR UndiadMedida", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "CREAR UndiadMedida", null, map, logSistemaId);
 
             throw e;
         }
     }
 
     @Override
-    public ResponseEntity<ProductoResponse> update(String token, String ipClient, String form,
-                                                   ProductoRequest request, String id, BindingResult result
+    public ResponseEntity<UnidadMedidaResponse> update(String token, String ipClient, String form,
+                                                   UnidadMedidaRequest request, String id, BindingResult result
     ) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> mapNuevo = new HashMap<>();
@@ -204,19 +205,19 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Producto updateProducto = repository.findById(idDesencriptado).orElseThrow();
-            map.put("Producto", ConvercionUtil.toJson(updateProducto));
+            UnidadMedida updateUnidadMedida = repository.findById(idDesencriptado).orElseThrow();
+            map.put("Unidad_Medida", ConvercionUtil.toJson(updateUnidadMedida));
 
-            updateProducto.setNombre(request.getNombre());
-            updateProducto.setCodigo(request.getCodigo());
-            updateProducto.setDescripcion(request.getDescripcion());
+            updateUnidadMedida.setNombre(request.getNombre());
+            updateUnidadMedida.setCodigo(request.getCodigo());
+            updateUnidadMedida.setDescripcion(request.getDescripcion());
 
-            updateProducto = repository.save(updateProducto);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(updateProducto));
-            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, mapNuevo);
+            updateUnidadMedida = repository.save(updateUnidadMedida);
+            mapNuevo.put("Unidad_Medida", ConvercionUtil.toJson(updateUnidadMedida));
+            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Unidad Medida", map, mapNuevo);
 
-            ResponseEntity<ProductoResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updateProducto, ProductoResponse.class));
+            ResponseEntity<UnidadMedidaResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(updateUnidadMedida, UnidadMedidaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
@@ -225,14 +226,14 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        //} catch (EncriptacionExcepcion | ApiException e) {
+            //} catch (EncriptacionExcepcion | ApiException e) {
         } catch (ApiException e) {
-            final String mensajeError = "Error al modificar un producto, " + e.getMessage();
+            final String mensajeError = "Error al modificar un unidad medida, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Modificar Producto", mensajeError, e);
+                    "Modificar Unidad_Medida", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, null, logSistemaId);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Unidad_Medida", map, null, logSistemaId);
 
             throw new ApiException(result, mensajeError, e);
         }
@@ -258,21 +259,21 @@ public class ProductoController extends GenericControler
 
             //id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
-            Optional<Producto> temp = repository.findById(idDesencriptado);
+            Optional<UnidadMedida> temp = repository.findById(idDesencriptado);
 
             if (temp.isEmpty()) {
                 map.put(TiposComunes.ERROR, "El objeto buscado no se encuentra en la BD");
                 throw new NoHandlerFoundException("DELETE", "/{id}" + id, HttpHeaders.EMPTY);
             }
 
-            Producto model = temp.get();
-            map.put("producto", ConvercionUtil.toJson(model));
+            UnidadMedida model = temp.get();
+            map.put("Unidad_Medida", ConvercionUtil.toJson(model));
 
             //model.setEstado(GrupoEstado.INHABILITADO);
             repository.delete(model);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(model));
+            mapNuevo.put("Unidad_Medida", ConvercionUtil.toJson(model));
 
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto", map, mapNuevo);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Unidad Medida", map, mapNuevo);
             ResponseEntity<Object> out = ResponseEntity.ok().build();
 
             LoggerMain.printResponse(Stream.of(
@@ -283,17 +284,18 @@ public class ProductoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return out;
-        //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
+            //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
         } catch (RuntimeException | NoHandlerFoundException e) {
-            final String mensajeError = "Error al eliminar un producto, " + e.getMessage();
+            final String mensajeError = "Error al eliminar un unidad medida, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Eliminar Producto", mensajeError, e);
+                    "Eliminar Unidad Medida", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto", map, mapNuevo,
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Unidad Medida", map, mapNuevo,
                     logSistemaId);
 
             throw new ApiException(mensajeError, e);
         }
     }
+
 }
