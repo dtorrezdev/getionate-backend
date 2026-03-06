@@ -25,16 +25,17 @@
 
 - Tengo una consulta ChatGPT, en mi tbl producto, q relacion tiene con la Unidad de Medida de un producto, y puede ser que un producto se registre con una UnidadMedida particular y se venda con otra, x ejemplo Producto: 1, paracentamol, 1G Generico, tabletas,  pero en la venta puedo hacerlo por tableta, o por blíster (10 unidad), caja (50 unidad)
 
-
 - Cambiar nombre de la tabla Tipo en modulo producto por TipoPresentacion
 
 ## Frontend
+
 - Modulo Producto
   - Vista add producto: tener una seccion de Visualizacion Producto
     - donde se va imprimiendo cada campo
     - Hace una validacion q nombre de producto no se agrege a la presentacion
     - la concentracion/ principio activos
   
+  - Vista add producto: en formulardio para agregar (input:mod_prod.producto.nombre) hacer un busqueda de nombres simmilares, para q no ingresen repetidos
+
   - En la vista add producto: habra una seccion de "Existencia "
     - donde ingresara la cantidad/ fecha de caducidad.
-  
