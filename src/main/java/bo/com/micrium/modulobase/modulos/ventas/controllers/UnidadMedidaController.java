@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.producto.controllers;
+package bo.com.micrium.modulobase.modulos.ventas.controllers;
 
 import bo.com.micrium.logger.LoggerMain;
 import bo.com.micrium.modulobase.common.exceptions.ApiException;
@@ -7,11 +7,11 @@ import bo.com.micrium.modulobase.commons.ConvercionUtil;
 import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
-import bo.com.micrium.modulobase.modulos.producto.validators.UnidadMedidaValidator;
-import com.micrium.bd.access.jpa.modulo.productos.models.UnidadMedida;
-import com.micrium.bd.access.jpa.modulo.productos.repository.IUnidadMedidaRepository;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.unidad_medida.UnidadMedidaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.unidad_medida.UnidadMedidaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.validators.UnidadMedidaValidator;
+import com.micrium.bd.access.jpa.modulo.venta.models.UnidadMedida;
+import com.micrium.bd.access.jpa.modulo.venta.repository.IUnidadMedidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -144,11 +144,11 @@ public class UnidadMedidaController extends GenericControler
             }
 
             final UnidadMedida newUnidadMedida = repository.save(
-                    new UnidadMedida(
-                            null, request.getCodigo(),
-                            request.getNombre(),
-                            request.getDescripcion()
-                    )
+                    UnidadMedida.builder()
+                            .codigo(request.getCodigo())
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .build()
             );
 
             map.put("unidad_medida", ConvercionUtil.toJson(newUnidadMedida));
@@ -205,19 +205,22 @@ public class UnidadMedidaController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            UnidadMedida updateUnidadMedida = repository.findById(idDesencriptado).orElseThrow();
-            map.put("Unidad_Medida", ConvercionUtil.toJson(updateUnidadMedida));
+            UnidadMedida updatedUnidadMedida = repository.findById(idDesencriptado).orElseThrow();
+            map.put("Unidad_Medida", ConvercionUtil.toJson(updatedUnidadMedida));
 
-            updateUnidadMedida.setNombre(request.getNombre());
-            updateUnidadMedida.setCodigo(request.getCodigo());
-            updateUnidadMedida.setDescripcion(request.getDescripcion());
-
-            updateUnidadMedida = repository.save(updateUnidadMedida);
-            mapNuevo.put("Unidad_Medida", ConvercionUtil.toJson(updateUnidadMedida));
+            updatedUnidadMedida = repository.save(
+                    UnidadMedida.builder()
+                            .unidadMedidaId(updatedUnidadMedida.getUnidadMedidaId())
+                            .codigo(request.getCodigo())
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .build()
+            );
+            mapNuevo.put("Unidad_Medida", ConvercionUtil.toJson(updatedUnidadMedida));
             bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Unidad Medida", map, mapNuevo);
 
             ResponseEntity<UnidadMedidaResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updateUnidadMedida, UnidadMedidaResponse.class));
+                    .body(ConvercionUtil.convertToObject(updatedUnidadMedida, UnidadMedidaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),

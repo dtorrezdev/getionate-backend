@@ -12,7 +12,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class TipoRequest implements Serializable {
-    private String codigo;
     private String nombre;
     private String descripcion;
 }

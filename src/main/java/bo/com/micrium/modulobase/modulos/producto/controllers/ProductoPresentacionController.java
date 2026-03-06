@@ -7,22 +7,21 @@ import bo.com.micrium.modulobase.commons.ConvercionUtil;
 import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.presentacion.PresentacionRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.presentacion.PresentacionResponse;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
-import bo.com.micrium.modulobase.modulos.producto.validators.PresentacionValidator;
-import bo.com.micrium.modulobase.modulos.producto.validators.ProductoValidator;
-import com.micrium.bd.access.jpa.modulo.productos.models.Presentacion;
-import com.micrium.bd.access.jpa.modulo.productos.models.Producto;
-import com.micrium.bd.access.jpa.modulo.productos.repository.IPresentacionRepository;
-import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoRepository;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionResponse;
+import bo.com.micrium.modulobase.modulos.producto.validators.ProductoPresentacionValidator;
+import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
+import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.net.URI;
@@ -34,31 +33,43 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PresentacionController extends GenericControler
-    implements ICrudControler<PresentacionRequest, PresentacionResponse, String> {
+@RestController
+@RequestMapping(value = "/producto_presentacion", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class ProductoPresentacionController extends GenericControler
+    implements ICrudControler<ProductoPresentacionRequest, ProductoPresentacionResponse, String> {
 
     @Autowired
-    private IPresentacionRepository repository;
+    private IProductoPresentacionRepository repository;
 
     @Autowired
-    private PresentacionValidator validator;
+    private ProductoPresentacionValidator validator;
 
     @Override
-    public Page<PresentacionResponse> list(String token, String ipClient, String form,
-                                       Pageable pageRequest
+    public Page<ProductoPresentacionResponse> list(String token, String ipClient, String form,
+                                                   Pageable pageRequest
     ) throws Exception {
         try {
             validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"),
                     this.httpServletRequest.getParameter("sort"));
             final String nombre = this.httpServletRequest.getParameter("nombre");
+            final String concepto = this.httpServletRequest.getParameter("concepto");
             final String descripcion = this.httpServletRequest.getParameter("descripcion");
+            final String unidadMedida = this.httpServletRequest.getParameter("unidadMedida");
 
-            if (!isBlanck(nombre) && (nombre.length() > 100)) {
-                throw new Exception("La longitud del nombre no debe ser mayor a 100.");
+            if (!isBlanck(nombre) && (nombre.length() > 60)) {
+                throw new Exception("La longitud del nombre no debe ser mayor a 60.");
+            }
+
+            if (!isBlanck(concepto) && (concepto.length() > 255)) {
+                throw new Exception("La longitud de concepto no debe ser mayor a 255.");
             }
 
             if (!isBlanck(descripcion) && (descripcion.length() > 255)) {
                 throw new Exception("La longitud de descripcion no debe ser mayor a 255.");
+            }
+
+            if (!isBlanck(unidadMedida) && (unidadMedida.length() > 120)) {
+                throw new Exception("La longitud de unidad medida no debe ser mayor a 120.");
             }
 
             ipClient = obtenerIp(ipClient);
@@ -75,14 +86,20 @@ public class PresentacionController extends GenericControler
                             new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<PresentacionResponse> out = repository.filter(
+            Page<ProductoPresentacionResponse> out = repository.filter(
                     ((nombre == null || nombre.isEmpty()) ? -1 : 0),
                     ((nombre == null || nombre.trim().isEmpty()) ? ""
                             : "%" + nombre.trim().toUpperCase() + "%"),
+                    ((concepto == null || concepto.isEmpty()) ? -1 : 0),
+                    ((concepto == null || concepto.trim().isEmpty()) ? ""
+                            : "%" + concepto.trim().toUpperCase() + "%"),
                     ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
                     ((descripcion == null || descripcion.trim().isEmpty()) ? ""
                             : "%" + descripcion.trim().toUpperCase() + "%"),
-                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, PresentacionResponse.class));
+                    ((unidadMedida == null || unidadMedida.isEmpty()) ? -1 : 0),
+                    ((unidadMedida == null || unidadMedida.trim().isEmpty()) ? ""
+                            : "%" + unidadMedida.trim().toUpperCase() + "%"),
+                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, ProductoPresentacionResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -107,14 +124,14 @@ public class PresentacionController extends GenericControler
     }
 
     @Override
-    public ResponseEntity<PresentacionResponse> get(String token, String ipClient, String form,
-                                                String id) throws ApiException {
+    public ResponseEntity<ProductoPresentacionResponse> get(String token, String ipClient, String form,
+                                                            String id) throws ApiException {
         throw new ApiException("GET not support method /{id}" + id);
     }
 
     @Override
-    public ResponseEntity<PresentacionResponse> create(String token, String ipClient, String form,
-                                                   PresentacionRequest request, BindingResult result
+    public ResponseEntity<ProductoPresentacionResponse> create(String token, String ipClient, String form,
+                                                               ProductoPresentacionRequest request, BindingResult result
     ) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
         LoggerMain.info("Llego aqui controlador");
@@ -135,21 +152,26 @@ public class PresentacionController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            final Presentacion newPresentacion = repository.save(
-                    Presentacion.builder()
+            final ProductoPresentacion newPresentacion = repository.save(
+                    ProductoPresentacion.builder()
                         .nombre(request.getNombre())
+                        .concepto(request.getConcepto())
                         .descripcion(request.getDescripcion())
-                        .unidadMedidaId(request.getUnidadMedidaId())
-                        .tipoId(request.getTipoId())
+                        .unidadMedida(request.getUnidadMedida())
+                        .precioRef(request.getPrecioRef())
+                        .precioVenta(request.getPrecioVenta())
+                        .precioXMayor(request.getPrecioXMayor())
+                        .tipoPresentacionId(request.getTipoId())
+                        .productoId(request.getProductoId())
                         .build()
             );
 
             map.put("presentacion", ConvercionUtil.toJson(newPresentacion));
             bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Presentacion", null, map);
 
-            ResponseEntity<PresentacionResponse> out = ResponseEntity
+            ResponseEntity<ProductoPresentacionResponse> out = ResponseEntity
                     .created(new URI("/presentaciones/" + newPresentacion.getId()))
-                    .body(ConvercionUtil.convertToObject(newPresentacion, PresentacionResponse.class));
+                    .body(ConvercionUtil.convertToObject(newPresentacion, ProductoPresentacionResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -171,8 +193,8 @@ public class PresentacionController extends GenericControler
     }
 
     @Override
-    public ResponseEntity<PresentacionResponse> update(String token, String ipClient, String form,
-                                           PresentacionRequest request, String id, BindingResult result
+    public ResponseEntity<ProductoPresentacionResponse> update(String token, String ipClient, String form,
+                                                               ProductoPresentacionRequest request, String id, BindingResult result
     ) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> mapNuevo = new HashMap<>();
@@ -199,22 +221,28 @@ public class PresentacionController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Presentacion updatedPresentacion = repository.findById(idDesencriptado).orElseThrow();
-            map.put("presentacion", ConvercionUtil.toJson(updatedPresentacion));
+            ProductoPresentacion updatedProductoPresentacion = repository.findById(idDesencriptado).orElseThrow();
+            map.put("presentacion", ConvercionUtil.toJson(updatedProductoPresentacion));
 
-            updatedPresentacion = repository.save(
-                    Presentacion.builder()
+            updatedProductoPresentacion = repository.save(
+                    ProductoPresentacion.builder()
+                            .Id(updatedProductoPresentacion.getId())
                             .nombre(request.getNombre())
+                            .concepto(request.getConcepto())
                             .descripcion(request.getDescripcion())
-                            .unidadMedidaId(request.getUnidadMedidaId())
-                            .tipoId(request.getTipoId())
+                            .unidadMedida(request.getUnidadMedida())
+                            .precioRef(request.getPrecioRef())
+                            .precioVenta(request.getPrecioVenta())
+                            .precioXMayor(request.getPrecioXMayor())
+                            .tipoPresentacionId(request.getTipoId())
+                            .productoId(request.getProductoId())
                             .build()
             );
-            mapNuevo.put("presentacion", ConvercionUtil.toJson(updatedPresentacion));
+            mapNuevo.put("presentacion", ConvercionUtil.toJson(updatedProductoPresentacion));
             bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Presentacion", map, mapNuevo);
 
-            ResponseEntity<PresentacionResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updatedPresentacion, PresentacionResponse.class));
+            ResponseEntity<ProductoPresentacionResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(updatedProductoPresentacion, ProductoPresentacionResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
@@ -256,21 +284,20 @@ public class PresentacionController extends GenericControler
 
             //id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
-            Optional<Presentacion> temp = repository.findById(idDesencriptado);
+            Optional<ProductoPresentacion> temp = repository.findById(idDesencriptado);
 
             if (temp.isEmpty()) {
                 map.put(TiposComunes.ERROR, "El objeto buscado no se encuentra en la BD");
                 throw new NoHandlerFoundException("DELETE", "/{id}" + id, HttpHeaders.EMPTY);
             }
 
-            Presentacion model = temp.get();
-            map.put("presentacion", ConvercionUtil.toJson(model));
+            ProductoPresentacion model = temp.get();
+            map.put("producto_presentacion", ConvercionUtil.toJson(model));
 
-            //model.setEstado(GrupoEstado.INHABILITADO);
             repository.delete(model);
-            mapNuevo.put("presentacion", ConvercionUtil.toJson(model));
+            mapNuevo.put("producto_presentacion", ConvercionUtil.toJson(model));
 
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Presentacion", map, mapNuevo);
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto Presentacion", map, mapNuevo);
             ResponseEntity<Object> out = ResponseEntity.ok().build();
 
             LoggerMain.printResponse(Stream.of(
@@ -283,12 +310,12 @@ public class PresentacionController extends GenericControler
             return out;
             //} catch (EncriptacionExcepcion | RuntimeException | NoHandlerFoundException e) {
         } catch (RuntimeException | NoHandlerFoundException e) {
-            final String mensajeError = "Error al eliminar un presentacion, " + e.getMessage();
+            final String mensajeError = "Error al eliminar un producto presentacion, " + e.getMessage();
 
             final Long logSistemaId = logWeb.error(obtenerNombreUsuario(), Apps.TRAZABILIDAD_SISTEMA,
-                    "Eliminar Presentacion", mensajeError, e);
+                    "Eliminar Producto Presentacion", mensajeError, e);
             map.put(TiposComunes.MENSAJE_ERROR, mensajeError);
-            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Presentacion", map, mapNuevo,
+            bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto Presentacion", map, mapNuevo,
                     logSistemaId);
 
             throw new ApiException(mensajeError, e);

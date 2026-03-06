@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida;
+package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.unidad_medida;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

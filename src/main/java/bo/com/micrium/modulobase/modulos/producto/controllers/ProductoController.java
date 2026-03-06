@@ -124,7 +124,7 @@ public class ProductoController extends GenericControler
                                                    ProductoRequest request, BindingResult result
     ) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
-        LoggerMain.info("Llego aqui controlador");
+
         try {
             ipClient = obtenerIp(ipClient);
             LoggerMain.printRequest(Stream.of(
@@ -142,19 +142,20 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            final Producto newProduct = new Producto(
-                    null, request.getCodigo(),
-                    request.getNombre(),
-                    request.getDescripcion()
+            final Producto newProducto = repository.save(
+                    Producto.builder()
+                            .codigo(request.getCodigo())
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .marcaId(request.getMarcaId())
+                            .build()
             );
 
-            final Producto producto = repository.save(newProduct);
-
-            map.put("Producto", ConvercionUtil.toJson(producto));
+            map.put("Producto", ConvercionUtil.toJson(newProducto));
             bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Producto", null, map);
 
-            ResponseEntity<ProductoResponse> out = ResponseEntity.created(new URI("/productos/" + producto.getProductoId()))
-                    .body(ConvercionUtil.convertToObject(newProduct, ProductoResponse.class));
+            ResponseEntity<ProductoResponse> out = ResponseEntity.created(new URI("/productos/" + newProducto.getId()))
+                    .body(ConvercionUtil.convertToObject(newProducto, ProductoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -204,19 +205,24 @@ public class ProductoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Producto updateProducto = repository.findById(idDesencriptado).orElseThrow();
-            map.put("Producto", ConvercionUtil.toJson(updateProducto));
+            Producto updatedProducto = repository.findById(idDesencriptado).orElseThrow();
+            map.put("Producto", ConvercionUtil.toJson(updatedProducto));
 
-            updateProducto.setNombre(request.getNombre());
-            updateProducto.setCodigo(request.getCodigo());
-            updateProducto.setDescripcion(request.getDescripcion());
 
-            updateProducto = repository.save(updateProducto);
-            mapNuevo.put("Producto", ConvercionUtil.toJson(updateProducto));
+            updatedProducto = repository.save(
+                    Producto.builder()
+                            .id(updatedProducto.getId())
+                            .codigo(request.getCodigo())
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .marcaId(request.getMarcaId())
+                            .build()
+            );
+            mapNuevo.put("Producto", ConvercionUtil.toJson(updatedProducto));
             bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Producto", map, mapNuevo);
 
             ResponseEntity<ProductoResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updateProducto, ProductoResponse.class));
+                    .body(ConvercionUtil.convertToObject(updatedProducto, ProductoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
@@ -268,7 +274,6 @@ public class ProductoController extends GenericControler
             Producto model = temp.get();
             map.put("producto", ConvercionUtil.toJson(model));
 
-            //model.setEstado(GrupoEstado.INHABILITADO);
             repository.delete(model);
             mapNuevo.put("Producto", ConvercionUtil.toJson(model));
 

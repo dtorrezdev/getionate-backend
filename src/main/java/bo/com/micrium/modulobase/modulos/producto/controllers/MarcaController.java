@@ -48,13 +48,8 @@ public class MarcaController extends GenericControler
         try {
             validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"),
                     this.httpServletRequest.getParameter("sort"));
-            final String codigo = this.httpServletRequest.getParameter("codigo");
             final String nombre = this.httpServletRequest.getParameter("nombre");
             final String descripcion = this.httpServletRequest.getParameter("descripcion");
-
-            if (!isBlanck(codigo) && (codigo.length() > 20)) {
-                throw new Exception("La longitud del nombre no debe ser mayor a 20.");
-            }
 
             if (!isBlanck(nombre) && (nombre.length() > 60)) {
                 throw new Exception("La longitud del nombre no debe ser mayor a 60.");
@@ -69,7 +64,6 @@ public class MarcaController extends GenericControler
             LoggerMain.printRequest(Stream.of(
                             new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                             new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                            new AbstractMap.SimpleEntry<>("codigo ", codigo),
                             new AbstractMap.SimpleEntry<>("nombre ", nombre),
                             new AbstractMap.SimpleEntry<>("descripcion ", descripcion),
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -80,9 +74,6 @@ public class MarcaController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             Page<MarcaResponse> out = repository.filter(
-                    ((codigo == null || codigo.isEmpty()) ? -1 : 0),
-                    ((codigo == null || codigo.trim().isEmpty()) ? ""
-                            : "%" + codigo.trim().toUpperCase() + "%"),
                     ((nombre == null || nombre.isEmpty()) ? -1 : 0),
                     ((nombre == null || nombre.trim().isEmpty()) ? ""
                             : "%" + nombre.trim().toUpperCase() + "%"),
@@ -143,9 +134,10 @@ public class MarcaController extends GenericControler
             }
 
             final Marca newMarca = repository.save(
-                    new Marca(null, request.getCodigo(),
-                            request.getNombre(),
-                            request.getDescripcion())
+                    Marca.builder()
+                         .nombre(request.getNombre())
+                         .descripcion(request.getDescripcion())
+                         .build()
             );
             map.put("marca", ConvercionUtil.toJson(newMarca));
             bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Marca", null, map);
@@ -190,7 +182,6 @@ public class MarcaController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             //id = limpiarCaracterEspecialEncriptacion(id);
-
             Long idDesencriptado = Long.valueOf(id); //ConfigEncriptacion.desencryptIdToConvertLong(id);
             validator.validate(request, idDesencriptado, result);
 
@@ -202,11 +193,13 @@ public class MarcaController extends GenericControler
             Marca updateMarca = repository.findById(idDesencriptado).orElseThrow();
             map.put("Marca", ConvercionUtil.toJson(updateMarca));
 
-            updateMarca.setNombre(request.getNombre());
-            updateMarca.setCodigo(request.getCodigo());
-            updateMarca.setDescripcion(request.getDescripcion());
-
-            updateMarca = repository.save(updateMarca);
+            updateMarca = repository.save(
+                    Marca.builder()
+                            .marcaId(updateMarca.getMarcaId())
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .build()
+            );
             mapNuevo.put("Marca", ConvercionUtil.toJson(updateMarca));
             bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Marca", map, mapNuevo);
 
@@ -262,7 +255,6 @@ public class MarcaController extends GenericControler
             Marca model = temp.get();
             map.put("Marca", ConvercionUtil.toJson(model));
 
-            //model.setEstado(GrupoEstado.INHABILITADO);
             repository.delete(model);
             mapNuevo.put("Marca", ConvercionUtil.toJson(model));
 

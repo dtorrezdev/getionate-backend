@@ -55,13 +55,8 @@ public class TipoController extends GenericControler
         try {
             validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"),
                     this.httpServletRequest.getParameter("sort"));
-            final String codigo = this.httpServletRequest.getParameter("codigo");
             final String nombre = this.httpServletRequest.getParameter("nombre");
             final String descripcion = this.httpServletRequest.getParameter("descripcion");
-
-            if (!isBlanck(codigo) && (codigo.length() > 100)) {
-                throw new Exception("La longitud del nombre no debe ser mayor a 100.");
-            }
 
             if (!isBlanck(nombre) && (nombre.length() > 100)) {
                 throw new Exception("La longitud del nombre no debe ser mayor a 100.");
@@ -76,7 +71,6 @@ public class TipoController extends GenericControler
             LoggerMain.printRequest(Stream.of(
                             new AbstractMap.SimpleEntry<>("url ", httpServletRequest.getRequestURL()),
                             new AbstractMap.SimpleEntry<>("metodo ", httpServletRequest.getMethod()),
-                            new AbstractMap.SimpleEntry<>("codigo ", codigo),
                             new AbstractMap.SimpleEntry<>("nombre ", nombre),
                             new AbstractMap.SimpleEntry<>("descripcion ", descripcion),
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -87,9 +81,6 @@ public class TipoController extends GenericControler
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             Page<TipoResponse> out = repository.filter(
-                    ((codigo == null || codigo.isEmpty()) ? -1 : 0),
-                    ((codigo == null || codigo.trim().isEmpty()) ? ""
-                            : "%" + codigo.trim().toUpperCase() + "%"),
                     ((nombre == null || nombre.isEmpty()) ? -1 : 0),
                     ((nombre == null || nombre.trim().isEmpty()) ? ""
                             : "%" + nombre.trim().toUpperCase() + "%"),
@@ -150,11 +141,10 @@ public class TipoController extends GenericControler
             }
 
             final Tipo newTipo = repository.save(
-                    new Tipo(
-                            null, request.getCodigo(),
-                            request.getNombre(),
-                            request.getDescripcion()
-                    )
+                    Tipo.builder()
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .build()
             );
 
             map.put("tipo", ConvercionUtil.toJson(newTipo));
@@ -211,19 +201,21 @@ public class TipoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Tipo updateTipo = repository.findById(idDesencriptado).orElseThrow();
-            map.put("tipo", ConvercionUtil.toJson(updateTipo));
+            Tipo updatedTipo = repository.findById(idDesencriptado).orElseThrow();
+            map.put("tipo", ConvercionUtil.toJson(updatedTipo));
 
-            updateTipo.setNombre(request.getNombre());
-            updateTipo.setCodigo(request.getCodigo());
-            updateTipo.setDescripcion(request.getDescripcion());
-
-            updateTipo = repository.save(updateTipo);
-            mapNuevo.put("tipo", ConvercionUtil.toJson(updateTipo));
+            updatedTipo = repository.save(
+                    Tipo.builder()
+                            .tipoId(updatedTipo.getTipoId())
+                            .nombre(request.getNombre())
+                            .descripcion(request.getDescripcion())
+                            .build()
+            );
+            mapNuevo.put("tipo", ConvercionUtil.toJson(updatedTipo));
             bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Tipo", map, mapNuevo);
 
             ResponseEntity<TipoResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updateTipo, TipoResponse.class));
+                    .body(ConvercionUtil.convertToObject(updatedTipo, TipoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),

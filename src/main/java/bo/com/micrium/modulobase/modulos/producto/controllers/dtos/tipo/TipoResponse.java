@@ -13,7 +13,6 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class TipoResponse implements Serializable {
     private Long tipoId;
-    private String codigo;
     private String nombre;
     private String descripcion;
 }

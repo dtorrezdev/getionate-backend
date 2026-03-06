@@ -2,17 +2,16 @@ package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class MarcaRequest implements Serializable {
-    private String codigo;
     private String nombre;
     private String descripcion;
 }
