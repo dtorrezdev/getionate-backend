@@ -142,7 +142,7 @@ public class MarcaController extends GenericControler
             map.put("marca", ConvercionUtil.toJson(newMarca));
             bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Marca", null, map);
 
-            ResponseEntity<MarcaResponse> out = ResponseEntity.created(new URI("/marcas/" + newMarca.getMarcaId()))
+            ResponseEntity<MarcaResponse> out = ResponseEntity.created(new URI("/marcas/" + newMarca.getId()))
                     .body(ConvercionUtil.convertToObject(newMarca, MarcaResponse.class));
 
             LoggerMain.printResponse(Stream.of(
@@ -195,7 +195,7 @@ public class MarcaController extends GenericControler
 
             updateMarca = repository.save(
                     Marca.builder()
-                            .marcaId(updateMarca.getMarcaId())
+                            .id(updateMarca.getId())
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
                             .build()

@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo;
+package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo_producto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
-public class TipoRequest implements Serializable {
+public class TipoProductoResponse implements Serializable {
+    private Long tipoId;
     private String nombre;
     private String descripcion;
 }

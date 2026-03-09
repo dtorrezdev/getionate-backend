@@ -7,11 +7,11 @@ import bo.com.micrium.modulobase.commons.ConvercionUtil;
 import bo.com.micrium.modulobase.commons.TiposComunes;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.template.ICrudControler;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo.TipoRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo.TipoResponse;
-import bo.com.micrium.modulobase.modulos.producto.validators.TipoValidator;
-import com.micrium.bd.access.jpa.modulo.productos.models.Tipo;
-import com.micrium.bd.access.jpa.modulo.productos.repository.ITipoRepository;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo_producto.TipoProductoRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.tipo_producto.TipoProductoResponse;
+import bo.com.micrium.modulobase.modulos.producto.validators.TipoProductoValidator;
+import com.micrium.bd.access.jpa.modulo.productos.models.TipoProducto;
+import com.micrium.bd.access.jpa.modulo.productos.repository.ITipoProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,19 +38,19 @@ import java.util.stream.Stream;
  * Pueden ser: SOLIDO, LIQUIDO: GASEOSO, INYECTABLE,etc
  * */
 @RestController
-@RequestMapping(value = "/tipos", produces = { MediaType.APPLICATION_JSON_VALUE })
-public class TipoController extends GenericControler
-    implements ICrudControler<TipoRequest, TipoResponse, String> {
+@RequestMapping(value = "/tipo_productos", produces = { MediaType.APPLICATION_JSON_VALUE })
+public class TipoProductoController extends GenericControler
+    implements ICrudControler<TipoProductoRequest, TipoProductoResponse, String> {
 
     @Autowired
-    private ITipoRepository repository;
+    private ITipoProductoRepository repository;
 
     @Autowired
-    private TipoValidator validator;
+    private TipoProductoValidator validator;
 
     @Override
-    public Page<TipoResponse> list(String token, String ipClient, String form,
-                                       Pageable pageRequest
+    public Page<TipoProductoResponse> list(String token, String ipClient, String form,
+                                           Pageable pageRequest
     ) throws Exception {
         try {
             validator.page(this.httpServletRequest.getParameter("size"), this.httpServletRequest.getParameter("page"),
@@ -80,14 +80,14 @@ public class TipoController extends GenericControler
                             new AbstractMap.SimpleEntry<>("pageRequest ", pageRequest))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-            Page<TipoResponse> out = repository.filter(
+            Page<TipoProductoResponse> out = repository.filter(
                     ((nombre == null || nombre.isEmpty()) ? -1 : 0),
                     ((nombre == null || nombre.trim().isEmpty()) ? ""
                             : "%" + nombre.trim().toUpperCase() + "%"),
                     ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
                     ((descripcion == null || descripcion.trim().isEmpty()) ? ""
                             : "%" + descripcion.trim().toUpperCase() + "%"),
-                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, TipoResponse.class));
+                    pageRequest).map(model ->  ConvercionUtil.convertToObject(model, TipoProductoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -112,14 +112,14 @@ public class TipoController extends GenericControler
     }
 
     @Override
-    public ResponseEntity<TipoResponse> get(String token, String ipClient, String form,
-                                                String id) throws ApiException {
+    public ResponseEntity<TipoProductoResponse> get(String token, String ipClient, String form,
+                                                    String id) throws ApiException {
         throw new ApiException("GET not support method /{id}" + id);
     }
 
     @Override
-    public ResponseEntity<TipoResponse> create(String token, String ipClient, String form,
-                                               TipoRequest request, BindingResult result
+    public ResponseEntity<TipoProductoResponse> create(String token, String ipClient, String form,
+                                                       TipoProductoRequest request, BindingResult result
     ) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
         LoggerMain.info("Llego aqui controlador");
@@ -140,8 +140,8 @@ public class TipoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            final Tipo newTipo = repository.save(
-                    Tipo.builder()
+            final TipoProducto newTipo = repository.save(
+                    TipoProducto.builder()
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
                             .build()
@@ -150,8 +150,8 @@ public class TipoController extends GenericControler
             map.put("tipo", ConvercionUtil.toJson(newTipo));
             bitacoraService.guardarBitacora(token, ipClient, form, "CREAR Tipo", null, map);
 
-            ResponseEntity<TipoResponse> out = ResponseEntity.created(new URI("/tipos/" + newTipo.getTipoId()))
-                    .body(ConvercionUtil.convertToObject(newTipo, TipoResponse.class));
+            ResponseEntity<TipoProductoResponse> out = ResponseEntity.created(new URI("/tipos/" + newTipo.getId()))
+                    .body(ConvercionUtil.convertToObject(newTipo, TipoProductoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("token ", token),
@@ -173,8 +173,8 @@ public class TipoController extends GenericControler
     }
 
     @Override
-    public ResponseEntity<TipoResponse> update(String token, String ipClient, String form,
-                                                   TipoRequest request, String id, BindingResult result
+    public ResponseEntity<TipoProductoResponse> update(String token, String ipClient, String form,
+                                                       TipoProductoRequest request, String id, BindingResult result
     ) throws ApiException {
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> mapNuevo = new HashMap<>();
@@ -201,12 +201,12 @@ public class TipoController extends GenericControler
                 throw new ApiException(result, "Errores en la validacion");
             }
 
-            Tipo updatedTipo = repository.findById(idDesencriptado).orElseThrow();
+            TipoProducto updatedTipo = repository.findById(idDesencriptado).orElseThrow();
             map.put("tipo", ConvercionUtil.toJson(updatedTipo));
 
             updatedTipo = repository.save(
-                    Tipo.builder()
-                            .tipoId(updatedTipo.getTipoId())
+                    TipoProducto.builder()
+                            .id(updatedTipo.getId())
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
                             .build()
@@ -214,8 +214,8 @@ public class TipoController extends GenericControler
             mapNuevo.put("tipo", ConvercionUtil.toJson(updatedTipo));
             bitacoraService.guardarBitacora(token, ipClient, form, "Modificar Tipo", map, mapNuevo);
 
-            ResponseEntity<TipoResponse> out = ResponseEntity.ok()
-                    .body(ConvercionUtil.convertToObject(updatedTipo, TipoResponse.class));
+            ResponseEntity<TipoProductoResponse> out = ResponseEntity.ok()
+                    .body(ConvercionUtil.convertToObject(updatedTipo, TipoProductoResponse.class));
 
             LoggerMain.printResponse(Stream.of(
                             new AbstractMap.SimpleEntry<>("trazabilidad ", obtenerNombreUsuario()),
@@ -257,14 +257,14 @@ public class TipoController extends GenericControler
 
             //id = limpiarCaracterEspecialEncriptacion(id);
             Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
-            Optional<Tipo> temp = repository.findById(idDesencriptado);
+            Optional<TipoProducto> temp = repository.findById(idDesencriptado);
 
             if (temp.isEmpty()) {
                 map.put(TiposComunes.ERROR, "El objeto buscado no se encuentra en la BD");
                 throw new NoHandlerFoundException("DELETE", "/{id}" + id, HttpHeaders.EMPTY);
             }
 
-            Tipo model = temp.get();
+            TipoProducto model = temp.get();
             map.put("tipo", ConvercionUtil.toJson(model));
 
             //model.setEstado(GrupoEstado.INHABILITADO);
