@@ -12,6 +12,16 @@
   - Validacion a nivel Java Jakarte.validate
   - Validacion a nivel org.springframework.validation
 
+- Manejo de Errores
+  - No se visualizan vien las validaciones
+  - No son descriptivos los errores
+
+- Manejos de Logs
+  - esta muy cargado el controlador
+
+- Paginacion data en Spring
+
+
 ## Pensamientos
 
 - El controlador hereda GenericController e implementa ICRUDController varias clases, e indirectamente SubHerada la clase GlobalValidator.
