@@ -4,6 +4,7 @@ import java.io.Serializable;
 //import java.util.Arrays;
 
 //import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter; @deprecado
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.web.cors.CorsConfiguration;
 //import org.springframework.web.cors.CorsConfigurationSource;
@@ -70,7 +71,7 @@ public class WebSecurityConfig implements Serializable {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(csrf -> csrf.disable())            
+            .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authRequest -> authRequest
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers(EtiquetaControler.RESOURCE_BY_LLAVE).permitAll()
@@ -87,31 +88,8 @@ public class WebSecurityConfig implements Serializable {
             //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
-}
+    }
 
-    /*@Override
-        protected void configure(HttpSecurity httpSecurity) throws Exception {
-            httpSecurity.csrf().disable()
-                    .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().
-                    antMatchers(HttpMethod.OPTIONS, "/**").permitAll().
-                    antMatchers(EtiquetaControler.RESOURCE_BY_LLAVE).permitAll().
-                    antMatchers(EtiquetaControler.RESOURCE_BY_GRUPO).permitAll().
-                    antMatchers(PerfilControler.RESOURCE_CAMBIOLOGIN).permitAll().
-                    antMatchers(JwtAuthenticationController.METODO_AUTENTICACION).permitAll().
-                    antMatchers(JwtAuthenticationController.METODO_VERSION).permitAll().
-                    anyRequest().authenticated();
-            //coverity  
-            httpSecurity.authorizeRequests().
-                    antMatchers(HttpMethod.OPTIONS, "/**").permitAll().
-                    antMatchers(EtiquetaControler.RESOURCE_BY_LLAVE).permitAll().
-                    antMatchers(EtiquetaControler.RESOURCE_BY_GRUPO).permitAll().
-                    antMatchers(PerfilControler.RESOURCE_CAMBIOLOGIN).permitAll().
-                    antMatchers(JwtAuthenticationController.METODO_AUTENTICACION).permitAll().
-                    antMatchers(JwtAuthenticationController.METODO_VERSION).permitAll().anyRequest().authenticated();
-
-            httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-        }*/
   
 
 }

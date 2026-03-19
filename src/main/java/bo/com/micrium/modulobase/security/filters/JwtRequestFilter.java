@@ -103,21 +103,16 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         LoggerMain.info("+++ UR2: " + request.getRequestURI());
 
         HttpServletResponse httpResp = (HttpServletResponse) response;
-        //response.setHeader("Access-Control-Allow-Origin", "*");
-        //httpResp.setHeader("Access-Control-Allow-Origin", "https://10.19.11.141:8443,http://localhost:8081/Gateway/api/v1");
         response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
         httpResp.setHeader("Access-Control-Max-Age", "1500");
 
-        //response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Cache-Control", "no-cache, must-understand, no-store, max-age=604800, must-revalidate, private");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setHeader("X-XSS-Protection", "1; mode=block");
-        //response.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';");
         response.setHeader("X-Content-Type-Options", "nosniff");
 
-        //response.setHeader("Content-Security-Policy", "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.googleapis.com; object-src 'self'; img-src 'self' data:; form-action 'self'; font-src 'self' https:; default-src 'self' http:;");
         response.setHeader("Content-Security-Policy", "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'self'; img-src 'self' data:; form-action 'self'; font-src 'self' https:; default-src 'self' http:;");
 
         Enumeration<String> headersEnum = ((HttpServletRequest) request).getHeaders("Access-Control-Request-Headers");
@@ -130,20 +125,21 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         httpResp.setHeader("Access-Control-Allow-Headers", headers.toString());
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        PrintWriter res = response.getWriter();
-        res.append("Unauthorized");
-        res.close();
+        response.setContentType("application/json");
+        response.getWriter().write("""
+            {
+              "error": "Unauthorized",
+              "message": "Token inválido"
+            }
+        """);
     }
 
     private void sinPermiso(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        HttpServletResponse httpResp = (HttpServletResponse) response;
-        //response.setHeader("Access-Control-Allow-Origin", "*");
-        // httpResp.setHeader("Access-Control-Allow-Origin", "https://10.19.11.141:8443,http://localhost:8081/Gateway/api/v1");
         response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
         //response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
         response.setHeader("Cache-Control", "no-cache, must-understand, no-store, max-age=604800, must-revalidate, private");
-        httpResp.setHeader("Access-Control-Max-Age", "1500");
+        response.setHeader("Access-Control-Max-Age", "1500");
 
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
@@ -162,12 +158,17 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
             headers.append(delim).append(headersEnum.nextElement());
             delim = ", ";
         }
-        httpResp.setHeader("Access-Control-Allow-Headers", headers.toString());
+        response.setHeader("Access-Control-Allow-Headers", headers.toString());
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        PrintWriter res = response.getWriter();
-        res.append("Forbidden");
-        res.close();
+        response.setContentType("application/json");
+        response.getWriter()
+                .write("""
+            {
+              "error": "Unauthorized",
+              "message": "Forbidden"
+            }
+            """);
     }
 
     @Override
@@ -196,23 +197,26 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 return;
             }
             
-            // Resolver el Bucket basado en el usuario
-            bucket = rateLimiterService.resolveBucket(jwtTokenUtil.getUsernameFromToken(requestTokenHeader));
-
-            // Aplicar control de tasa
-            if (!bucket.tryConsume(1)) {
-                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                response.getWriter().write("Demasiadas solicitudes, vuelva intentar mas tarde...");
-                return;
-            }
-
             try {
-                rolNombre = jwtTokenUtil.getRolNombreFromToken(requestTokenHeader);
-                //log.info("ROL> " + rolNombre);
-                //log.info("USER> " + jwtTokenUtil.getUsernameFromToken(requestTokenHeader));
                 if (jwtTokenUtil.isTokenExpired(requestTokenHeader)) {
                     log.warn("Token expirado ");
                     tokenInvalido(request, response);
+                    return;
+                }
+                rolNombre = jwtTokenUtil.getRolNombreFromToken(requestTokenHeader);
+                log.info("ROL> " + rolNombre);
+                // Resolver el Bucket basado en el usuario
+                bucket = rateLimiterService.resolveBucket(jwtTokenUtil.getUsernameFromToken(requestTokenHeader));
+                // Aplicar control de tasa
+                if (!bucket.tryConsume(1)) {
+                    response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                    response.setContentType("application/json");
+                    response.getWriter().write("""
+                    {
+                      "error": "Unauthorized",
+                      "message": "Demasiadas solicitudes, vuelva intentar mas tarde..."
+                    }
+                    """);
                     return;
                 }
             } catch (Exception e) {
@@ -248,7 +252,6 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                         flag = false;
                         break exito;
                     }
-
                 }
             }
             if (flag) {
@@ -269,25 +272,15 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         // Aplicar control de tasa
         if (!bucket.tryConsume(1)) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.getWriter().write("Demasiadas solicitudes, vuelva intentar mas tarde...");
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                  "error": "Unauthorized",
+                  "message": "Demasiadas solicitudes, vuelva intentar mas tarde..."
+                }
+            """);
             return;
         }
-        
-        chain.doFilter(request, response);        
+        chain.doFilter(request, response);
     }
-
-    // private void printAllHeaders(HttpServletRequest request) {
-    //     Enumeration<String> headerNames = request.getHeaderNames();
-
-    //     if (headerNames != null) {
-    //         while (headerNames.hasMoreElements()) {
-    //             String headerName = headerNames.nextElement();
-    //             String headerValue = request.getHeader(headerName);
-    //             log.info(headerName + ": " + headerValue);
-    //         }
-    //     } else {
-    //         log.info("No headers found.");
-    //     }
-    // }
-
 }

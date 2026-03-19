@@ -33,4 +33,20 @@ public class MarcaValidator extends GlobalValidator {
         }
     }
 
+    /**
+     *
+     * @param nombre: solo valida la longuitud maxima permitida de 60 (si nombre!=null or notEmpty)
+     * @param descripcion: solo valida la longuitud maxima permitida de 255 (si nombre!=null or notEmpty)
+     * @throws Exception
+     */
+    public void validate(String nombre, String descripcion) throws Exception {
+        if (!isBlanck(nombre) && (nombre.length() > 60)) {
+            throw new Exception("La longitud del nombre no debe ser mayor a 60.");
+        }
+        if (!isBlanck(descripcion) && (descripcion.length() > 255)) {
+            throw new Exception("La longitud de descripcion no debe ser mayor a 255.");
+        }
+
+    }
+
 }

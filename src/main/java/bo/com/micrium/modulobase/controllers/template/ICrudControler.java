@@ -34,7 +34,9 @@ public interface ICrudControler<R extends Serializable, T extends Serializable, 
     @GetMapping
     Page<T> list(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form, Pageable pageRequest)throws Exception;
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
+                 Pageable pageRequest
+    )throws Exception;
             //@RequestHeader(value = JWTTokenUtil.ROUTE) String form, @Valid @RequestBody @Size(max = 1000) Pageable pageRequest)throws Exception;
 
     @GetMapping("/{id}")

@@ -4,7 +4,7 @@ import bo.com.micrium.modulobase.commons.GlobalValidator;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.unidad_medida.UnidadMedidaRequest;
 import bo.com.micrium.modulobase.services.ParametroService;
 import com.micrium.bd.access.enuns.Parametro;
-import com.micrium.bd.access.jpa.modulo.venta.repository.IUnidadMedidaRepository;
+import com.micrium.bd.access.jpa.modulo.productos.repository.IUnidadMedidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

@@ -156,11 +156,10 @@ public class ProductoPresentacionController extends GenericControler
                         .nombre(request.getNombre())
                         .concepto(request.getConcepto())
                         .descripcion(request.getDescripcion())
-                        .unidadMedida(request.getUnidadMedida())
+                        .unidadMedidaId(0L)
                         .precioRef(request.getPrecioRef())
                         .precioVenta(request.getPrecioVenta())
                         .precioXMayor(request.getPrecioXMayor())
-                        .tipoPresentacionId(request.getTipoId())
                         .productoId(request.getProductoId())
                         .build()
             );
@@ -225,15 +224,14 @@ public class ProductoPresentacionController extends GenericControler
 
             updatedProductoPresentacion = repository.save(
                     ProductoPresentacion.builder()
-                            .Id(updatedProductoPresentacion.getId())
+                            .id(updatedProductoPresentacion.getId())
                             .nombre(request.getNombre())
                             .concepto(request.getConcepto())
                             .descripcion(request.getDescripcion())
-                            .unidadMedida(request.getUnidadMedida())
+                            .unidadMedidaId(1L)
                             .precioRef(request.getPrecioRef())
                             .precioVenta(request.getPrecioVenta())
                             .precioXMayor(request.getPrecioXMayor())
-                            .tipoPresentacionId(request.getTipoId())
                             .productoId(request.getProductoId())
                             .build()
             );
