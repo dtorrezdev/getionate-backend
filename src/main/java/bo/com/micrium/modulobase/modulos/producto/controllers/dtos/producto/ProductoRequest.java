@@ -16,5 +16,5 @@ public class ProductoRequest implements Serializable {
     private String nombre;
     private String descripcion;
 
-    private Long marcaId;
+    private Long categoriaId;
 }

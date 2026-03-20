@@ -147,7 +147,7 @@ public class ProductoController extends GenericControler
                             .codigo(request.getCodigo())
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
-                            .marcaId(request.getMarcaId())
+                            .categoriaId(request.getCategoriaId())
                             .build()
             );
 
@@ -215,7 +215,7 @@ public class ProductoController extends GenericControler
                             .codigo(request.getCodigo())
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
-                            .marcaId(request.getMarcaId())
+                            .categoriaId(request.getCategoriaId())
                             .build()
             );
             mapNuevo.put("Producto", ConvercionUtil.toJson(updatedProducto));

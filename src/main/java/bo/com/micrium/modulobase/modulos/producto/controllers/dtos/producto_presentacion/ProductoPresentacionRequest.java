@@ -14,9 +14,11 @@ public class ProductoPresentacionRequest implements Serializable {
     private String nombre;
     private String concepto;
     private String descripcion;
-    private Long tipoId;
-    private String unidadMedida;
+    private Long unidadMedidaId;
+    private Boolean hasUnidadBase;
+    private Integer factorConversion;
     private Double precioRef;
     private Double precioVenta;
     private Double precioXMayor;
+    private Long marcaId;
 }

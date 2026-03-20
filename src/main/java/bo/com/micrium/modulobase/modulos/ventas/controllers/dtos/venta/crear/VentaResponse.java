@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta;
+package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

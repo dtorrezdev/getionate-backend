@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta;
+package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Min;
@@ -34,7 +34,7 @@ public class DetalleVentaRequest implements Serializable {
     @Min(value = 1, message = "Total debe ser mayor a 0")
     private Double precioUnitario;
 
-    @NotNull(message = "Subtotal no puede ser null")
-    @Min(value = 1, message = "Subtotal debe ser mayor a 0")
-    private Double subtotal;
+//    @NotNull(message = "Subtotal no puede ser null")
+//    @Min(value = 1, message = "Subtotal debe ser mayor a 0")
+//    private Double subtotal;
 }

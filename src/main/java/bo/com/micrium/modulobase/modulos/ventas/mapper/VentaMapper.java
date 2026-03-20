@@ -1,8 +1,8 @@
 package bo.com.micrium.modulobase.modulos.ventas.mapper;
 
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.DetalleVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.VentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.VentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
 import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
 import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
 
@@ -21,7 +21,7 @@ public class VentaMapper {
                     .cantidad(dto.getCantidad())
                     .cantidadBase(dto.getCantidadBase())
                     .precioUnitario(dto.getPrecioUnitario())
-                    .subtotal(dto.getSubtotal())
+//                    .subtotal(dto.getSubtotal())
                     .build();
 
     public static final Function<VentaRequest, Venta> toEntity = request -> {

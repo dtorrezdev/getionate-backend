@@ -53,7 +53,7 @@ public class ProductoPresentacionController extends GenericControler
             final String nombre = this.httpServletRequest.getParameter("nombre");
             final String concepto = this.httpServletRequest.getParameter("concepto");
             final String descripcion = this.httpServletRequest.getParameter("descripcion");
-            final String unidadMedida = this.httpServletRequest.getParameter("unidadMedida");
+//            final String unidadMedida = this.httpServletRequest.getParameter("unidadMedida");
 
             if (!isBlanck(nombre) && (nombre.length() > 60)) {
                 throw new Exception("La longitud del nombre no debe ser mayor a 60.");
@@ -67,9 +67,9 @@ public class ProductoPresentacionController extends GenericControler
                 throw new Exception("La longitud de descripcion no debe ser mayor a 255.");
             }
 
-            if (!isBlanck(unidadMedida) && (unidadMedida.length() > 120)) {
-                throw new Exception("La longitud de unidad medida no debe ser mayor a 120.");
-            }
+//            if (!isBlanck(unidadMedida) && (unidadMedida.length() > 120)) {
+//                throw new Exception("La longitud de unidad medida no debe ser mayor a 120.");
+//            }
 
             ipClient = obtenerIp(ipClient);
 
@@ -95,9 +95,6 @@ public class ProductoPresentacionController extends GenericControler
                     ((descripcion == null || descripcion.isEmpty()) ? -1 : 0),
                     ((descripcion == null || descripcion.trim().isEmpty()) ? ""
                             : "%" + descripcion.trim().toUpperCase() + "%"),
-                    ((unidadMedida == null || unidadMedida.isEmpty()) ? -1 : 0),
-                    ((unidadMedida == null || unidadMedida.trim().isEmpty()) ? ""
-                            : "%" + unidadMedida.trim().toUpperCase() + "%"),
                     pageRequest).map(model ->  ConvercionUtil.convertToObject(model, ProductoPresentacionResponse.class));
 
             LoggerMain.printResponse(Stream.of(

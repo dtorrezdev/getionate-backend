@@ -15,10 +15,13 @@ public class ProductoPresentacionResponse implements Serializable {
     private String nombre;
     private String concepto;
     private String descripcion;
-    private String unidadMedida;
+    private Long unidadMedidaId;
+    private Boolean hasUnidadBase;
+    private Integer factorConversion;
     private Double precioRef;
     private Double precioVenta;
     private Double precioXMayor;
-    private Long tipoPresentacionId;
+    private Long marcaId;
+
 
 }
