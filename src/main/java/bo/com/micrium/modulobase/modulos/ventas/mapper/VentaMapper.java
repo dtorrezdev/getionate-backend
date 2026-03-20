@@ -2,43 +2,81 @@ package bo.com.micrium.modulobase.modulos.ventas.mapper;
 
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.DetalleVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.VentaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.VentaResponse;
 import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
 import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
-import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component
 public class VentaMapper {
 
-    public Venta toEntity(VentaRequest dto) {
+    public static final Function<DetalleVentaRequest, DetalleVenta> toDetalleEntity
+            = dto ->
+            DetalleVenta.builder()
+                    .presentacionId(dto.getPresentacionId())
+                    .productoId(dto.getProductoId())
+                    .cantidad(dto.getCantidad())
+                    .cantidadBase(dto.getCantidadBase())
+                    .precioUnitario(dto.getPrecioUnitario())
+                    .subtotal(dto.getSubtotal())
+                    .build();
+
+    public static final Function<VentaRequest, Venta> toEntity = request -> {
 
         Venta venta = new Venta();
-        venta.setEstado(dto.getEstado());
-        venta.setTotal(dto.getTotal());
-        venta.setGlosa(dto.getGlosa());
-        venta.setCodigo(dto.getCodigo());
-        venta.setClienteId(dto.getClienteId());
+//        venta.setId(null);
+        venta.setFechaRegistro(new Timestamp(System.currentTimeMillis()));
+        venta.setEstado(request.getEstado());
+        venta.setTotal(request.getTotal());
+        venta.setGlosa(request.getGlosa());
+        venta.setCodigo(request.getCodigo());
+        venta.setClienteId(request.getClienteId());
+        venta.setMovimientoId(null);
 
-        final List<DetalleVenta> detalle = dto.getDetalle().stream()
-                .map(this::toDetalleEntity)
+        List<DetalleVenta> detalles = request.getDetalle().stream()
+                .map(toDetalleEntity)
                 .collect(Collectors.toList());
 
-        venta.setDetalle(detalle);
+        venta.setDetalle(detalles);
 
-        detalle.forEach(d -> d.setVenta(venta));
+        detalles.forEach(d -> d.setVenta(venta));
 
         return venta;
-    }
+    };
 
-    private DetalleVenta toDetalleEntity(DetalleVentaRequest dto) {
+    public static final Function<Venta, VentaResponse> toResponse = venta -> {
+        VentaResponse response = new VentaResponse();
+        response.setId(venta.getId());
+        return response;
+    };
 
-        DetalleVenta d = new DetalleVenta();
-        d.setProductoId(dto.getProductoId());
-        d.setCantidad(dto.getCantidad());
+//    public static final Function<Venta, VentaResponse> toResponse = venta -> {
+//
+//        VentaResponse response = new VentaResponse();
+//        response.setId(venta.getId());
+//        response.setCliente(venta.getCliente());
+//        response.setTotal(venta.getTotal());
+//
+//        List<DetalleVentaResponse> detalles = venta.getDetalles().stream()
+//                .map(toDetalleResponse)
+//                .collect(Collectors.toList());
+//
+//        response.setDetalles(detalles);
+//
+//        return response;
+//    };
 
-        return d;
-    }
 
+//    public static final Function<DetalleVenta, DetalleVentaResponse> toDetalleResponse = detalle -> {
+//
+//        DetalleVentaResponse d = new DetalleVentaResponse();
+//        d.setProductoId(detalle.getProductoId());
+//        d.setCantidad(detalle.getCantidad());
+//        d.setPrecio(detalle.getPrecio());
+//        d.setSubtotal(detalle.getSubtotal());
+//        return d;
+//    };
 }
