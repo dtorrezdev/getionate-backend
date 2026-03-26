@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListClienteResponse implements Serializable {
+public class ClienteResponse implements Serializable {
     private Long id;
     private String ci;
     private String nombre;

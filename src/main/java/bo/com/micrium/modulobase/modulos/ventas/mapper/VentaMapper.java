@@ -1,10 +1,12 @@
 package bo.com.micrium.modulobase.modulos.ventas.mapper;
 
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
 import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
 import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
+import com.micrium.bd.access.jpa.modulo.venta.projection.ListVentaProjection;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -50,6 +52,21 @@ public class VentaMapper {
     public static final Function<Venta, VentaResponse> toResponse = venta -> {
         VentaResponse response = new VentaResponse();
         response.setId(venta.getId());
+        return response;
+    };
+
+    public static final Function<ListVentaProjection, ListVentaResponse>
+            fromProjectionToListVentaResponse = venta -> {
+        ListVentaResponse response = new ListVentaResponse();
+        response.setId(venta.getId());
+        response.setCliente(venta.getCliente());
+        response.setEstado(venta.getEstado());
+        response.setCodigo(venta.getCodigo());
+        response.setGlosa(venta.getGlosa());
+        response.setTotal(venta.getTotal());
+        response.setClienteId(venta.getClienteId());
+        response.setFechaRegistro(venta.getFechaRegistro());
+        response.setMovimientoId(venta.getMovimientoId());
         return response;
     };
 

@@ -5,8 +5,8 @@ import bo.com.micrium.modulobase.controllers.template.ICreateController;
 import bo.com.micrium.modulobase.controllers.template.IDeleteController;
 import bo.com.micrium.modulobase.controllers.template.IListController;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.AnularVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.ListVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.ListVentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.IAnularVentaService;
@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/ventas", produces = { MediaType.APPLICATION_JSON_VALUE })

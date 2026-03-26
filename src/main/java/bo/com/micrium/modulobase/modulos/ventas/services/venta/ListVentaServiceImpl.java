@@ -1,7 +1,8 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.venta;
 
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.ListVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.ListVentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
 import com.micrium.bd.access.jpa.modulo.venta.repository.IVentaRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,21 +11,46 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 public class ListVentaServiceImpl implements IListVentaService {
 
     @Autowired
-    private IVentaRepository ventaRepository;
+    private IVentaRepository repository;
 
      private final Logger log = LogManager.getLogger(ListVentaServiceImpl.class);
 
     @Override
-    public Page<ListVentaResponse> execute(ListVentaRequest params, Pageable page) {
-        log.info("params: " + params);
+    public Page<ListVentaResponse> execute(ListVentaRequest request, Pageable page) {
+        log.info("params: " + request);
         log.info("page: " + page);
+        return repository.filter(
+                queryfilterTexto(request.getId()),
+                filterTextoQueryUpperLike(request.getId()),
+                queryfilterTexto(request.getCodigo()),
+                filterTextoQueryUpperLike(request.getCodigo()),
+                queryfilterTexto(request.getGlosa()),
+                filterTextoQueryUpperLike(request.getGlosa()),
+                queryfilterTexto(request.getTotal()),
+                filterTextoQueryUpperLike(request.getTotal()),
+                queryfilterTexto(request.getFechaRegistro()),
+                filterTextoQueryUpperLike(request.getFechaRegistro()),
+                queryfilterTexto(request.getCliente()),
+                filterTextoQueryUpperLike(request.getCliente()),
+                queryfilterTexto(request.getEstado()),
+                filterTextoQueryUpperLike(request.getEstado()),
+                page)
+                .map(VentaMapper.fromProjectionToListVentaResponse);
+    }
 
-        return null;
+    private boolean isBlanck(String dato) {
+        return dato == null || dato.trim().isEmpty();
+    }
+
+    private int queryfilterTexto(String texto) {
+        return this.isBlanck(texto) ? -1 : 0;
+    }
+
+    private String filterTextoQueryUpperLike(String texto) {
+        return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
 }

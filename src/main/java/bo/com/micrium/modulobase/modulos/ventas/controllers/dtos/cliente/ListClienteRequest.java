@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente;
 
 //import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-//@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class ListClienteRequest implements Serializable {
     private Long id;
     private String ci;

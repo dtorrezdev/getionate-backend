@@ -40,18 +40,6 @@ public class IMarcaServiceImpl implements IMarcaService {
                 pageRequest).map(MarcaMapper.toResponse);
     }
 
-    private boolean isBlanck(String dato) {
-        return dato == null || dato.trim().isEmpty();
-    }
-
-    private int queryfilterTexto(String texto) {
-        return this.isBlanck(texto) ? -1 : 0;
-    }
-
-    private String filterTextoQueryUpperLike(String texto) {
-        return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
-    }
-
     @Override
     public MarcaResponse create(MarcaRequest request) {
 
@@ -88,4 +76,17 @@ public class IMarcaServiceImpl implements IMarcaService {
                 }
             );
     }
+
+    private boolean isBlanck(String dato) {
+        return dato == null || dato.trim().isEmpty();
+    }
+
+    private int queryfilterTexto(String texto) {
+        return this.isBlanck(texto) ? -1 : 0;
+    }
+
+    private String filterTextoQueryUpperLike(String texto) {
+        return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
+    }
+
 }
