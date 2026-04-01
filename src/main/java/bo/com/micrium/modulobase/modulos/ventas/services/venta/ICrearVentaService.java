@@ -8,3 +8,4 @@ public interface ICrearVentaService {
     VentaResponse execute(VentaRequest crearVentaRequest);
 
 }
+

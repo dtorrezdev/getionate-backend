@@ -3,15 +3,13 @@ package bo.com.micrium.modulobase.modulos.ventas.controllers;
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateController;
 import bo.com.micrium.modulobase.controllers.template.IDeleteController;
+import bo.com.micrium.modulobase.controllers.template.IGetController;
 import bo.com.micrium.modulobase.controllers.template.IListController;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.AnularVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.IAnularVentaService;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.ICrearVentaService;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.IListVentaService;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +21,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/ventas", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class VentaController implements
         IListController<ListVentaRequest, ListVentaResponse>,
+        IGetController<GetVentaResponse, Long>,
         ICreateController<VentaRequest, VentaResponse>,
         IDeleteController<AnularVentaRequest>
 {
     @Autowired
     private IListVentaService listServie;
+
+    @Autowired
+    private IGetVentaService getService;
 
     @Autowired
     private ICrearVentaService crearService;
@@ -47,6 +49,19 @@ public class VentaController implements
                 .body(ApiResponse.ok(
                         this.listServie.execute(params, pageRequest),
                         "Se ha listado correctamente")
+                );
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<GetVentaResponse>> get(
+            String token,
+            String ipClient,
+            String form,
+            Long id) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        this.getService.execute(id),
+                        "Se ha obtenido correctamente")
                 );
     }
 
@@ -73,4 +88,5 @@ public class VentaController implements
         this.anularService.execute(request);
         return ResponseEntity.status(204).build();
     }
+
 }
