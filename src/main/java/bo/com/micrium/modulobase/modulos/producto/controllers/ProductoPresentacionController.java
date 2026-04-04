@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping(value = "/producto_presentacion", produces = { MediaType.APPLICATION_JSON_VALUE })
+@RequestMapping(value = "/producto_presentacion")
 public class ProductoPresentacionController extends GenericControler
     implements ICrudControler<ProductoPresentacionRequest, ProductoPresentacionResponse, String> {
 
@@ -150,15 +149,20 @@ public class ProductoPresentacionController extends GenericControler
 
             final ProductoPresentacion newPresentacion = repository.save(
                     ProductoPresentacion.builder()
-                        .nombre(request.getNombre())
-                        .concepto(request.getConcepto())
-                        .descripcion(request.getDescripcion())
-                        .unidadMedidaId(0L)
-                        .precioRef(request.getPrecioRef())
-                        .precioVenta(request.getPrecioVenta())
-                        .precioXMayor(request.getPrecioXMayor())
-                        .productoId(request.getProductoId())
-                        .build()
+                            .nombre(request.getNombre())
+                            .concepto(request.getConcepto())
+                            .descripcion(request.getDescripcion())
+                            .unidadMedidaId(request.getUnidadMedidaId())
+                            .esUnidadMinima(request.getEsUnidadMinina())
+                            .factorConversion(request.getFactorConversion())
+                            .precioUnitario(request.getPrecioUnitario())
+                            .precioVenta(request.getPrecioVenta())
+                            .productoId(request.getProductoId())
+                            .marcaId(request.getMarcaId())
+                            .cantidadDisponibleStock(request.getCantidadDisponibleStock())
+                            .cantidadMinimoStock(request.getCantidadMinimoStock())
+                            .diasAntesExpiracion(request.getDiasAntesExpiracion())
+                            .build()
             );
 
             map.put("presentacion", ConvercionUtil.toJson(newPresentacion));
@@ -225,11 +229,16 @@ public class ProductoPresentacionController extends GenericControler
                             .nombre(request.getNombre())
                             .concepto(request.getConcepto())
                             .descripcion(request.getDescripcion())
-                            .unidadMedidaId(1L)
-                            .precioRef(request.getPrecioRef())
+                            .unidadMedidaId(request.getUnidadMedidaId())
+                            .esUnidadMinima(request.getEsUnidadMinina())
+                            .factorConversion(request.getFactorConversion())
+                            .precioUnitario(request.getPrecioUnitario())
                             .precioVenta(request.getPrecioVenta())
-                            .precioXMayor(request.getPrecioXMayor())
                             .productoId(request.getProductoId())
+                            .marcaId(request.getMarcaId())
+                            .cantidadDisponibleStock(request.getCantidadDisponibleStock())
+                            .cantidadMinimoStock(request.getCantidadMinimoStock())
+                            .diasAntesExpiracion(request.getDiasAntesExpiracion())
                             .build()
             );
             mapNuevo.put("presentacion", ConvercionUtil.toJson(updatedProductoPresentacion));

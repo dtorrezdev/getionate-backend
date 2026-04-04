@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
@@ -15,10 +16,12 @@ public class ProductoPresentacionRequest implements Serializable {
     private String concepto;
     private String descripcion;
     private Long unidadMedidaId;
-    private Boolean hasUnidadBase;
+    private Boolean esUnidadMinina;
     private Integer factorConversion;
-    private Double precioRef;
-    private Double precioVenta;
-    private Double precioXMayor;
+    private BigDecimal precioUnitario;
+    private BigDecimal precioVenta;
+    public Integer cantidadDisponibleStock;
+    public Integer cantidadMinimoStock;
+    public Integer diasAntesExpiracion;
     private Long marcaId;
 }

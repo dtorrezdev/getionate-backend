@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.unidad_medida;
+package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -12,8 +12,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class UnidadMedidaResponse implements Serializable {
-    private Long unidadMedidaId;
-    private String codigo;
+    private Long id;
+    private String abreviatura;
     private String nombre;
-    private String descripcion;
+    private Boolean esUnidadMinima;
 }

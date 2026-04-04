@@ -1,7 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.mappers;
 
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.*;
 import com.micrium.bd.access.jpa.modulo.productos.models.Marca;
 
 import java.util.function.Function;

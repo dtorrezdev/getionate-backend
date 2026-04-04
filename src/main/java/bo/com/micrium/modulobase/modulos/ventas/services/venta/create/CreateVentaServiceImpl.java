@@ -1,15 +1,12 @@
-package bo.com.micrium.modulobase.modulos.ventas.services.venta;
+package bo.com.micrium.modulobase.modulos.ventas.services.venta.create;
 
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
-import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
-import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
-import com.micrium.bd.access.jpa.modulo.venta.repository.IClienteRepository;
-import com.micrium.bd.access.jpa.modulo.venta.repository.IDetalleVenta;
-import com.micrium.bd.access.jpa.modulo.venta.repository.IVentaRepository;
+import com.micrium.bd.access.jpa.modulo.venta.repository.*;
+import com.micrium.bd.access.jpa.modulo.venta.models.*;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CrearVentaServiceImpl implements ICrearVentaService {
+public class CreateVentaServiceImpl implements ICreateVentaService {
 
     @Autowired
     private IVentaRepository repository;
@@ -32,8 +29,7 @@ public class CrearVentaServiceImpl implements ICrearVentaService {
     @Autowired
     private IProductoPresentacionRepository productoRepository; // eliminar dependencia
 
-     private final Logger log = LogManager.getLogger(CrearVentaServiceImpl.class);
-
+     private final Logger log = LogManager.getLogger(CreateVentaServiceImpl.class);
 
     @Override
     public VentaResponse execute(VentaRequest crearVentaRequest) {

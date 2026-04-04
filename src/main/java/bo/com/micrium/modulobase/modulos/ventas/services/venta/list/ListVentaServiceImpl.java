@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.ventas.services.venta;
+package bo.com.micrium.modulobase.modulos.ventas.services.venta.list;
 
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;

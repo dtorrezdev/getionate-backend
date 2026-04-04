@@ -9,16 +9,18 @@ import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.*;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.anular.IAnularVentaService;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.ICreateVentaService;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaService;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.IListVentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/ventas", produces = { MediaType.APPLICATION_JSON_VALUE })
+@RequestMapping(value = "/ventas")
 public class VentaController implements
         IListController<ListVentaRequest, ListVentaResponse>,
         IGetController<GetVentaResponse, Long>,
@@ -26,13 +28,13 @@ public class VentaController implements
         IDeleteController<AnularVentaRequest>
 {
     @Autowired
-    private IListVentaService listServie;
+    private IListVentaService listService;
 
     @Autowired
     private IGetVentaService getService;
 
     @Autowired
-    private ICrearVentaService crearService;
+    private ICreateVentaService crearService;
 
     @Autowired
     private IAnularVentaService anularService;
@@ -47,7 +49,7 @@ public class VentaController implements
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.listServie.execute(params, pageRequest),
+                        this.listService.execute(params, pageRequest),
                         "Se ha listado correctamente")
                 );
     }
@@ -88,5 +90,4 @@ public class VentaController implements
         this.anularService.execute(request);
         return ResponseEntity.status(204).build();
     }
-
 }
