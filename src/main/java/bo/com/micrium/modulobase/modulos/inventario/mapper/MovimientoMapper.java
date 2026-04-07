@@ -3,15 +3,8 @@ package bo.com.micrium.modulobase.modulos.inventario.mapper;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.DetalleMovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.MovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.MovimientoResponse;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Movimiento;
 import com.micrium.bd.access.jpa.modulo.inventario.models.MovimientoProducto;
-import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
-import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
-import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
-//import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
 
 import java.sql.Timestamp;
 import java.util.List;
