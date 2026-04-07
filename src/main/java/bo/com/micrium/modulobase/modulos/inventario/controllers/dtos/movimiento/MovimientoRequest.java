@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos;
+package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
@@ -10,10 +10,8 @@ import java.io.Serializable;
 import java.util.List;
 
 @Getter
-@Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = false)
+@AllArgsConstructor
 @ToString
 public class MovimientoRequest implements Serializable {
     @NotNull( message = "Tipo Movimiento Id no puede ser nulo.")
@@ -29,7 +27,7 @@ public class MovimientoRequest implements Serializable {
     @NotNull( message = "Presentacion Id no puede ser nulo.")
     private Long presentacionId;
 
-    @NotNull( message = "Ubicacion Stock Id no puede ser nulo.")
+//    @NotNull( message = "Ubicacion Stock Id no puede ser nulo.")
     private Long ubicacionStockId;
 
     @NotEmpty(message = "Debe existir al menos un fila en detalle")

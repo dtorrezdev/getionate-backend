@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos;
+package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Future;
@@ -24,8 +24,8 @@ public class DetalleMovimientoRequest implements Serializable {
     @Future(message = "La Fecha Expitacion debe ser futura.")
     private Date fechaExpiracion;
 
-    @NotNull(message = "Cantidad Stock no puede ser nulo.")
-    @Min(value = 1, message = "Cantidad Stock debe ser mayor a 0")
+//    @NotNull(message = "Cantidad Stock no puede ser nulo.")
+//    @Min(value = 1, message = "Cantidad Stock debe ser mayor a 0")
     private Integer cantidadStock;
 
     @NotNull(message = "Cantidad Stock Base no puede ser nulo.")

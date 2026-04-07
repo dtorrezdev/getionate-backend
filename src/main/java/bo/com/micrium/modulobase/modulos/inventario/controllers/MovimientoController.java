@@ -2,7 +2,8 @@ package bo.com.micrium.modulobase.modulos.inventario.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateController;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.*;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoResponse;
 import bo.com.micrium.modulobase.modulos.inventario.services.ICreateMovimientoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,12 @@ public class MovimientoController implements
     private ICreateMovimientoService createService;
 
     @Override
-    public ResponseEntity<ApiResponse<MovimientoResponse>> create(String token, String ipClient, String form, MovimientoRequest request) {
+    public ResponseEntity<ApiResponse<MovimientoResponse>> create(
+            String token,
+            String ipClient,
+            String form,
+            MovimientoRequest request
+    ) {
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.createService.execute(request),

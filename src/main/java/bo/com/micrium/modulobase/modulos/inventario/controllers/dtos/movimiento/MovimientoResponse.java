@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos;
+package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;

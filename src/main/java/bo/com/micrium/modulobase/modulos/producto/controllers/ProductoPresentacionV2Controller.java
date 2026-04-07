@@ -3,6 +3,7 @@ package bo.com.micrium.modulobase.modulos.producto.controllers;
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateController;
 import bo.com.micrium.modulobase.controllers.template.IListController;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.CreateProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.*;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/producto_presentacion_v2")
 public class ProductoPresentacionV2Controller implements
         IListController<ListPresentacionRequest, ListPresentacionResponse>,
-        ICreateController<ProductoPresentacionRequest, ProductoPresentacionResponse> {
+        ICreateController<ProductoPresentacionRequest, CreateProductoPresentacionResponse> {
 
     @Autowired
     private IListProductoPresentacionService listService;
@@ -43,7 +44,7 @@ public class ProductoPresentacionV2Controller implements
     }
 
     @Override
-    public ResponseEntity<ApiResponse<ProductoPresentacionResponse>> create(
+    public ResponseEntity<ApiResponse<CreateProductoPresentacionResponse>> create(
             String token,
             String ipClient,
             String form,

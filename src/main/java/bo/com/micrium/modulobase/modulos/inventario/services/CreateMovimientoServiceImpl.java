@@ -1,6 +1,8 @@
 package bo.com.micrium.modulobase.modulos.inventario.services;
 
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.*;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.DetalleMovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoResponse;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.MovimientoMapper;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Movimiento;
 import com.micrium.bd.access.jpa.modulo.inventario.models.MovimientoProducto;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,9 +45,9 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
     @Override
     @Transactional
     public MovimientoResponse execute(MovimientoRequest request) {
-
-        if (!validateMovimiento(request)) return null;
-
+        log.info("execute create");
+        this.validateMovimiento(request);
+        log.info("is validate create");
         final Movimiento movimiento = MovimientoMapper.
                 fromMovimientoRequestToMovimientoEntity
                 .apply(request);
@@ -67,6 +70,7 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
                     }
 
                     this.log.info("model stock: " + stock);
+                    detalle.setCantidad(dto.getCantidadStockBase());
                     detalle.setCantidadBase(getCantidadBaseConSigno(request,dto));
                     detalle.setStock(stock);
                     return detalle;
@@ -79,17 +83,17 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
                 .apply(repository.save(movimiento));
     }
 
-    private boolean validateMovimiento(MovimientoRequest movimiento) {
+    private void validateMovimiento(MovimientoRequest movimiento) {
         presentacionRepository.findByIdAndProductoId(movimiento.getPresentacionId(), movimiento.getProductoId())
                 .orElseThrow(() -> new RuntimeException("Producto Presentacion no existe."));
 
         tipoMovimientoRepository.findById(movimiento.getTipoMovimientoId())
                 .orElseThrow(() -> new RuntimeException("Tipo Movimiento no existe."));
 
-        if (esMovimientoTipoEntrada(movimiento)) {
+        if (esMovimientoTipoEntrada(movimiento) &&
+            Objects.nonNull(movimiento.getUbicacionStockId())) {
             stockService.validateUbicacionStock(movimiento.getUbicacionStockId());
         }
-        return true;
     }
 
     private boolean esMovimientoTipoSalida(MovimientoRequest movimiento) {
