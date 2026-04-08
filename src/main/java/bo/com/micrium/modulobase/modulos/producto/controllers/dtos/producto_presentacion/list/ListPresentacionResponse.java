@@ -27,4 +27,6 @@ public class ListPresentacionResponse implements Serializable {
     private BigDecimal precioVenta;
     private Long categoriaId;
     private String categoria;
+    private Integer cantidadMinimoStock;
+    private Integer cantidadDisponibleStock;
 }

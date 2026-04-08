@@ -3,12 +3,8 @@ package bo.com.micrium.modulobase.modulos.producto.mappers;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.CreateProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.ListPresentacionResponse;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.projection.ListPresentacionProjection;
-import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
-import com.micrium.bd.access.jpa.modulo.venta.projection.ListVentaProjection;
 
 import java.util.function.Function;
 
@@ -42,22 +38,24 @@ public class ProductoPresentacionMapper {
     };
 
     public static final Function<ListPresentacionProjection, ListPresentacionResponse>
-            fromProjectionToListPresentacionResponse = venta -> {
+            fromProjectionToListPresentacionResponse = entity -> {
         ListPresentacionResponse response = new ListPresentacionResponse();
-        response.setProductoId(venta.getProductoId());
-        response.setProducto(venta.getProducto());
-        response.setId(venta.getId());
-        response.setPresentacion(venta.getPresentacion());
-        response.setPresentacionLarga(venta.getPresentacionLarga());
-        response.setPrincipioActivo(venta.getPrincipioActivo());
-        response.setUnidadMedidaId(venta.getUnidadMedidaId());
-        response.setUnidadMedidaShort(venta.getUnidadMedidaShort());
-        response.setUnidadMedida(venta.getUnidadMedida());
-        response.setMarcaId(venta.getMarcaId());
-        response.setMarca(venta.getMarca());
-        response.setPrecioVenta(venta.getPrecioVenta());
-        response.setCategoriaId(venta.getCategoriaId());
-        response.setCategoria(venta.getCategoria());
+        response.setProductoId(entity.getProductoId());
+        response.setProducto(entity.getProducto());
+        response.setId(entity.getId());
+        response.setPresentacion(entity.getPresentacion());
+        response.setPresentacionLarga(entity.getPresentacionLarga());
+        response.setPrincipioActivo(entity.getPrincipioActivo());
+        response.setUnidadMedidaId(entity.getUnidadMedidaId());
+        response.setUnidadMedidaShort(entity.getUnidadMedidaShort());
+        response.setUnidadMedida(entity.getUnidadMedida());
+        response.setMarcaId(entity.getMarcaId());
+        response.setMarca(entity.getMarca());
+        response.setPrecioVenta(entity.getPrecioVenta());
+        response.setCategoriaId(entity.getCategoriaId());
+        response.setCategoria(entity.getCategoria());
+        response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
+        response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
         return response;
     };
 }
