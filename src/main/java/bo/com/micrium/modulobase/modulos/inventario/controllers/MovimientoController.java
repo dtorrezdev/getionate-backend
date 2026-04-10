@@ -2,12 +2,12 @@ package bo.com.micrium.modulobase.modulos.inventario.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateController;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoResponse;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoResponse;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoResponse;
-import bo.com.micrium.modulobase.modulos.inventario.services.ICreateMovimientoService;
-import bo.com.micrium.modulobase.modulos.inventario.services.stock.ListStockDisponibleService;
+import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoService;
+import bo.com.micrium.modulobase.modulos.inventario.services.stock.GetStockDisponibleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +40,7 @@ public class MovimientoController implements
     }
 
     @Autowired
-    private ListStockDisponibleService listService;
+    private GetStockDisponibleService listService;
 
     @GetMapping("/stocks_by_producto")
     public ResponseEntity<ApiResponse<List<StockDisponibleByProductoResponse>>> list(

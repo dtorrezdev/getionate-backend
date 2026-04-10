@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -21,7 +22,7 @@ import java.util.List;
 public class VentaRequest implements Serializable {
     @NotNull(message = "total no puede ser null")
     @Min(value = 1, message = "total debe ser mayor a 0")
-    private Double total;
+    private BigDecimal total;
 
     @NotNull(message = "codigo no puede ser null")
     private String codigo;

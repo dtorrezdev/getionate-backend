@@ -1,5 +1,8 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.venta.create;
 
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaResponse;
+import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoService;
+import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
@@ -13,11 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CreateVentaServiceImpl implements ICreateVentaService {
 
+    // Dominio del Modulo Venta
     @Autowired
     private IVentaRepository repository;
 
@@ -27,22 +33,38 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
     @Autowired
     private IClienteRepository clienteRepository;
 
+    // Dominio del Modulo Producto
     @Autowired
     private IProductoPresentacionRepository productoRepository; // eliminar dependencia
 
      private final Logger log = LogManager.getLogger(CreateVentaServiceImpl.class);
+
+    // Dominio del Modulo Inventario
+    @Autowired
+    private ICreateMovimientoVentaService createMovimientoService;
+
 
     @Override
     @Transactional
     public VentaResponse execute(VentaRequest crearVentaRequest) {
 
         final Venta newVenta = VentaMapper.toEntity
-                    .apply(crearVentaRequest);
+                .apply(crearVentaRequest);
 
-        clienteRepository.findById(newVenta.getClienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente no existe"));
+        if(crearVentaRequest.getEstado().equals("VENTA") ) {
+            MovimientoVentaResponse resp = this.createMovimientoService
+                    .execute(crearVentaRequest.getDetalle());
+
+            if(Objects.isNull(resp) || resp.getId() == null) {
+                throw new RuntimeException("Movimiento no se ha creado");
+            }
+            log.info("movimiento response: "+ resp);
+            newVenta.setMovimientoId(resp.getId());
+        }
 
         log.info("venta " + newVenta.toString());
+        clienteRepository.findById(newVenta.getClienteId())
+                .orElseThrow(() -> new RuntimeException("Cliente no existe"));
 
         List<DetalleVenta> detalles = newVenta.getDetalle().stream()
                 .map( (detalle) -> {
@@ -64,7 +86,9 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
                     }*/
 
                     // calculo de precio ya lo hago en el Frontend
-                    detalle.setSubtotal( detalle.getPrecioUnitario() * detalle.getCantidadBase());
+                    BigDecimal precio = productoPresentacion.getPrecioVenta();
+                  BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidad()));
+                    detalle.setSubtotal(subtotal);
                     return detalle;
                 }).toList();
 
@@ -73,6 +97,9 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
 //                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         log.info("detalles " + detalles);
+//        VentaResponse response = new VentaResponse();
+//        response.setId(0L);
+//        return response;
 //        newVenta.setTotal(total);
         return VentaMapper.toResponse
                 .apply(repository.save(newVenta));

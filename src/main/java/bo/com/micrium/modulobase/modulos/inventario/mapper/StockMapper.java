@@ -14,7 +14,6 @@ public class StockMapper {
         resp.setExpiracion(entity.getExpiracion());
         resp.setLote(entity.getLote());
         resp.setCantidad(entity.getCantidad());
-        resp.setMovimientoProductoId(entity.getMovimientoProductoId());
         resp.setSeccion(entity.getSeccion());
         resp.setEstante(entity.getEstante());
         resp.setNivel(entity.getNivel());

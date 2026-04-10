@@ -3,7 +3,7 @@ package bo.com.micrium.modulobase.modulos.inventario.controllers;
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoResponse;
-import bo.com.micrium.modulobase.modulos.inventario.services.stock.ListStockDisponibleService;
+import bo.com.micrium.modulobase.modulos.inventario.services.stock.GetStockDisponibleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ public class StockController
         {
 
     @Autowired
-    private ListStockDisponibleService listService;
+    private GetStockDisponibleService listService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<StockDisponibleByProductoResponse>>> list(

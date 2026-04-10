@@ -1,9 +1,10 @@
-package bo.com.micrium.modulobase.modulos.inventario.services;
+package bo.com.micrium.modulobase.modulos.inventario.services.movimiento;
 
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.DetalleMovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoResponse;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoResponse;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.MovimientoMapper;
+import bo.com.micrium.modulobase.modulos.inventario.services.stock.StockServiceImpl;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Movimiento;
 import com.micrium.bd.access.jpa.modulo.inventario.models.MovimientoProducto;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
@@ -27,9 +28,6 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
 
     @Autowired
     private IMovimientoRepository repository;
-
-    @Autowired
-    private IMovimientoProductoRepository detalleRepository;
 
     @Autowired
     private StockServiceImpl stockService;

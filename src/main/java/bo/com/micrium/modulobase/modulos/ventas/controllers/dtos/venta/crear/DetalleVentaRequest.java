@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear;
 
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockProductoRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,13 +29,15 @@ public class DetalleVentaRequest implements Serializable {
     @Min(value = 1, message = "Cantidad debe ser mayor a 0")
     private Integer cantidad;
 
-    @NotNull(message = "Cantidad Base no puede ser null")
-    @Min(value = 1, message = "Total debe ser mayor a 0")
-    private Integer cantidadBase;
+//    @NotNull(message = "Cantidad Base no puede ser null")
+//    @Min(value = 1, message = "Total debe ser mayor a 0")
+//    private Integer cantidadBase;
 
     @NotNull(message = "Precio Unitario no puede ser null")
     @Min(value = 1, message = "Total debe ser mayor a 0")
-    private Double precioUnitario;
+    private BigDecimal precioVenta;
+
+    private List<StockProductoRequest> stocks;
 
 //    @NotNull(message = "Subtotal no puede ser null")
 //    @Min(value = 1, message = "Subtotal debe ser mayor a 0")

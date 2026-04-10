@@ -1,7 +1,7 @@
-package bo.com.micrium.modulobase.modulos.inventario.services;
+package bo.com.micrium.modulobase.modulos.inventario.services.stock;
 
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.DetalleMovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
 import com.micrium.bd.access.jpa.modulo.inventario.models.UbicacionStock;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IStockRepository;
@@ -44,6 +44,17 @@ public class StockServiceImpl {
     public boolean validateUbicacionStock(Long ubicacionStockId) {
         ubicacionStockRepository.findById(ubicacionStockId)
                 .orElseThrow(() -> new RuntimeException("Ubicacion Stock no existe."));
+        return true;
+    }
+
+
+    public boolean hayStockDisponibleByProductoId(Long productoId, Long presentacionId, Integer cantidadAVender) {
+
+        final Integer cantidadDisponibleStock = repository.getCantidadStockDisponibleByProducto(productoId, presentacionId);
+
+        if(cantidadAVender > cantidadDisponibleStock) {
+            throw new RuntimeException("Stock insuficiente del producto PR-"+presentacionId);
+        }
         return true;
     }
 }

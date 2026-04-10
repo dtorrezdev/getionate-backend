@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.controllers.template.ICreateController;
 import bo.com.micrium.modulobase.controllers.template.IDeleteController;
 import bo.com.micrium.modulobase.controllers.template.IGetController;
 import bo.com.micrium.modulobase.controllers.template.IListController;
+import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;

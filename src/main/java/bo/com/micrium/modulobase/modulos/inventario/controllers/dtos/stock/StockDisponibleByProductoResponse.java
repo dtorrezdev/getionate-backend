@@ -19,7 +19,6 @@ public class StockDisponibleByProductoResponse implements Serializable {
     private String lote;
     private Date expiracion;
     private Integer cantidad;
-    private Long movimientoProductoId;
     private String seccion;
     private String estante;
     private String nivel;

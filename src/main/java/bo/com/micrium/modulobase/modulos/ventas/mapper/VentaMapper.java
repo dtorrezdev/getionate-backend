@@ -21,8 +21,8 @@ public class VentaMapper {
                     .presentacionId(dto.getPresentacionId())
                     .productoId(dto.getProductoId())
                     .cantidad(dto.getCantidad())
-                    .cantidadBase(dto.getCantidadBase())
-                    .precioUnitario(dto.getPrecioUnitario())
+                    .cantidadBase(dto.getCantidad())
+                    .precioUnitario(dto.getPrecioVenta())
 //                    .subtotal(dto.getSubtotal())
                     .build();
 
@@ -70,30 +70,4 @@ public class VentaMapper {
         return response;
     };
 
-//    public static final Function<Venta, VentaResponse> toResponse = venta -> {
-//
-//        VentaResponse response = new VentaResponse();
-//        response.setId(venta.getId());
-//        response.setCliente(venta.getCliente());
-//        response.setTotal(venta.getTotal());
-//
-//        List<DetalleVentaResponse> detalles = venta.getDetalles().stream()
-//                .map(toDetalleResponse)
-//                .collect(Collectors.toList());
-//
-//        response.setDetalles(detalles);
-//
-//        return response;
-//    };
-
-
-//    public static final Function<DetalleVenta, DetalleVentaResponse> toDetalleResponse = detalle -> {
-//
-//        DetalleVentaResponse d = new DetalleVentaResponse();
-//        d.setProductoId(detalle.getProductoId());
-//        d.setCantidad(detalle.getCantidad());
-//        d.setPrecio(detalle.getPrecio());
-//        d.setSubtotal(detalle.getSubtotal());
-//        return d;
-//    };
 }

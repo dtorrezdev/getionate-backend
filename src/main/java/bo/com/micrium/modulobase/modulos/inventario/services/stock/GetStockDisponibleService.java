@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ListStockDisponibleService {
+public class GetStockDisponibleService {
 
     @Autowired
     private IStockRepository repository;
@@ -21,7 +21,7 @@ public class ListStockDisponibleService {
     @Autowired
     private IMovimientoProductoRepository detalleMovimientoRepository;
 
-    private final Logger log = LogManager.getLogger(ListStockDisponibleService.class);
+    private final Logger log = LogManager.getLogger(GetStockDisponibleService.class);
 
     public List<StockDisponibleByProductoResponse> execute(StockDisponibleByProductoRequest request) {
         log.info("request " + request);
