@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import bo.com.micrium.modulobase.commons.LogNivel;
-import com.micrium.bd.access.jpa.modulo.administracion.models.LogSistema;
-import com.micrium.bd.access.jpa.modulo.administracion.repositories.ILogSistemaRepository;
+import com.micrium.bd.access.jpa.modulo.eventos.models.LogSistema;
+import com.micrium.bd.access.jpa.modulo.eventos.repositories.ILogSistemaRepository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

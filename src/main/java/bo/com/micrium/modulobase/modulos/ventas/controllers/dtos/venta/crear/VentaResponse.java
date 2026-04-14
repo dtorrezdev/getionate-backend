@@ -1,10 +1,7 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -13,6 +10,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
+@ToString
 public class VentaResponse implements Serializable {
 
     private Long id;

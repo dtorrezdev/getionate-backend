@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.micrium.bd.access.jpa.modulo.administracion.repositories.IBitacoraRespository;
+import com.micrium.bd.access.jpa.modulo.eventos.repositories.IBitacoraRespository;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.dto.BitacoraResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;

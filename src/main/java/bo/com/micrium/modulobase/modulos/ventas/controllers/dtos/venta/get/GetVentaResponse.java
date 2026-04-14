@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Getter
@@ -16,9 +18,10 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class GetVentaResponse implements Serializable {
     private Long id;
-    private Double total;
+    private BigDecimal total;
     private String codigo;
     private String glosa;
+    private Timestamp fechaRegistro;
     private Long clienteId;
     private String estado;  // PREVENTA, ANULADA, VENTA
     private Long movimientoId;

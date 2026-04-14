@@ -1,5 +1,7 @@
 package bo.com.micrium.modulobase.modulos.ventas.mapper;
 
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetDetalleResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
@@ -14,6 +16,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VentaMapper {
+
+    private VentaMapper() {
+        throw new AssertionError();
+    }
 
     public static final Function<DetalleVentaRequest, DetalleVenta> toDetalleEntity
             = dto ->
@@ -70,4 +76,34 @@ public class VentaMapper {
         return response;
     };
 
+    // Get Venta Response
+    public static final Function<Venta, GetVentaResponse> entityToGetResponse = venta -> {
+        GetVentaResponse response = new GetVentaResponse();
+        response.setId(venta.getId());
+        response.setClienteId(venta.getClienteId());
+        response.setCodigo(venta.getCodigo());
+        response.setFechaRegistro(venta.getFechaRegistro());
+        response.setGlosa(venta.getGlosa());
+        response.setEstado(venta.getEstado());
+        response.setTotal(venta.getTotal());
+        response.setMovimientoId(venta.getMovimientoId());
+        final List<GetDetalleResponse> list = venta.getDetalle().stream()
+                .map(VentaMapper.entitytoGetDetalleResponse)
+                .toList();
+        response.setDetalle(list);
+        return response;
+    };
+
+    public static final Function<DetalleVenta, GetDetalleResponse> entitytoGetDetalleResponse
+            = detalle -> {
+        GetDetalleResponse dto = new GetDetalleResponse();
+        dto.setId(detalle.getId());
+        dto.setCantidad(detalle.getCantidad());
+        dto.setSubtotal(detalle.getSubtotal());
+        dto.setCantidadBase(detalle.getCantidadBase());
+        dto.setPresentacionId(detalle.getPresentacionId());
+        dto.setProductoId(detalle.getProductoId());
+        dto.setPrecioUnitario(detalle.getPrecioUnitario());
+            return dto;
+    };
 }

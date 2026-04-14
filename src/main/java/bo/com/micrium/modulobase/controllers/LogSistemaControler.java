@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.micrium.bd.access.jpa.modulo.administracion.repositories.ILogSistemaRepository;
+import com.micrium.bd.access.jpa.modulo.eventos.repositories.ILogSistemaRepository;
 import bo.com.micrium.modulobase.controllers.template.GenericControler;
 import bo.com.micrium.modulobase.controllers.dto.LogSistemaResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;

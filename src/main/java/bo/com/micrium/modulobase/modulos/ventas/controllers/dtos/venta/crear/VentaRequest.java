@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear;
 
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -39,4 +40,8 @@ public class VentaRequest implements Serializable {
     @NotEmpty(message = "Debe existir al menos una fila en detalle")
     @Valid
     private List<DetalleVentaRequest> detalle;
+
+    // Pagos
+    //@Valid
+    private PagoRequest pagos;
 }

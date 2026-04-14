@@ -19,7 +19,7 @@ public class ProductoPresentacionRequest implements Serializable {
 
     @NotNull(message = "Nombre Presentacion no puede ser nulo.")
     @NotEmpty(message = "Nombre Presentacion no puede ser vacio.")
-    @Size(max = 60, message = "Nombre no debe exceder de 100 letras.")
+    @Size(max = 60, message = "Nombre no debe exceder de 60 letras.")
     private String nombre;
 
     @Size(max = 255, message = "Principo activos no debe exceder de 255 letras.")

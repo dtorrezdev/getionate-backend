@@ -5,7 +5,6 @@ import bo.com.micrium.modulobase.controllers.template.ICreateController;
 import bo.com.micrium.modulobase.controllers.template.IDeleteController;
 import bo.com.micrium.modulobase.controllers.template.IGetController;
 import bo.com.micrium.modulobase.controllers.template.IListController;
-import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;
@@ -14,6 +13,7 @@ import bo.com.micrium.modulobase.modulos.ventas.services.venta.anular.IAnularVen
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.ICreateVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.IListVentaService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -20,6 +20,6 @@ public class GetDetalleResponse implements Serializable {
     private Long productoId;
     private Integer cantidad;
     private Integer cantidadBase;
-    private Double precioUnitario;
+    private BigDecimal precioUnitario;
     private BigDecimal subtotal;
 }

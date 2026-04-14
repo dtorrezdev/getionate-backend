@@ -29,4 +29,5 @@ public class ListPresentacionResponse implements Serializable {
     private String categoria;
     private Integer cantidadMinimoStock;
     private Integer cantidadDisponibleStock;
+    private String estadoStock; // computado: {EN_STOCK, BAJO_STOCK, SIN_STOCK}
 }

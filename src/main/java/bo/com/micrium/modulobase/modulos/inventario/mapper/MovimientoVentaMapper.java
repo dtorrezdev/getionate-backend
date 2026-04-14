@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 public class MovimientoVentaMapper {
 
-
     private static final Logger log = LogManager.getLogger(MovimientoVentaMapper.class);
 
     public static MovimientoVentaRequest fromVentaRequestToMovimiento(List<DetalleVentaRequest> request) {

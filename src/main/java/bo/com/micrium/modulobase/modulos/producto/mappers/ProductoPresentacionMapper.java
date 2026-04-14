@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.mappers;
 
+import bo.com.micrium.modulobase.common.enums.EnumInventario;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.CreateProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.ListPresentacionResponse;
@@ -56,6 +57,15 @@ public class ProductoPresentacionMapper {
         response.setCategoria(entity.getCategoria());
         response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
         response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
+        // no es buena practica poner logica del negocio en Mapper BAD
+        if(entity.getCantidadDisponibleStock() <= 0) {
+            response.setEstadoStock(EnumInventario.StockStatus.AGOTADO.name());
+        } else
+        if(entity.getCantidadDisponibleStock() <= entity.getCantidadMinimoStock()) {
+            response.setEstadoStock(EnumInventario.StockStatus.POCO_STOCK.name());
+        } else {
+            response.setEstadoStock(EnumInventario.StockStatus.HAY_STOCK.name());
+        }
         return response;
     };
 }
