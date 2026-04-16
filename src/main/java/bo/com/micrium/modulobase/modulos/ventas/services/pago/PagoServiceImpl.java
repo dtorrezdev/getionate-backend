@@ -4,6 +4,7 @@ import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoReques
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.PagoMapper;
 import com.micrium.bd.access.jpa.modulo.venta.models.Pago;
+import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
 import com.micrium.bd.access.jpa.modulo.venta.repository.IPagoRepository;
 import com.micrium.bd.access.jpa.modulo.venta.repository.IVentaRepository;
 import org.apache.logging.log4j.LogManager;
@@ -29,9 +30,18 @@ public class PagoServiceImpl implements IPagoService {
         log.info("pago request: ", request);
         //1. validar el fromatod del json validapo
         this.validateRequest(request);
+        final Venta venta = ventarepository.findById(request.getVentaId())
+                .orElseThrow(()-> new RuntimeException("Venta no existe."));
 
         //2. transformar a entidades
-        final List<Pago> pagos = PagoMapper.toEntities.apply(request);
+        final List<Pago> pagos = request.getDetallePago().stream()
+                .map(detalle ->
+                    Pago.builder()
+                            .tipoPago(detalle.getTipo())
+                            .total(detalle.getMonto())
+                            .venta(venta)
+                            .build()
+                ).toList();
         return PagoMapper
                 .toListResponse
                 .apply(repository.saveAll(pagos));
@@ -45,9 +55,6 @@ public class PagoServiceImpl implements IPagoService {
         if (request.getVentaId() == null) {
             throw new RuntimeException("Venta Id es null.");
         }
-
-        ventarepository.findById(request.getVentaId())
-                .orElseThrow(()-> new RuntimeException("Venta no existe."));
 
         if (request.getTotalPago() == null) {
             throw new RuntimeException("Total Pago es null.");

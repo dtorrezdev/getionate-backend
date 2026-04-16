@@ -1,5 +1,7 @@
 package bo.com.micrium.modulobase.modulos.ventas.mapper;
 
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.DetallePagoResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetDetalleResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
@@ -91,6 +93,16 @@ public class VentaMapper {
                 .map(VentaMapper.entitytoGetDetalleResponse)
                 .toList();
         response.setDetalle(list);
+
+        final List<DetallePagoResponse> detallePagos = venta.getPagos().stream().map(pago -> {
+            DetallePagoResponse detalle = new DetallePagoResponse();
+            detalle.setId(pago.getId());
+            detalle.setTotal(pago.getTotal());
+            detalle.setTipoPago(pago.getTipoPago());
+            return detalle;
+        }).toList();
+        response.setPagos(detallePagos);
+
         return response;
     };
 

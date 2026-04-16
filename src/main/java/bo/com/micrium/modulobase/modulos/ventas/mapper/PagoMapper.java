@@ -20,7 +20,7 @@ public class PagoMapper {
                     return Pago.builder()
                             .tipoPago(detalle.getTipo())
                             .total(detalle.getMonto())
-                            .ventaId(request.getVentaId())
+                            //.ventaId(request.getVentaId())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -35,7 +35,7 @@ public class PagoMapper {
                                 .id(pago.getId())
                                 .tipoPago(pago.getTipoPago())
                                 .total(pago.getTotal())
-                                .ventaId(pago.getVentaId())
+                                //.ventaId(pago.getVentaId())
                                 .build()
                     )
                     .collect(Collectors.toList());

@@ -1,6 +1,9 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.venta.create;
 
+import bo.com.micrium.modulobase.common.enums.EnumEvento;
+import bo.com.micrium.modulobase.common.enums.EnumInventario;
 import bo.com.micrium.modulobase.common.enums.EnumVenta;
+import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaResponse;
 import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
@@ -8,12 +11,15 @@ import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRespon
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
 import bo.com.micrium.modulobase.modulos.ventas.services.pago.IPagoService;
+import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IStockRepository;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
 import com.micrium.bd.access.jpa.modulo.venta.repository.*;
 import com.micrium.bd.access.jpa.modulo.venta.models.*;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +57,9 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
     @Autowired
     private IPagoService pagoService;
 
+    @Autowired
+    private IEventoNotificacionService eventoService;
+
     @Override
     @Transactional
     public VentaResponse execute(VentaRequest request) {
@@ -87,6 +96,8 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
         if(newVenta.getEstado().equals(EnumVenta.Estado.VENTA.name())) {
             this.crearPagos(request.getPagos(), ventaResponse.getId());
         }
+        //proceso Asyncrono
+        this.eventoService.procesarEventosPendientes();
         return ventaResponse;
     }
 
@@ -120,11 +131,28 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
         ProductoPresentacion productoPresentacion = productoRepository.findById(detalle.getPresentacionId())
                 .orElseThrow(()-> new RuntimeException("Producto no existe"));
 
-        final Integer cantidadStockDisponible = stockRepository.getCantidadStockDisponibleByProducto(
+        final Integer cantidadDisponibleEnStock = stockRepository.getCantidadStockDisponibleByProducto(
                 productoPresentacion.getProductoId(), productoPresentacion.getId());
 
-        if(cantidadStockDisponible < detalle.getCantidad()) {
+        this.registrarEventoNotificacion(productoPresentacion, cantidadDisponibleEnStock, detalle.getCantidad());
+
+        if (cantidadDisponibleEnStock < detalle.getCantidad()) {
             throw new RuntimeException("Producto PR-"+ productoPresentacion.getId() +" con stock insuficiente.");
+        }
+    }
+
+    private void registrarEventoNotificacion(ProductoPresentacion presentacion,
+                                             Integer cantidadDisponibleEnStock, Integer cantidadAVender) {
+        final Integer cantidadDisponibleReal = cantidadDisponibleEnStock - cantidadAVender;
+
+        if (cantidadDisponibleReal <= presentacion.getCantidadMinimoStock()) {
+            EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.STOCK_BAJO.name(), presentacion.getId());
+            log.info("Se creado evento quiebre type STOCK_BAJO: " + event);
+        }
+
+        if (cantidadDisponibleEnStock <= 0 ) {
+            EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.SIN_STOCK.name(), presentacion.getId());
+            log.info("Se creado evento type SIN_STOCK: " + event);
         }
     }
 

@@ -1,5 +1,7 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get;
 
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.DetallePagoResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,4 +28,5 @@ public class GetVentaResponse implements Serializable {
     private String estado;  // PREVENTA, ANULADA, VENTA
     private Long movimientoId;
     private List<GetDetalleResponse> detalle;
+    private List<DetallePagoResponse> pagos;
 }
