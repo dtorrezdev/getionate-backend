@@ -11,4 +11,11 @@ public class EnumInventario {
             return name().toLowerCase();
         }
     }
+
+    public enum StockExpiracion {
+        VIGENTE,
+        POR_VENCER,
+        CRITICO,
+        VENCIDO;
+    }
 }

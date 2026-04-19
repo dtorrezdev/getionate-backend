@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
-public class StockDisponibleByProductoResponse implements Serializable {
+public class StockDisponibleResponse implements Serializable {
     private Long id; // stock_id
     private String lote;
     private Date expiracion;
@@ -22,4 +22,5 @@ public class StockDisponibleByProductoResponse implements Serializable {
     private String seccion;
     private String estante;
     private String nivel;
+    private String estadoExpiracion; // VIGENTE, POR_VENCER, VENCIDO
 }

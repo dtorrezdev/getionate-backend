@@ -8,12 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.Serializable;
-import java.util.Map;
 
-public interface IListController <R extends Serializable, T extends Serializable> {
+public interface IListMethod<R extends Serializable, T extends Serializable> {
 
     @GetMapping
     ResponseEntity<ApiResponse<Page<T>>> list(

@@ -1,5 +1,8 @@
 package bo.com.micrium.modulobase.modulos.producto.services.presentacion.create;
 
+import bo.com.micrium.modulobase.common.enums.EnumEvento;
+import bo.com.micrium.modulobase.common.enums.EnumInventario;
+import bo.com.micrium.modulobase.modulos.evento.services.EventoNotificaconServiceImpl;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.*;
 import bo.com.micrium.modulobase.modulos.producto.mappers.ProductoPresentacionMapper;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
@@ -31,8 +34,29 @@ public class CreateProductoPresentacionServiceImpl implements ICreateProductoPre
 
         log.info("print: " + prodPresentacion);
 
-        return ProductoPresentacionMapper.toResponse
+        final CreateProductoPresentacionResponse createdProducto = ProductoPresentacionMapper.toResponse
                 .apply(repository.save(prodPresentacion));
+
+        this.registrarEventoProducto(request, createdProducto);
+        return createdProducto;
+    }
+
+    @Autowired
+    private EventoNotificaconServiceImpl eventoNotificacionService;
+
+    private void registrarEventoProducto(ProductoPresentacionRequest request, CreateProductoPresentacionResponse producto) {
+
+        if(request.getDiasAntesExpiracion() == null || request.getDiasAntesExpiracion() <= 1) {
+            eventoNotificacionService.registrarEventoYNotificacionProducto(
+                    EnumEvento.Type.PROD_SIN_DIAS_ANTES_EXPIRACION.name(),
+                    producto.getId());
+        }
+
+        if(request.getCantidadMinimoStock() == null || request.getCantidadMinimoStock() <= 1) {
+            eventoNotificacionService.registrarEventoYNotificacionProducto(
+                    EnumEvento.Type.PROD_SIN_MIN_STOCK_DISPONIBLE.name(),
+                    producto.getId());
+        }
     }
 
     @Autowired

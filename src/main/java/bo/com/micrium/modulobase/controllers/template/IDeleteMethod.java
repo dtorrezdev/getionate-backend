@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
 
-public interface IDeleteController<R extends Serializable> {
+public interface IDeleteMethod<R extends Serializable> {
 
     @DeleteMapping
     ResponseEntity<?> delete(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,

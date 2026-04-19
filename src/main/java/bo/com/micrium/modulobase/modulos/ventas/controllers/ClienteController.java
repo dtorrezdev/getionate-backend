@@ -1,8 +1,8 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.controllers.template.ICreateController;
-import bo.com.micrium.modulobase.controllers.template.IListController;
+import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
+import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ClienteRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ListClienteRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ClienteResponse;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/clientes", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class ClienteController implements
-       IListController<ListClienteRequest, ClienteResponse>,
-        ICreateController<ClienteRequest, ClienteResponse> {
+        IListMethod<ListClienteRequest, ClienteResponse>,
+        ICreateMethod<ClienteRequest, ClienteResponse> {
 
     @Autowired
     private IClienteService service;

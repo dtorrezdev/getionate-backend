@@ -1,20 +1,18 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.controllers.template.ICreateController;
-import bo.com.micrium.modulobase.controllers.template.IDeleteController;
-import bo.com.micrium.modulobase.controllers.template.IGetController;
-import bo.com.micrium.modulobase.controllers.template.IListController;
+import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.update.VentaUpdateRequest;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.anular.IAnularVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.ICreateVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.IListVentaService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.update.IUpdateVentaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -22,23 +20,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/ventas")
-public class VentaController implements
-        IListController<ListVentaRequest, ListVentaResponse>,
-        IGetController<GetVentaResponse, Long>,
-        ICreateController<VentaRequest, VentaResponse>,
-        IDeleteController<AnularVentaRequest>
+public class VentaController implements IListMethod<ListVentaRequest, ListVentaResponse>,
+        IGetMethod<GetVentaResponse, Long>, ICreateMethod<VentaRequest, VentaResponse>,
+        IUpdateMethod<VentaUpdateRequest,VentaResponse, Long>, IDeleteMethod<AnularVentaRequest>
 {
-    @Autowired
-    private IListVentaService listService;
-
-    @Autowired
-    private IGetVentaService getService;
-
-    @Autowired
-    private ICreateVentaService crearService;
-
-    @Autowired
-    private IAnularVentaService anularService;
+    private final IListVentaService listService;
+    private final IGetVentaService getService;
+    private final ICreateVentaService crearService;
+    private final IUpdateVentaService updateService;
+    private final IAnularVentaService anularService;
 
     @Override
     public ResponseEntity<ApiResponse<Page<ListVentaResponse>>> list(
@@ -83,6 +73,21 @@ public class VentaController implements
     }
 
     @Override
+    public ResponseEntity<ApiResponse<VentaResponse>> update(
+            String token,
+            String ipClient,
+            String form,
+            VentaUpdateRequest request,
+            Long id
+    ) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        this.updateService.execute(request, id),
+                        "Se ha actualizado correctamente")
+                );
+    }
+
+    @Override
     public ResponseEntity<?> delete(
             String token,
             String ipClient,
@@ -91,4 +96,20 @@ public class VentaController implements
         this.anularService.execute(request);
         return ResponseEntity.status(204).build();
     }
+
+    public VentaController(
+            IListVentaService listService,
+            IGetVentaService getService,
+            ICreateVentaService crearService,
+            IUpdateVentaService updateService,
+            IAnularVentaService anularService
+    ){
+        this.listService = listService;
+        this.getService = getService;
+        this.crearService = crearService;
+        this.updateService = updateService;
+        this.anularService = anularService;
+
+    }
+
 }

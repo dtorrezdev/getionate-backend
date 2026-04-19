@@ -1,17 +1,18 @@
 package bo.com.micrium.modulobase.modulos.evento.services;
 
 import bo.com.micrium.modulobase.common.enums.EnumEvento;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.CreateVentaServiceImpl;
+import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionRequest;
+import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionResponse;
 import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
 import com.micrium.bd.access.jpa.modulo.eventos.models.Notificacion;
 import com.micrium.bd.access.jpa.modulo.eventos.repositories.IEventoNotificacionRepository;
 import com.micrium.bd.access.jpa.modulo.eventos.repositories.INotificacionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +27,41 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
     private final Logger log = LogManager.getLogger(EventoNotificaconServiceImpl.class);
 
     @Override
+    public Page<EventoNotificacionResponse> list(EventoNotificacionRequest request, Pageable page) {
+
+        log.info("list request "+ request);
+
+        return repository.filter(
+                        queryfilterTexto(request.getId()),
+                        filterTextoQueryUpperLike(request.getId()),
+                        queryfilterTexto(request.getPresentacionId()),
+                        filterTextoQueryUpperLike(request.getPresentacionId()),
+                        queryfilterTexto(request.getTipoEvento()),
+                        filterTextoQueryUpperLike(request.getTipoEvento()),
+                        queryfilterTexto(request.getNotificacionId()),
+                        filterTextoQueryUpperLike(request.getNotificacionId()),
+                        queryfilterTexto(request.getTipoNotificacion()),
+                        filterTextoQueryUpperLike(request.getTipoNotificacion()),
+                        page)
+                .map(ele -> {
+                    EventoNotificacionResponse resp = new EventoNotificacionResponse();
+                    resp.setId(ele.getId());
+                    resp.setNotificacionId(ele.getNotificacionId());
+                    resp.setPresentacionId(ele.getPresentacionId());
+                    resp.setTitulo(ele.getTitulo());
+                    resp.setMensaje(ele.getMensaje());
+                    resp.setDescripcion(ele.getDescripcion());
+                    resp.setTipoEvento(ele.getTipoEvento());
+                    resp.setTipoNotificacion(ele.getTipoNotificacion());
+                    return resp;
+                });
+    }
+
+    @Override
     public EventoNotificacion registrarEvento(String typeEvento, Long presentacionId) {
 
         final Optional<EventoNotificacion> eventExist = repository.
-                findByTipoEventoAndProductoId(typeEvento, presentacionId);
+                findByTipoEventoAndPresentacionId(typeEvento, presentacionId);
 
         if (eventExist.isPresent()) {
             log.info("registrarEvento ya existe: " + eventExist.get());
@@ -39,9 +71,17 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         EventoNotificacion event = new EventoNotificacion();
         event.setTipoEvento(typeEvento);
         event.setEstado(EnumEvento.NotificacionStatus.PENDIENTE.name());
-        event.setProductoId(presentacionId);
+        event.setPresentacionId(presentacionId);
 
         return repository.save(event);
+    }
+
+    public void registrarEventoYNotificacionProducto(String typeEvento, Long presentacionId) {
+
+        EventoNotificacion newEvento = this.registrarEvento(typeEvento, presentacionId);
+        this.crearNotificacionProducto(newEvento);
+        newEvento.setEstado(EnumEvento.NotificacionStatus.PROCESADO.name());
+        repository.save(newEvento);
     }
 
     @Override
@@ -52,7 +92,7 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         log.info("procesarEventosPendientes size: " + eventosNotificacion.size());
 
         for (EventoNotificacion event: eventosNotificacion) {
-            this.crearNotificacion(event);
+            this.crearNotificacionVentaProducto(event);
 
             event.setEstado(EnumEvento.NotificacionStatus.PROCESADO.name());
 
@@ -61,11 +101,11 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         // this.repository.saveAll(eventosNotificacion);
     }
 
-    private void crearNotificacion(EventoNotificacion eventoNotificacion) {
+    private void crearNotificacionVentaProducto(EventoNotificacion eventoNotificacion) {
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
-        notificacion.setTitulo("Notificacion Producto PR-" + eventoNotificacion.getProductoId());
+        notificacion.setTitulo("Notificacion Producto PR-" + eventoNotificacion.getPresentacionId());
 
         notificacion.setMensaje("El producto esta " + eventoNotificacion.getTipoEvento());
         notificacion.setDescripcion("es una descripcion cualquiera");
@@ -81,9 +121,36 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         this.notificacionRepository.save(notificacion);
     }
 
+    private void crearNotificacionProducto(EventoNotificacion eventoNotificacion) {
+        Notificacion notificacion = new Notificacion();
+        notificacion.setEventoNotificacionId(eventoNotificacion.getId());
+        notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
+        notificacion.setTitulo("Notificacion Producto PR-" + eventoNotificacion.getPresentacionId());
+
+        notificacion.setMensaje("El producto esta " + eventoNotificacion.getTipoEvento());
+        notificacion.setDescripcion("Este producto no esta configurado adecuadamente");
+
+        notificacion.setTipo(EnumEvento.NotificacionTipo.RECOMENDACION.name());
+        //notificacion.setUsuarioId(null);
+        log.info("CreandoNotificacion: " + notificacion);
+        this.notificacionRepository.save(notificacion);
+    }
+
     public EventoNotificaconServiceImpl(IEventoNotificacionRepository repository, INotificacionRepository notificacionRepository) {
         this.repository = repository;
         this.notificacionRepository = notificacionRepository;
+    }
+
+    private boolean isBlanck(String dato) {
+        return dato == null || dato.trim().isEmpty();
+    }
+
+    private int queryfilterTexto(String texto) {
+        return this.isBlanck(texto) ? -1 : 0;
+    }
+
+    private String filterTextoQueryUpperLike(String texto) {
+        return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
 
 }

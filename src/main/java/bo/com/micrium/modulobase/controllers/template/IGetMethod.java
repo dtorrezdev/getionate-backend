@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.io.Serializable;
 
-public interface IGetController<T extends Serializable, P> {
+public interface IGetMethod<T extends Serializable, P> {
     @GetMapping("/{id}")
     ResponseEntity<ApiResponse<T>> get(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,

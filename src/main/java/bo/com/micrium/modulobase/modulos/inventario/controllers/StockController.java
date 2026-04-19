@@ -1,8 +1,8 @@
 package bo.com.micrium.modulobase.modulos.inventario.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoResponse;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleResponse;
 import bo.com.micrium.modulobase.modulos.inventario.services.stock.GetStockDisponibleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +22,8 @@ public class StockController
     private GetStockDisponibleService listService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<StockDisponibleByProductoResponse>>> list(
-            @ModelAttribute StockDisponibleByProductoRequest request
+    public ResponseEntity<ApiResponse<List<StockDisponibleResponse>>> list(
+            @ModelAttribute StockDisponibleRequest request
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(

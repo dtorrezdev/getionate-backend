@@ -1,15 +1,15 @@
 package bo.com.micrium.modulobase.modulos.inventario.mapper;
 
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleByProductoResponse;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleResponse;
 import com.micrium.bd.access.jpa.modulo.inventario.projection.StockDisponibleProjection;
 
 import java.util.function.Function;
 
 public class StockMapper {
 
-    public static final Function<StockDisponibleProjection, StockDisponibleByProductoResponse>
+    public static final Function<StockDisponibleProjection, StockDisponibleResponse>
         toResponse = entity -> {
-        StockDisponibleByProductoResponse resp = new StockDisponibleByProductoResponse();
+        StockDisponibleResponse resp = new StockDisponibleResponse();
         resp.setId(entity.getId());
         resp.setExpiracion(entity.getExpiracion());
         resp.setLote(entity.getLote());

@@ -8,6 +8,7 @@ import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.List
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.update.VentaUpdateRequest;
 import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
 import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
 import com.micrium.bd.access.jpa.modulo.venta.projection.ListVentaProjection;
@@ -29,8 +30,7 @@ public class VentaMapper {
                     .presentacionId(dto.getPresentacionId())
                     .productoId(dto.getProductoId())
                     .cantidad(dto.getCantidad())
-                    .cantidadBase(dto.getCantidad())
-                    .precioUnitario(dto.getPrecioVenta())
+                    .precio(dto.getPrecio())
 //                    .subtotal(dto.getSubtotal())
                     .build();
 
@@ -112,10 +112,33 @@ public class VentaMapper {
         dto.setId(detalle.getId());
         dto.setCantidad(detalle.getCantidad());
         dto.setSubtotal(detalle.getSubtotal());
-        dto.setCantidadBase(detalle.getCantidadBase());
         dto.setPresentacionId(detalle.getPresentacionId());
         dto.setProductoId(detalle.getProductoId());
-        dto.setPrecioUnitario(detalle.getPrecioUnitario());
+        dto.setPrecio(detalle.getPrecio());
             return dto;
+    };
+
+    // Update
+    public static final Function<VentaUpdateRequest, Venta> fromUpdatetoEntity = request -> {
+
+        Venta venta = new Venta();
+        venta.setId(request.getId());
+        venta.setFechaRegistro(new Timestamp(System.currentTimeMillis()));
+        venta.setEstado(request.getEstado());
+        venta.setTotal(request.getTotal());
+        venta.setGlosa(request.getGlosa());
+        venta.setCodigo(request.getCodigo());
+        venta.setClienteId(request.getClienteId());
+        venta.setMovimientoId(null);
+
+        List<DetalleVenta> detalles = request.getDetalle().stream()
+                .map(toDetalleEntity)
+                .collect(Collectors.toList());
+
+        venta.setDetalle(detalles);
+
+        detalles.forEach(d -> d.setVenta(venta));
+
+        return venta;
     };
 }

@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 @ToString
-public class StockDisponibleByProductoRequest implements Serializable {
+public class StockDisponibleRequest implements Serializable {
     private Long productoId;
     private Long presentacionId;
 

@@ -1,11 +1,10 @@
-package bo.com.micrium.modulobase.modulos.inventario.controllers;
-
+package bo.com.micrium.modulobase.modulos.evento.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.ubicacion_stock.UbicacionStockRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.ubicacion_stock.UbicacionStockResponse;
-import bo.com.micrium.modulobase.modulos.inventario.services.ubicacion_stock.IUbicacionStockService;
+import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionRequest;
+import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionResponse;
+import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,24 +13,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/ubicacion_stock")
-public class UbicacionStockController implements
-        IListMethod<UbicacionStockRequest, UbicacionStockResponse> {
+@RequestMapping(value = "/evento_notificacion")
+public class EventoNotificacionController implements
+        IListMethod<EventoNotificacionRequest, EventoNotificacionResponse> {
 
     @Autowired
-    private IUbicacionStockService listService;
+    private IEventoNotificacionService service;
 
     @Override
-    public ResponseEntity<ApiResponse<Page<UbicacionStockResponse>>> list(
+    public ResponseEntity<ApiResponse<Page<EventoNotificacionResponse>>> list(
             String token,
             String ipClient,
             String form,
-            UbicacionStockRequest request,
+            EventoNotificacionRequest request,
             Pageable pageRequest
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.listService.list(request, pageRequest),
+                        this.service.list(request, pageRequest),
                         "Se ha listado correctamente")
                 );
     }

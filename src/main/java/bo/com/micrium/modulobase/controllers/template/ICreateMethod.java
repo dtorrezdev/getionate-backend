@@ -3,14 +3,12 @@ package bo.com.micrium.modulobase.controllers.template;
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
 
-public interface ICreateController <R extends Serializable, T extends Serializable> {
+public interface ICreateMethod<R extends Serializable, T extends Serializable> {
 
     @PostMapping
     ResponseEntity<ApiResponse<T>> create(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,

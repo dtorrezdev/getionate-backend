@@ -1,7 +1,7 @@
 package bo.com.micrium.modulobase.modulos.ventas.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.controllers.template.ICreateController;
+import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
 
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/pagos")
 public class PagoController implements
-        ICreateController<PagoRequest, PagoResponse> {
+        ICreateMethod<PagoRequest, PagoResponse> {
 
     @Autowired
     private IPagoService service;

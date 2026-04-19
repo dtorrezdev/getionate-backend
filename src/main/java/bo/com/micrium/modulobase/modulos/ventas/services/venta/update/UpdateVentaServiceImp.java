@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.ventas.services.venta.create;
+package bo.com.micrium.modulobase.modulos.ventas.services.venta.update;
 
 import bo.com.micrium.modulobase.common.enums.EnumEvento;
 import bo.com.micrium.modulobase.common.enums.EnumVenta;
@@ -7,16 +7,20 @@ import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.
 import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.update.VentaUpdateRequest;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
 import bo.com.micrium.modulobase.modulos.ventas.services.pago.IPagoService;
 import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IStockRepository;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
-import com.micrium.bd.access.jpa.modulo.venta.repository.*;
-import com.micrium.bd.access.jpa.modulo.venta.models.*;
-
+import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
+import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
+import com.micrium.bd.access.jpa.modulo.venta.repository.IClienteRepository;
+import com.micrium.bd.access.jpa.modulo.venta.repository.IDetalleVenta;
+import com.micrium.bd.access.jpa.modulo.venta.repository.IVentaRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -28,16 +32,14 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class CreateVentaServiceImpl implements ICreateVentaService {
-
+public class UpdateVentaServiceImp implements IUpdateVentaService {
     // Dominio del Modulo Venta
     private final IVentaRepository repository;
+    private final IDetalleVenta detalleRepository;
     private final IClienteRepository clienteRepository;
     private final IPagoService pagoService;
-
     // Dominio del Modulo Producto
     private IProductoPresentacionRepository productoRepository; // eliminar dependencia
-
     // Dominio del Modulo Inventario
     private final ICreateMovimientoVentaService createMovimientoService;
     private final IStockRepository stockRepository;
@@ -45,46 +47,55 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
     // Dominio del Modulo Evento
     private final IEventoNotificacionService eventoService;
 
-    private final Logger log = LogManager.getLogger(CreateVentaServiceImpl.class);
-
+    private final Logger log = LogManager.getLogger(UpdateVentaServiceImp.class);
 
     @Override
     @Transactional
-    public VentaResponse execute(VentaRequest request) {
-        
-        this.validarRequest(request);
+    public VentaResponse execute(VentaUpdateRequest request, Long id) {
+        /*1. validar el request*/
+        this.validarRequest(request, id);
         log.info("request valido");
 
-        final Venta newVenta = VentaMapper.toEntity.apply(request);
+        /*2. transformar la data (Mapping)*/
+        final Venta updateVenta = VentaMapper.fromUpdatetoEntity.apply(request);
         log.info("request mapeado a entity");
-        
+
+        /*3. Estoy seguro q va ser venta (no esta demas validar) para movimiento*/
         if(request.getEstado().equals(EnumVenta.Estado.VENTA.name()) ) {
             final Long movimientoId = this.crearMovimientoAndObtenerId(request.getDetalle());
-            newVenta.setMovimientoId(movimientoId);
+            updateVenta.setMovimientoId(movimientoId);
         }
 
-        List<DetalleVenta> detalles = this.procesarDetalleCalculos(newVenta);
+        /*4. procesar Detalle */
+        this.eliminarDetalleVentaExistente(updateVenta.getId());
+        List<DetalleVenta> detalles = this.procesarDetalleCalculos(updateVenta.getDetalle());
 
-        newVenta.setDetalle(detalles);
+        /* 5. Guardar Venta con datos actuales */
+        updateVenta.setDetalle(detalles);
         BigDecimal totalVenta = detalles.stream()
                 .map(DetalleVenta::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        newVenta.setTotal(totalVenta);
+        updateVenta.setTotal(totalVenta);
 
         final VentaResponse ventaResponse = VentaMapper.toResponse
-                .apply(repository.save(newVenta));
-        log.info("venta creada " + ventaResponse);
-        
-        if(newVenta.getEstado().equals(EnumVenta.Estado.VENTA.name())) {
+                .apply(repository.save(updateVenta));
+        log.info("venta update " + ventaResponse);
+        /*6. Crear pago (validar si es venta)*/
+        if(updateVenta.getEstado().equals(EnumVenta.Estado.VENTA.name())) {
             this.crearPagos(request.getPagos(), ventaResponse.getId());
         }
-        //proceso Asyncrono
+        /*7. registar eventos Existente*/
         this.eventoService.procesarEventosPendientes();
+        // 8. Dar respuesta
         return ventaResponse;
     }
 
-    private List<DetalleVenta> procesarDetalleCalculos(Venta venta) {
-        return venta.getDetalle().stream()
+    private void eliminarDetalleVentaExistente(Long ventaId) {
+        detalleRepository.deleteByVentaId(ventaId);
+    }
+
+    private List<DetalleVenta> procesarDetalleCalculos(List<DetalleVenta> detalles) {
+        return detalles.stream()
                 .map( (detalle) -> {
                     // el precio ya lo hago en el Frontend
                     BigDecimal precio = detalle.getPrecio();
@@ -95,15 +106,13 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
     }
 
     // REF: reulizado
-    private void validarRequest(VentaRequest request) {
+    private void validarRequest(VentaUpdateRequest request, Long ventaId) {
+
+        repository.findById(ventaId)
+                .orElseThrow(() -> new RuntimeException("Venta Id no existe"));
 
         clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente no existe"));
-
-        repository.findByCodigo(request.getCodigo())
-                .ifPresent(venta -> {
-                    throw new RuntimeException("Venta con codigo "+ request.getCodigo() + " ya registrado.");
-                });
 
         if(!this.esEstadoValido(request.getEstado())) {
             throw new RuntimeException("Estado "+request.getEstado()+" no es valido");
@@ -137,13 +146,14 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
                                              Integer cantidadDisponibleEnStock, Integer cantidadAVender) {
 
         final Integer cantidadDisponibleReal = cantidadDisponibleEnStock - cantidadAVender;
-
+        log.info("cantidadDisponibleEnStock: " + cantidadDisponibleEnStock + " cantidadAVender: "+ presentacion.getId());
+        log.info("cantidadDisponibleReal: "+cantidadDisponibleReal + " prodId: "+ presentacion.getId());
         if (cantidadDisponibleReal <= presentacion.getCantidadMinimoStock()) {
             EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.STOCK_BAJO.name(), presentacion.getId());
             log.info("Se creado evento quiebre type STOCK_BAJO: " + event);
         }
 
-        if (cantidadDisponibleEnStock <= 0 ) {
+        if (cantidadDisponibleReal <= 0 ) {
             EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.SIN_STOCK.name(), presentacion.getId());
             log.info("Se creado evento type SIN_STOCK: " + event);
         }
@@ -170,9 +180,9 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
         log.info("creados Pagos " + savePagos);
     }
 
-    public CreateVentaServiceImpl(
+    public UpdateVentaServiceImp(
             IVentaRepository repository,
-//            IDetalleVenta detalleRepository,
+            IDetalleVenta detalleRepository,
             IClienteRepository clienteRepository,
             IPagoService pagoService,
             IProductoPresentacionRepository productoRepository,
@@ -181,7 +191,7 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
             IEventoNotificacionService eventoService
     ) {
         this.repository = repository;
-//        this.detalleRepository = detalleRepository;
+        this.detalleRepository = detalleRepository;
         this.clienteRepository = clienteRepository;
         this.pagoService = pagoService;
         this.productoRepository = productoRepository;

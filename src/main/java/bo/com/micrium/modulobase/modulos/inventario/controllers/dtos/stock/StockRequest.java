@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class StockProductoRequest implements Serializable {
+public class StockRequest implements Serializable {
     private Long id;
     private Integer cantidad;
 }

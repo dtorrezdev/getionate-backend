@@ -1,12 +1,9 @@
 package bo.com.micrium.modulobase.modulos.inventario.mapper;
 
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoResponse;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.DetalleMovimientoVentaRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaResponse;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockProductoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Movimiento;
 import com.micrium.bd.access.jpa.modulo.inventario.models.MovimientoProducto;
@@ -33,7 +30,7 @@ public class MovimientoVentaMapper {
 
             Integer cantidadBase = detalle.getCantidad();
 
-            for (StockProductoRequest stock : detalle.getStocks()) {
+            for (StockRequest stock : detalle.getStocks()) {
                 DetalleMovimientoVentaRequest detMovi = new DetalleMovimientoVentaRequest();
                 final int diff = stock.getCantidad() - cantidadBase;
                 detMovi.setStockId(stock.getId());

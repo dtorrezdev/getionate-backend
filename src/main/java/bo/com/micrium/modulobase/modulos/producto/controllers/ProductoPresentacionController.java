@@ -42,6 +42,7 @@ public class ProductoPresentacionController extends GenericControler
     @Autowired
     private ProductoPresentacionValidator validator;
 
+    @Deprecated
     @Override
     public Page<ProductoPresentacionResponse> list(String token, String ipClient, String form,
                                                    Pageable pageRequest
@@ -118,6 +119,7 @@ public class ProductoPresentacionController extends GenericControler
         }
     }
 
+    @Deprecated
     @Override
     public ResponseEntity<ProductoPresentacionResponse> get(String token, String ipClient, String form,
                                                             String id) throws ApiException {
