@@ -1,19 +1,14 @@
 package bo.com.micrium.modulobase.controllers.template;
 
-import bo.com.micrium.modulobase.common.exceptions.ApiException;
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
 import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -23,7 +18,7 @@ import java.util.Map;
  * @param <T>
  * @param <P>
  */
-public interface ICrudControlerV2<R extends Serializable, T extends Serializable, P> {
+public interface ICrudMethods<R extends Serializable, T extends Serializable, P> {
 
     @GetMapping
     ResponseEntity<ApiResponse<Page<T>>> list(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,

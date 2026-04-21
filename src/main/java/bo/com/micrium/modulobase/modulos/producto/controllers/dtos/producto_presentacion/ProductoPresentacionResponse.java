@@ -3,6 +3,7 @@ package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_pre
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 public class ProductoPresentacionResponse implements Serializable {
     private Long id;
     private Long productoId;

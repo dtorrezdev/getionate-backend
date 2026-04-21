@@ -3,6 +3,7 @@ package bo.com.micrium.modulobase.modulos.producto.mappers;
 import bo.com.micrium.modulobase.common.enums.EnumInventario;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.CreateProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionRequest;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.ListPresentacionResponse;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.projection.ListPresentacionProjection;
@@ -66,6 +67,27 @@ public class ProductoPresentacionMapper {
         } else {
             response.setEstadoStock(EnumInventario.StockStatus.HAY_STOCK.name());
         }
+        return response;
+    };
+
+    // Get
+    public static final Function<ProductoPresentacion, ProductoPresentacionResponse>
+            toGetResponse = entity -> {
+        ProductoPresentacionResponse response = new ProductoPresentacionResponse();
+        response.setId(entity.getId());
+        response.setProductoId(entity.getProductoId());
+        response.setConcepto(entity.getConcepto());
+        response.setDescripcion(entity.getDescripcion());
+        response.setPrecioUnitario(entity.getPrecioUnitario());
+        response.setPrecioVenta(entity.getPrecioVenta());
+        response.setUnidadMedidaId(entity.getUnidadMedidaId());
+        response.setEsUnidadMinima(entity.getEsUnidadMinima());
+        response.setFactorConversion(entity.getFactorConversion());
+        response.setMarcaId(entity.getMarcaId());
+        response.setNombre(entity.getNombre());
+        response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
+        response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
+        response.setDiasAntesExpiracion(entity.getDiasAntesExpiracion());
         return response;
     };
 }

@@ -1,10 +1,10 @@
 package bo.com.micrium.modulobase.modulos.producto.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.controllers.template.ICrudControlerV2;
+import bo.com.micrium.modulobase.controllers.template.ICrudMethods;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
-import bo.com.micrium.modulobase.modulos.producto.services.IUnidadMedidaService;
+import bo.com.micrium.modulobase.modulos.producto.services.unidad_medida.IUnidadMedidaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/unidades_medidas")
 public class UnidadMedidaController implements
-        ICrudControlerV2<UnidadMedidaRequest, UnidadMedidaResponse, String> {
+        ICrudMethods<UnidadMedidaRequest, UnidadMedidaResponse, String> {
 
     @Autowired
     private IUnidadMedidaService service;

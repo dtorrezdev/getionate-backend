@@ -1,14 +1,12 @@
 package bo.com.micrium.modulobase.modulos.producto.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
-import bo.com.micrium.modulobase.controllers.template.ICrudControlerV2;
+import bo.com.micrium.modulobase.controllers.template.ICrudMethods;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
-import bo.com.micrium.modulobase.modulos.producto.services.IMarcaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import bo.com.micrium.modulobase.modulos.producto.services.marca.IMarcaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,12 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/marcas", produces = { MediaType.APPLICATION_JSON_VALUE })
+@RequestMapping(value = "/marcas")
 public class MarcaController implements
-        ICrudControlerV2<MarcaRequest, MarcaResponse, String> {
+        ICrudMethods<MarcaRequest, MarcaResponse, String> {
 
-    @Autowired
-    private IMarcaService service;
+    private final IMarcaService service;
 
     @Override
     public ResponseEntity<ApiResponse<Page<MarcaResponse>>> list(
@@ -81,5 +78,9 @@ public class MarcaController implements
     ) {
         this.service.delete(id);
         return ResponseEntity.status(204).build();
+    }
+
+    public MarcaController(IMarcaService service) {
+        this.service = service;
     }
 }

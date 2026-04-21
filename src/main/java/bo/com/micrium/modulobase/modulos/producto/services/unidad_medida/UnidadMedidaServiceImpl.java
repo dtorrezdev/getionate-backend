@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.producto.services;
+package bo.com.micrium.modulobase.modulos.producto.services.unidad_medida;
 
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
