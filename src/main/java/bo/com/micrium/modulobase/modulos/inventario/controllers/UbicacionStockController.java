@@ -19,7 +19,7 @@ public class UbicacionStockController implements
         IListMethod<UbicacionStockRequest, UbicacionStockResponse> {
 
     @Autowired
-    private IUbicacionStockService listService;
+    private IUbicacionStockService service;
 
     @Override
     public ResponseEntity<ApiResponse<Page<UbicacionStockResponse>>> list(
@@ -31,7 +31,7 @@ public class UbicacionStockController implements
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.listService.list(request, pageRequest),
+                        this.service.list(request, pageRequest),
                         "Se ha listado correctamente")
                 );
     }

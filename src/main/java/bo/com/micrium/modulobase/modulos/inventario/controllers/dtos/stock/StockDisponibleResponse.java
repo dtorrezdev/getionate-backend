@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,12 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class StockDisponibleResponse implements Serializable {
-    private Long id; // stock_id
-    private String lote;
-    private Date expiracion;
-    private Integer cantidad;
-    private String seccion;
-    private String estante;
-    private String nivel;
-    private String estadoExpiracion; // VIGENTE, POR_VENCER, VENCIDO
+
+    private List<StockDisponibleDto> stocks;
+
 }

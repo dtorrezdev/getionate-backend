@@ -58,6 +58,7 @@ public class ProductoPresentacionMapper {
         response.setCategoria(entity.getCategoria());
         response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
         response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
+        response.setDiasAntesExpiracion(entity.getDiasAntesExpiracion());
         // no es buena practica poner logica del negocio en Mapper BAD
         if(entity.getCantidadDisponibleStock() <= 0) {
             response.setEstadoStock(EnumInventario.StockStatus.AGOTADO.name());
