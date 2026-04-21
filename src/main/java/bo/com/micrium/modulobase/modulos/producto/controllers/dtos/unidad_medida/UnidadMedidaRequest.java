@@ -12,6 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class UnidadMedidaRequest implements Serializable {
+    private Long id;
     private String abreviatura;
     private String nombre;
     private String esUnidadMinima;

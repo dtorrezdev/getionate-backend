@@ -21,24 +21,18 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
 
     private final Logger log = LogManager.getLogger(UnidadMedidaServiceImpl.class);
 
-
     @Override
-    public Page<UnidadMedidaResponse> list(Map<String, String> params, Pageable pageRequest) {
-        final String abreviatura = params.get("abreviatura");
-        final String nombre = params.get("nombre");
-        final String esUnidadMinima = params.get("esUnidadMinima");
-        log.info(" metodo list " + params);
-        final Page<UnidadMedidaResponse> map = repository.filter(
-                queryfilterTexto(abreviatura),
-                filterTextoQueryUpperLike(abreviatura),
-                queryfilterTexto(nombre),
-                filterTextoQueryUpperLike(nombre),
-                queryfilterTexto(esUnidadMinima),
-                filterTextoQueryUpperLike(esUnidadMinima),
+    public Page<UnidadMedidaResponse> list(UnidadMedidaRequest request, Pageable pageRequest) {
+        log.info(" list(): request " + request);
+        return repository.filter(
+                queryfilterTexto(request.getAbreviatura()),
+                filterTextoQueryUpperLike(request.getAbreviatura()),
+                queryfilterTexto(request.getNombre()),
+                filterTextoQueryUpperLike(request.getNombre()),
+                queryfilterTexto(request.getEsUnidadMinima()),
+                filterTextoQueryUpperLike(request.getEsUnidadMinima()),
                 pageRequest
         ).map(UnidadMedidaMapper.fromEntityToResponse);
-        log.info("data from repository: " + map);
-        return map;
     }
 
     @Override
@@ -47,12 +41,12 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
     }
 
     @Override
-    public UnidadMedidaResponse update(UnidadMedidaRequest marcaRequest, String id) {
+    public UnidadMedidaResponse update(UnidadMedidaRequest marcaRequest, Long id) {
         return null;
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(Long id) {
 
     }
 

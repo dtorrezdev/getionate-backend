@@ -9,11 +9,11 @@ import java.util.Map;
 
 public interface IUnidadMedidaService {
 
-    Page<UnidadMedidaResponse> list(Map<String, String> params, Pageable pageRequest);
+    Page<UnidadMedidaResponse> list(UnidadMedidaRequest params, Pageable pageRequest);
 
     UnidadMedidaResponse create(UnidadMedidaRequest marcaRequest);
 
-    UnidadMedidaResponse update(UnidadMedidaRequest marcaRequest, String id);
+    UnidadMedidaResponse update(UnidadMedidaRequest marcaRequest, Long id);
 
-    void delete(String id);
+    void delete(Long id);
 }

@@ -2,7 +2,9 @@ package bo.com.micrium.modulobase.modulos.ventas.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
+import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
+import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ClienteRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ListClienteRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ClienteResponse;
@@ -19,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/clientes", produces = { MediaType.APPLICATION_JSON_VALUE })
 public class ClienteController implements
         IListMethod<ListClienteRequest, ClienteResponse>,
-        ICreateMethod<ClienteRequest, ClienteResponse> {
-
-    @Autowired
-    private IClienteService service;
+        ICreateMethod<ClienteRequest, ClienteResponse>,
+        IUpdateMethod<ClienteRequest,ClienteResponse, Long>, IDeleteMethod<ClienteRequest>
+{
+    private final IClienteService service;
 
     @Override
     public ResponseEntity<ApiResponse<Page<ClienteResponse>>> list(
@@ -50,5 +52,24 @@ public class ClienteController implements
                         this.service.create(request),
                         "Se ha creado correctamente")
                 );
+    }
+
+    @Override
+    public ResponseEntity<?> delete(String token, String ipClient, String form, ClienteRequest request) {
+        this.service.delete(request.getId());
+        return ResponseEntity.status(204).build();
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<ClienteResponse>> update(String token, String ipClient, String form, ClienteRequest request, Long id) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        this.service.update(request, id),
+                        "Se ha actualizado correctamente")
+                );
+    }
+
+    public ClienteController(IClienteService service) {
+        this.service = service;
     }
 }

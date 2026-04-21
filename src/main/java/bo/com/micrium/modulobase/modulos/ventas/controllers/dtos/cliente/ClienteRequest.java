@@ -17,6 +17,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class ClienteRequest implements Serializable {
+
+    private Long id;
+
     @NotNull(message = "CI no puede ser null")
     @NotBlank(message = "El CI no puede estar vacío")
     @Size(max = 20, message = "CI debe ser maximo de 20 letras.")

@@ -8,4 +8,9 @@ public interface IUbicacionStockService {
 
     Page<UbicacionStockResponse> list(UbicacionStockRequest request, Pageable page);
 
+    UbicacionStockResponse create(UbicacionStockRequest marcaRequest);
+
+    UbicacionStockResponse update(UbicacionStockRequest marcaRequest, Long id);
+
+    void delete(Long id);
 }

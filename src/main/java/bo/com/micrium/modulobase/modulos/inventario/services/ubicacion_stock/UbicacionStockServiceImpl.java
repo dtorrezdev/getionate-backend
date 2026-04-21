@@ -34,6 +34,21 @@ public class UbicacionStockServiceImpl implements IUbicacionStockService {
                 .map(UbicacionStockMapper.fromEntityToResponse);
     }
 
+    @Override
+    public UbicacionStockResponse create(UbicacionStockRequest marcaRequest) {
+        return null;
+    }
+
+    @Override
+    public UbicacionStockResponse update(UbicacionStockRequest marcaRequest, Long id) {
+        return null;
+    }
+
+    @Override
+    public void delete(Long id) {
+
+    }
+
     private boolean isBlanck(String dato) {
         return dato == null || dato.trim().isEmpty();
     }
