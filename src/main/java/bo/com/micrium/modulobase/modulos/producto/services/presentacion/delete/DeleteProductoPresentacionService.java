@@ -18,7 +18,7 @@ public class DeleteProductoPresentacionService implements IDeleteProductoPresent
          final ProductoPresentacion producto = repository.findById(presentacionId.getId())
                  .orElseThrow(() ->
                          new RuntimeException("No existe la presentacion con id: " + presentacionId));
-         producto.setEsActivo(false);
+         producto.setEsActivo(Boolean.FALSE);
          repository.save(producto);
     }
 }

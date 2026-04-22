@@ -2,7 +2,10 @@ package bo.com.micrium.modulobase.modulos.producto.services.unidad_medida;
 
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
+import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
 import bo.com.micrium.modulobase.modulos.producto.mappers.UnidadMedidaMapper;
+import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
+import com.micrium.bd.access.jpa.modulo.productos.models.UnidadMedida;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IUnidadMedidaRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,18 +39,34 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
     }
 
     @Override
-    public UnidadMedidaResponse create(UnidadMedidaRequest marcaRequest) {
-        return null;
+    public UnidadMedidaResponse create(UnidadMedidaRequest request) {
+        return UnidadMedidaMapper.fromRequestToEntity
+                .andThen(repository::save)
+                .andThen(UnidadMedidaMapper.fromEntityToResponse)
+                .apply(request);
     }
 
     @Override
-    public UnidadMedidaResponse update(UnidadMedidaRequest marcaRequest, Long id) {
-        return null;
+    public UnidadMedidaResponse update(UnidadMedidaRequest request, Long id) {
+        return repository.findById(id)
+                .map(unidadMedida -> {
+                    unidadMedida.setAbreviatura(request.getAbreviatura());
+                    unidadMedida.setNombre(request.getNombre());
+                    unidadMedida.setEsUnidadMinima(Boolean.valueOf(request.getEsUnidadMinima()));
+                    return unidadMedida;
+                })
+                .map(repository::save)
+                .map(UnidadMedidaMapper.fromEntityToResponse)
+                .orElseThrow(() -> new RuntimeException("Unidad Medida Id no existe."));
     }
 
     @Override
     public void delete(Long id) {
-
+        final UnidadMedida unidadMedida = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Unidad Medida Id no existe."));
+        unidadMedida.setEsActivo(false);
+        repository.save(unidadMedida);
     }
 
     private boolean isBlanck(String dato) {

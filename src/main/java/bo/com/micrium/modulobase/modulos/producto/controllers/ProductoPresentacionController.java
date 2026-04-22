@@ -297,9 +297,9 @@ public class ProductoPresentacionController extends GenericControler
             }
 
             ProductoPresentacion model = temp.get();
+            model.setEsActivo(Boolean.FALSE);
             map.put("producto_presentacion", ConvercionUtil.toJson(model));
-
-            repository.delete(model);
+            repository.save(model);
             mapNuevo.put("producto_presentacion", ConvercionUtil.toJson(model));
 
             bitacoraService.guardarBitacora(token, ipClient, form, "Eliminar Producto Presentacion", map, mapNuevo);

@@ -1,10 +1,17 @@
 package bo.com.micrium.modulobase.modulos.producto.controllers.dtos.categoria;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class CategoriaResponse implements Serializable {
     private Long id;
+    private String nombre;
+    private String descripcion;
 }

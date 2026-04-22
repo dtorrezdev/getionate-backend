@@ -6,5 +6,7 @@ import java.io.Serializable;
 
 @Data
 public class CategoriaRequest implements Serializable {
-    private Long id;
+    private String id;
+    private String nombre;
+    private String descripcion;
 }

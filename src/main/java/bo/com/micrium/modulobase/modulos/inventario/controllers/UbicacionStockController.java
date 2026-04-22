@@ -43,7 +43,12 @@ public class UbicacionStockController implements
     }
 
     @Override
-    public ResponseEntity<ApiResponse<UbicacionStockResponse>> create(String token, String ipClient, String form, UbicacionStockRequest request) {
+    public ResponseEntity<ApiResponse<UbicacionStockResponse>> create(
+            String token,
+            String ipClient,
+            String form,
+            UbicacionStockRequest request
+    ) {
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),

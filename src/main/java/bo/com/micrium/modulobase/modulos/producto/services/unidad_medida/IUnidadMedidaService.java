@@ -11,9 +11,9 @@ public interface IUnidadMedidaService {
 
     Page<UnidadMedidaResponse> list(UnidadMedidaRequest params, Pageable pageRequest);
 
-    UnidadMedidaResponse create(UnidadMedidaRequest marcaRequest);
+    UnidadMedidaResponse create(UnidadMedidaRequest request);
 
-    UnidadMedidaResponse update(UnidadMedidaRequest marcaRequest, Long id);
+    UnidadMedidaResponse update(UnidadMedidaRequest request, Long id);
 
     void delete(Long id);
 }

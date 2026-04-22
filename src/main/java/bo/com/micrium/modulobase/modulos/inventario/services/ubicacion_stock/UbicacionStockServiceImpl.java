@@ -2,7 +2,10 @@ package bo.com.micrium.modulobase.modulos.inventario.services.ubicacion_stock;
 
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.ubicacion_stock.*;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.UbicacionStockMapper;
+import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
+import com.micrium.bd.access.jpa.modulo.inventario.models.UbicacionStock;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IUbicacionStockRepository;
+import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +38,34 @@ public class UbicacionStockServiceImpl implements IUbicacionStockService {
     }
 
     @Override
-    public UbicacionStockResponse create(UbicacionStockRequest marcaRequest) {
-        return null;
+    public UbicacionStockResponse create(UbicacionStockRequest request) {
+        return UbicacionStockMapper.toEntity
+                .andThen(repository::save)
+                .andThen(UbicacionStockMapper.fromEntityToResponse)
+                .apply(request);
     }
 
     @Override
-    public UbicacionStockResponse update(UbicacionStockRequest marcaRequest, Long id) {
-        return null;
+    public UbicacionStockResponse update(UbicacionStockRequest request, Long id) {
+        return repository.findById(id)
+                .map(ubicacionStock -> {
+                    ubicacionStock.setSeccion(request.getSeccion());
+                    ubicacionStock.setEstante(request.getEstante());
+                    ubicacionStock.setNivel(request.getNivel());
+                    return ubicacionStock;
+                })
+                .map(repository::save)
+                .map(UbicacionStockMapper.fromEntityToResponse)
+                .orElseThrow(() -> new RuntimeException("Ubicacion Id no existe."));
     }
 
     @Override
     public void delete(Long id) {
+        final UbicacionStock ubicacionStock = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Ubicacion Stock Id no existe."));
+        ubicacionStock.setEsActivo(false);
+        repository.save(ubicacionStock);
 
     }
 

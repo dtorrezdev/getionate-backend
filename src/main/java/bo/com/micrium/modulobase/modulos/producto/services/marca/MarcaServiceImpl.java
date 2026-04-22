@@ -3,6 +3,8 @@ package bo.com.micrium.modulobase.modulos.producto.services.marca;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
+import com.micrium.bd.access.jpa.modulo.productos.models.Marca;
+import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IMarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,19 +16,12 @@ import java.util.Map;
 @Service
 public class MarcaServiceImpl implements IMarcaService {
 
-    @Autowired
-    private IMarcaRepository repository;
-
-//    @Autowired
-//    private MarcaValidator validator;
-
+    private final IMarcaRepository repository;
     // private final Logger log = LogManager.getLogger(IMarcaServiceImpl.class);
-
 
     @Override
     public Page<MarcaResponse> list(Map<String, String> params, Pageable pageRequest) {
 
-        //validator.page(params);
         final String nombre = params.get("nombre");
         final String descripcion = params.get("descripcion");
 
@@ -66,13 +61,11 @@ public class MarcaServiceImpl implements IMarcaService {
     public void delete(String id) {
         //id = limpiarCaracterEspecialEncriptacion(id);
         //Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
-        repository.findById(Long.valueOf(id))
-            .ifPresentOrElse(
-                repository::delete,
-                () -> {
-                    throw new RuntimeException("Marca no encontrada");
-                }
-            );
+        final Marca marca = repository.findById(Long.valueOf(id))
+                .orElseThrow(() ->
+                        new RuntimeException("Marca no existe."));
+        marca.setEsActivo(Boolean.FALSE);
+        repository.save(marca);
     }
 
     private boolean isBlanck(String dato) {
@@ -87,4 +80,7 @@ public class MarcaServiceImpl implements IMarcaService {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
 
+    public MarcaServiceImpl(IMarcaRepository repository) {
+        this.repository = repository;
+    }
 }
