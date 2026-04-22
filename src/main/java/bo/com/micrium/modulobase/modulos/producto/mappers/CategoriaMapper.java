@@ -15,6 +15,7 @@ public class CategoriaMapper {
             Categoria.builder()
                     .nombre(req.getNombre())
                     .descripcion(req.getDescripcion())
+                    .esActivo(Boolean.TRUE)
                     .build();
 
     public static final Function<Categoria, CategoriaResponse> toResponse =

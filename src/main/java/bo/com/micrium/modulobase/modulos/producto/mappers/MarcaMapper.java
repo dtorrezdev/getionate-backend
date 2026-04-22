@@ -11,6 +11,7 @@ public class MarcaMapper {
         Marca.builder()
             .nombre(req.getNombre())
             .descripcion(req.getDescripcion())
+                .esActivo(Boolean.TRUE)
             .build();
 
     public static final Function<Marca, MarcaResponse> toResponse =

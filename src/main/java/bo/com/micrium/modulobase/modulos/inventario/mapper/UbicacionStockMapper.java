@@ -15,6 +15,7 @@ public class UbicacionStockMapper {
                     .seccion(req.getSeccion())
                     .estante(req.getEstante())
                     .nivel(req.getNivel())
+                    .esActivo(Boolean.TRUE)
                     .build();
 
     public static final Function<UbicacionStock, UbicacionStockResponse>

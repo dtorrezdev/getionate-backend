@@ -51,7 +51,7 @@ public interface ICrudMethods<R extends Serializable, T extends Serializable, P>
     @DeleteMapping("/{id}")
     ResponseEntity<?> delete(@RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
             @PathVariable P id);
 
 }

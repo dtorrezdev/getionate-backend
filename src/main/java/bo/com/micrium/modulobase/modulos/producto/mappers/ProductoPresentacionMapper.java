@@ -29,6 +29,7 @@ public class ProductoPresentacionMapper {
                 .cantidadDisponibleStock(request.getCantidadDisponibleStock())
                 .cantidadMinimoStock(request.getCantidadMinimoStock())
                 .diasAntesExpiracion(request.getDiasAntesExpiracion())
+                .esActivo(Boolean.TRUE)
                 .build()
      ;
 

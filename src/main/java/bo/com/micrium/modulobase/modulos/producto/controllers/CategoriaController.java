@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/categoria")
+@RequestMapping(value = "/categorias")
 public class CategoriaController implements IListMethod<CategoriaRequest, CategoriaResponse>,
         ICreateMethod<CategoriaRequest, CategoriaResponse>,
         IUpdateMethod<CategoriaRequest, CategoriaResponse, Long> {

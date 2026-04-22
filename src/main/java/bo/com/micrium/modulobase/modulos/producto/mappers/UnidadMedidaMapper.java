@@ -12,6 +12,7 @@ public class UnidadMedidaMapper {
                     .nombre(req.getNombre())
                     .abreviatura(req.getAbreviatura())
                     .esUnidadMinima(Boolean.valueOf(req.getEsUnidadMinima()))
+                    .esActivo(Boolean.TRUE)
                     .build();
 
     public static final Function<UnidadMedida, UnidadMedidaResponse> fromEntityToResponse =
