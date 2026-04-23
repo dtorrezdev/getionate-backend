@@ -28,7 +28,7 @@ public class MovimientoController implements
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.createService.execute(request),
-                        "Se ha creado correctamente")
+                        "se ha creado correctamente")
                 );
     }
 
