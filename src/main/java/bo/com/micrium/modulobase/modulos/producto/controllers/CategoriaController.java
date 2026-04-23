@@ -2,6 +2,7 @@ package bo.com.micrium.modulobase.modulos.producto.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
+import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.categoria.*;
@@ -16,8 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/categorias")
 public class CategoriaController implements IListMethod<CategoriaRequest, CategoriaResponse>,
         ICreateMethod<CategoriaRequest, CategoriaResponse>,
-        IUpdateMethod<CategoriaRequest, CategoriaResponse, Long> {
-
+        IUpdateMethod<CategoriaRequest, CategoriaResponse, Long>,
+        IDeleteMethod<CategoriaRequest>
+{
     private final ICategoriaService service;
 
     @Override
@@ -51,6 +53,17 @@ public class CategoriaController implements IListMethod<CategoriaRequest, Catego
                         this.service.update(request, id),
                         "Se ha actualizado correctamente")
                 );
+    }
+
+    @Override
+    public ResponseEntity<?> delete(
+            String token,
+            String ipClient,
+            String form,
+            CategoriaRequest request
+    ) {
+        this.service.delete(request.getId());
+        return ResponseEntity.status(204).build();
     }
 
     public CategoriaController(ICategoriaService service) {
