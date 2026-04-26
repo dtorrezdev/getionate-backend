@@ -148,6 +148,7 @@ public class ProductoController extends GenericControler
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
                             .categoriaId(request.getCategoriaId())
+                            .esActivo(Boolean.TRUE)
                             .build()
             );
 
@@ -208,7 +209,6 @@ public class ProductoController extends GenericControler
             Producto updatedProducto = repository.findById(idDesencriptado).orElseThrow();
             map.put("Producto", ConvercionUtil.toJson(updatedProducto));
 
-
             updatedProducto = repository.save(
                     Producto.builder()
                             .id(updatedProducto.getId())
@@ -216,6 +216,7 @@ public class ProductoController extends GenericControler
                             .nombre(request.getNombre())
                             .descripcion(request.getDescripcion())
                             .categoriaId(request.getCategoriaId())
+                            .esActivo(Boolean.TRUE)
                             .build()
             );
             mapNuevo.put("Producto", ConvercionUtil.toJson(updatedProducto));
