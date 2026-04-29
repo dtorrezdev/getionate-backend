@@ -144,13 +144,11 @@ public class AuthenticationLdapManager implements AuthenticationManager, Seriali
         int validacionActiveDirectory = ((BigDecimal) parametroService.getParamVal(Parametro.DelSistema.VALIDACION_ACTIVE_DIRECTORY.name())).intValue();
         log.info("validacionActiveDirectory: " + validacionActiveDirectory);
         Usuario usuario = usuarioRepository.findByNombreUsuarioAndEstadoIn(nombreUsuario, Arrays.asList(UsuarioEstado.HABILITADO, UsuarioEstado.BLOQUEADO, UsuarioEstado.INHABILITADO));
-
         LoggerMain.debug("***** OAC validacion si es usuario null y LOCAL");
         if (usuario == null && validacionActiveDirectory == TipoAutenticacion.LOCAL.getId()) {
             throw new BadCredentialsException("Usuario no existe en el sistema");
             //throw new BadCredentialsException("El usuario no existe en la BD."); // el usuario no existe en la BD            
         }
-
         LoggerMain.debug("***** OAC validacion si es usuario null y GRUPO LDAP");
         if (usuario == null && (validacionActiveDirectory == TipoAutenticacion.LDAP.getId() || validacionActiveDirectory == TipoAutenticacion.HIBRIDO.getId())) {
             try {

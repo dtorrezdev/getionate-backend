@@ -106,14 +106,12 @@ public class JwtAuthenticationController extends GenericControler {
 
     @RequestMapping(value = METODO_AUTENTICACION, method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(
-            @RequestHeader(value = JwtTokenUtil.IP_CLIENT) String ipClient,
-            @RequestHeader(value = JwtTokenUtil.ROUTE) String form,
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
             @Valid @RequestBody String authenticationRequestString, BindingResult result) {
-        log.info("Llego aqui");
         HashMap<String, String> map = new HashMap<String, String>();
         AutenticacionRequest authenticationRequest = null;
-        //
-        LoggerMain.info("***dtn java.class.path: " + System.getProperty("java.class.path"));
+
         try {
             // *** dtn cambios
             //authenticationRequest = new ObjectMapper().readValue(authenticationRequestString, AuteticacionRequest.class);
@@ -142,7 +140,6 @@ public class JwtAuthenticationController extends GenericControler {
                     new AbstractMap.SimpleEntry<>("form ", form),
                     new AbstractMap.SimpleEntry<>("request ", authenticationRequest)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
             Rol rol = null;
 
             try {
@@ -158,7 +155,6 @@ public class JwtAuthenticationController extends GenericControler {
             }
 
             final String token = jwtTokenUtil.generateToken(authenticationRequest.getNombreUsuario(), rol.getNombre());
-
             List<ModuloResponse> modulos = new ArrayList<>();
             List<Long> formularios = new ArrayList<>();
             Map<Long, Boolean> formVisible = new HashMap<>();
@@ -248,7 +244,7 @@ public class JwtAuthenticationController extends GenericControler {
             try {
                 String tipoAuth = tipoAD.getValor().equals(TipoAutenticacion.HIBRIDO.getId())? "1": tipoAD.getValor();
                 ResponseEntity<AutenticacionResponse> out = ResponseEntity.ok(new AutenticacionResponse(
-                        token, rol.getId(), rol.getNombre(),
+                        usuario.getId(), token, rol.getId(), rol.getNombre(),
                         modulos, usuario.getNombreCompleto(),
                         inactivityTime.getValor(), timeoutBackend.getValor(),
                         urlNoTimeoutBackend.getValor(), tipoAuth,
