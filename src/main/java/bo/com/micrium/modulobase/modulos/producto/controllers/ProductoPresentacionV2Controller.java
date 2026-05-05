@@ -46,7 +46,7 @@ public class ProductoPresentacionV2Controller implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.listService.execute(request, pageRequest),
-                        "Se ha listado correctamente")
+                        "Presentaciones listado correctamente.")
                 );
     }
 
@@ -60,7 +60,7 @@ public class ProductoPresentacionV2Controller implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.getService.execute(id),
-                        "Se ha obtenido correctamente")
+                        "Presentacion obtenida correctamente.")
                 );
     }
 
@@ -74,7 +74,7 @@ public class ProductoPresentacionV2Controller implements
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.createService.execute(request),
-                        "Se ha creado correctamente")
+                        "Presentacion creado correctamente.")
                 );
     }
 

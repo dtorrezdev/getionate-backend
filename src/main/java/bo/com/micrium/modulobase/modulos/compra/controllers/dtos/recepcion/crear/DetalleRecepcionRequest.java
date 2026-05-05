@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Date;
 
 @Getter
@@ -27,7 +28,7 @@ public class DetalleRecepcionRequest implements Serializable {
 
     @NotNull(message = "precio no puede ser null")
     @Min(value = 1, message = "precio debe ser mayor a 0")
-    private Double precio;
+    private BigDecimal precio;
 
     private Date fechaVencimiento;
 

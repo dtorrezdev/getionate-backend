@@ -31,7 +31,7 @@ public class EventoNotificacionController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
-                        "Se ha listado correctamente")
+                        "Notificaciones listado correctamente.")
                 );
     }
 }

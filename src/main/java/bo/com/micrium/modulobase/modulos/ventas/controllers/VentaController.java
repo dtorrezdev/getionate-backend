@@ -41,7 +41,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.listService.execute(params, pageRequest),
-                        "Se ha listado correctamente")
+                        "Ventas listado correctamente.")
                 );
     }
 
@@ -54,7 +54,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.getService.execute(id),
-                        "Se ha obtenido correctamente")
+                        "Venta obtenido correctamente.")
                 );
     }
 
@@ -68,7 +68,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.crearService.execute(request),
-                        "Se ha creado correctamente")
+                        "Venta creado correctamente.")
                 );
     }
 
@@ -83,7 +83,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.updateService.execute(request, id),
-                        "Se ha actualizado correctamente")
+                        "Venta actualizado correctamente.")
                 );
     }
 
@@ -109,7 +109,5 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         this.crearService = crearService;
         this.updateService = updateService;
         this.anularService = anularService;
-
     }
-
 }

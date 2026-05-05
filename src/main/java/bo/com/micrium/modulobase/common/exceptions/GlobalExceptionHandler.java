@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.common.exceptions;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,62 +19,101 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
+        Object target = ex.getBindingResult().getTarget();
 
         ex.getBindingResult().getFieldErrors()
                 .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
-
+        String entityName = target != null
+                ? target.getClass().getSimpleName()
+                : "Entidad";
         System.out.println("error: " + errors);
 
         ApiError apiError = new ApiError(
                 LocalDateTime.now().toString(),
-                400,
+                HttpStatus.BAD_REQUEST.value(), // 400: Invalido Input cliente error
                 "VALIDATION_ERROR",
-                errors
+                entityName + " tiene campos invalidos.",
+                errors,
+                ""
         );
 
         return ResponseEntity.badRequest().body(apiError);
     }
 
-    // REGLA NEGOCIO
-    /*
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiError> handleBusiness(BusinessException ex) {
-
+    // Recurso no encontrado
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiError> handleEntityNotFound(EntityNotFoundException ex) {
+        int status = HttpStatus.NOT_FOUND.value();
         ApiError apiError = new ApiError(
-                400,
-                "BUSINESS_ERROR",
-                ex.getMessage()
+                LocalDateTime.now().toString(),
+                HttpStatus.NOT_FOUND.value(),  // 404 Not Found
+                EntityNotFoundException.NAME,
+                ex.getMessage(),
+                ex.getDetails(),
+                ""
         );
+        return ResponseEntity.status(status).body(apiError);
+    }
 
-        return ResponseEntity.badRequest().body(apiError);
-    }*/
+    @ExceptionHandler(DuplicateEntityException.class)
+    public ResponseEntity<ApiError> handleDuplicateEntity(DuplicateEntityException ex) {
+        int status = HttpStatus.CONFLICT.value();
+        ApiError apiError = new ApiError(
+                LocalDateTime.now().toString(),
+                HttpStatus.CONFLICT.value(), // 409: conflict
+                DuplicateEntityException.NAME,
+                ex.getMessage(),
+                ex.getDetails(),
+                ""
+        );
+        return ResponseEntity.status(status).body(apiError);
+    }
+
+    // REGLA NEGOCIO
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ApiError> handleBusiness(BusinessRuleException ex) {
+        int status = HttpStatus.PRECONDITION_FAILED.value();
+        ApiError apiError = new ApiError(
+                LocalDateTime.now().toString(),
+                status, // 412: Precondition Failed (Logica negocio)
+                BusinessRuleException.NAME,
+                ex.getMessage(),
+                ex,
+                ""
+        );
+        return ResponseEntity.status(status).body(apiError);
+    }
 
     // SISTEMA (DB)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDB(DataIntegrityViolationException ex) {
+        int status = HttpStatus.CONFLICT.value();
+        String details = ex.getMostSpecificCause().getMessage();
 
         ApiError apiError = new ApiError(
                 LocalDateTime.now().toString(),
-                500,
+                status, // 409
                 "DATABASE_ERROR",
-                ex.getMessage()
+                "Error de integridad de datos en la BD.",
+                details,
+                ""
         );
-
-        return ResponseEntity.status(500).body(apiError);
+        return ResponseEntity.status(status).body(apiError);
     }
 
-    // 🔥 GENERAL
+    // GENERAL
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneral(Exception ex) {
+        int status = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
         ApiError apiError = new ApiError(
                 LocalDateTime.now().toString(),
-                500,
+                status,
                 "INTERNAL_ERROR",
-                ex.getMessage()
+                ex.getMessage(),
+                ex.getLocalizedMessage(),
+                ""
         );
-
-        return ResponseEntity.status(500).body(apiError);
+        return ResponseEntity.status(status).body(apiError);
     }
-
 }

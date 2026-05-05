@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.compra.services.proveedor;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.ProveedorMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.proveedor.ProveedorRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.proveedor.ProveedorResponse;
@@ -42,14 +43,14 @@ public class ProveedorService implements IProveedorService {
                 })
                 .map(repository::save)
                 .map(ProveedorMapper.toResponse)
-                .orElseThrow(() -> new RuntimeException("Proveedor no encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Proveedor","id", id));
     }
 
     @Override
     public void delete(String id) {
         final Proveedor proveedor = repository.findById(Long.valueOf(id))
                 .orElseThrow(() ->
-                        new RuntimeException("Proveedor no existe."));
+                        new EntityNotFoundException("Proveedor","id", id));
         proveedor.setEsActivo(Boolean.FALSE);
         repository.save(proveedor);
     }

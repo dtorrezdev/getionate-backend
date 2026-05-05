@@ -5,11 +5,9 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
-@NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = false)
 public class ProveedorResponse implements Serializable {
     private Long id;
     private String nombre;

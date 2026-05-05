@@ -29,7 +29,7 @@ public class UnidadMedidaController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
-                        "Se ha listado correctamente")
+                        "Unidad Medidas listado correctamente.")
                 );
     }
 
@@ -38,7 +38,7 @@ public class UnidadMedidaController implements
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),
-                        "Se ha creado correctamente")
+                        "Unidad de Medida creado correctamente.")
                 );
     }
 
@@ -53,7 +53,7 @@ public class UnidadMedidaController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.update(request, id),
-                        "Se ha actualizado correctamente")
+                        "Unidad de Medida actualizado correctamente.")
                 );
     }
 

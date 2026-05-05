@@ -1,5 +1,8 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.pago;
 
+import bo.com.micrium.modulobase.common.enums.EnumVenta;
+import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.PagoMapper;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -31,7 +35,7 @@ public class PagoServiceImpl implements IPagoService {
         //1. validar el fromatod del json validapo
         this.validateRequest(request);
         final Venta venta = ventarepository.findById(request.getVentaId())
-                .orElseThrow(()-> new RuntimeException("Venta no existe."));
+                .orElseThrow(()-> new EntityNotFoundException("Venta","id", request.getVentaId()));
 
         //2. transformar a entidades
         final List<Pago> pagos = request.getDetallePago().stream()
@@ -53,11 +57,17 @@ public class PagoServiceImpl implements IPagoService {
     private void validateRequest(PagoRequest request) {
 
         if (request.getVentaId() == null) {
-            throw new RuntimeException("Venta Id es null.");
+            throw new BusinessRuleException(
+                    "Venta Pagos",
+                    EnumVenta.Rules.VENTA_NOT_FOUND_FOR_PAGOS.name(),
+                    Map.of("ventaId", -1));
         }
 
         if (request.getTotalPago() == null) {
-            throw new RuntimeException("Total Pago es null.");
+            throw new BusinessRuleException(
+                    "Venta Pagos",
+                    EnumVenta.Rules.MONTO_NOT_ZERO.name(),
+                    Map.of("totalPago", 0));
         }
 
         final BigDecimal montoDetalleTotal = request.getDetallePago().stream()
@@ -66,16 +76,25 @@ public class PagoServiceImpl implements IPagoService {
                         throw new RuntimeException("Detalle tipo Pago es null.");
                     }
                     return Optional.ofNullable(detalle.getMonto())
-                            .orElseThrow( ()-> new RuntimeException("Detalle monto es null."));
+                            .orElseThrow( ()-> new BusinessRuleException(
+                                    "Venta Pagos",
+                                    EnumVenta.Rules.MONTO_NOT_ZERO.name(),
+                                    Map.of("detalleTotal", 0)));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (request.getTotalPago().equals(BigDecimal.ZERO)  || montoDetalleTotal.equals(BigDecimal.ZERO)) {
-            throw new RuntimeException("Montos no deben ser 0.");
+            throw new BusinessRuleException(
+                    "Venta Pagos",
+                    EnumVenta.Rules.MONTO_NOT_ZERO.name(),
+                    Map.of("totalPago",request.getTotalPago(),"detalleTotal",montoDetalleTotal));
         }
 
         if (!request.getTotalPago().equals(montoDetalleTotal)) {
-            throw new RuntimeException("Monto Total pago debe ser igual a Monto Detalle.");
+            throw new BusinessRuleException(
+                    "Venta Pagos",
+                    EnumVenta.Rules.MONTO_TOTAL_EQUALS_DETALLE_TOTAL.name(),
+                    Map.of("totalPago",request.getTotalPago(),"DetalleTotal",montoDetalleTotal));
         }
     }
 

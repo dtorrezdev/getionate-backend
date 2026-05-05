@@ -7,6 +7,7 @@ import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRe
 import bo.com.micrium.modulobase.modulos.producto.services.marca.IMarcaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,10 +29,10 @@ public class MarcaController implements
            Map<String, String> params,
            Pageable pageRequest
     ) {
-        return ResponseEntity.status(200)
+        return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.ok(
                         this.service.list(params, pageRequest),
-                        "Se ha listado correctamente")
+                        "Marcas listado correctamente.")
                 );
     }
 
@@ -47,10 +48,10 @@ public class MarcaController implements
             String form,
             MarcaRequest request
     ) {
-        return ResponseEntity.status(201)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(
                         this.service.create(request),
-                        "Se ha creado correctamente")
+                        "Marca creado correctamente.")
                 );
     }
 
@@ -65,7 +66,7 @@ public class MarcaController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.update(request, id),
-                        "Se ha actualizado correctamente")
+                        "Marca actualizado correctamente.")
                 );
     }
 
@@ -77,7 +78,7 @@ public class MarcaController implements
             String id
     ) {
         this.service.delete(id);
-        return ResponseEntity.status(204).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     public MarcaController(IMarcaService service) {

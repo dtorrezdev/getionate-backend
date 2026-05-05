@@ -55,6 +55,7 @@ public class ProductoPresentacionMapper {
         response.setMarcaId(entity.getMarcaId());
         response.setMarca(entity.getMarca());
         response.setPrecioVenta(entity.getPrecioVenta());
+        response.setPrecioUnitario(entity.getPrecioUnitario());
         response.setCategoriaId(entity.getCategoriaId());
         response.setCategoria(entity.getCategoria());
         response.setCantidadMinimoStock(entity.getCantidadMinimoStock());

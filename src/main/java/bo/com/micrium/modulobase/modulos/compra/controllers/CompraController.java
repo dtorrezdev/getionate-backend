@@ -41,7 +41,7 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.listService.execute(params, pageRequest),
-                        "Se ha listado correctamente")
+                        "Compras listado correctamente.")
                 );
     }
 
@@ -54,7 +54,7 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.getService.execute(id),
-                        "Se ha obtenido correctamente")
+                        "Compra obtenido correctamente.")
                 );
     }
 
@@ -65,10 +65,11 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
             String form,
             CompraRequest request
     ) {
+        final var response = this.crearService.execute(request);
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
-                        this.crearService.execute(request),
-                        "Se ha creado correctamente")
+                        response,
+                        response.getMensaje())
                 );
     }
 
@@ -83,7 +84,7 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.updateService.execute(request, id),
-                        "Se ha actualizado correctamente")
+                        "Compra actualizado correctamente.")
                 );
     }
 

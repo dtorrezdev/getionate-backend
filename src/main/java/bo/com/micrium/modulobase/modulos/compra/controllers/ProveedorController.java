@@ -33,7 +33,7 @@ public class ProveedorController implements IListMethod<ProveedorRequest, Provee
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
-                        "Se ha listado correctamente")
+                        "Proveedores listado correctamente.")
                 );
     }
 
@@ -42,7 +42,7 @@ public class ProveedorController implements IListMethod<ProveedorRequest, Provee
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),
-                        "Se ha creado correctamente")
+                        "Proveedor creado correctamente.")
                 );
     }
 
@@ -51,7 +51,7 @@ public class ProveedorController implements IListMethod<ProveedorRequest, Provee
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.update(request, id),
-                        "Se ha actualizado correctamente")
+                        "Proveedor actualizado correctamente.")
                 );
     }
 

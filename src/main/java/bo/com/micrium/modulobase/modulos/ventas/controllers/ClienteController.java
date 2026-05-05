@@ -36,7 +36,7 @@ public class ClienteController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(params, pageRequest),
-                        "se ha listado correctamente")
+                        "Clientes listado correctamente.")
                 );
     }
 
@@ -50,7 +50,7 @@ public class ClienteController implements
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),
-                        "se ha creado correctamente")
+                        "Cliente creado correctamente.")
                 );
     }
 
@@ -65,7 +65,7 @@ public class ClienteController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.update(request, id),
-                        "se ha actualizado correctamente")
+                        "Cliente actualizado correctamente.")
                 );
     }
 

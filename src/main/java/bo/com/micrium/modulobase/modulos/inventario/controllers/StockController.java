@@ -30,7 +30,7 @@ public class StockController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.stockDisponibles(),
-                        "se ha listado correctamente")
+                        "Stocks listado correctamente.")
                 );
     }
 
@@ -44,7 +44,7 @@ public class StockController implements
                 .body(ApiResponse.ok(
                         new StockDisponibleResponse(
                                 this.service.stockDisponibleByPresentacionId(id)),
-                        "se ha listado correctamente")
+                        "Stocks listado correctamente.")
                 );
     }
 

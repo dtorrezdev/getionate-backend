@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.services.presentacion.get;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.ProductoPresentacionMapper;
 import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
@@ -18,8 +19,7 @@ public class GetProductoPresentacionService implements IGetProductoPresentacionS
 
         final ProductoPresentacion presentacion = this.repository.findById(presentacionId)
                 .orElseThrow(() ->
-                        new RuntimeException("No existe la presentacion con id: " + presentacionId));
-
+                        new EntityNotFoundException("Presentacion", "id", presentacionId));
 
         return ProductoPresentacionMapper.toGetResponse.apply(presentacion);
     }

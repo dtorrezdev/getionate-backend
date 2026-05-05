@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.ubicacion_stock;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.ubicacion_stock.*;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.UbicacionStockMapper;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
@@ -56,14 +57,14 @@ public class UbicacionStockServiceImpl implements IUbicacionStockService {
                 })
                 .map(repository::save)
                 .map(UbicacionStockMapper.fromEntityToResponse)
-                .orElseThrow(() -> new RuntimeException("Ubicacion Id no existe."));
+                .orElseThrow(() -> new EntityNotFoundException("Ubicacion Stock", "id", id));
     }
 
     @Override
     public void delete(Long id) {
         final UbicacionStock ubicacionStock = repository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Ubicacion Stock Id no existe."));
+                        new EntityNotFoundException("Ubicacion Stock", "id", id));
         ubicacionStock.setEsActivo(false);
         repository.save(ubicacionStock);
 

@@ -1,5 +1,8 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.stock;
 
+import bo.com.micrium.modulobase.common.enums.EnumVenta;
+import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleDto;
@@ -83,7 +86,7 @@ public class StockServiceImpl implements IStockService {
     @Override
     public boolean validateUbicacionStock(Long ubicacionStockId) {
         ubicacionStockRepository.findById(ubicacionStockId)
-                .orElseThrow(() -> new RuntimeException("Ubicacion Stock no existe."));
+                .orElseThrow(() -> new EntityNotFoundException("Ubicacion Stock", "id", ubicacionStockId));
         return true;
     }
 
@@ -94,7 +97,10 @@ public class StockServiceImpl implements IStockService {
         final Integer cantidadDisponibleStock = repository.getCantidadStockDisponibleByProducto(productoId, presentacionId);
 
         if(cantidadAVender > cantidadDisponibleStock) {
-            throw new RuntimeException("Stock insuficiente del producto PR-"+presentacionId);
+            throw new BusinessRuleException("Presentacion",
+                    EnumVenta.Rules.STOCK_INSUFICIENTE.name() ,
+                    Map.of("id", presentacionId,"disponible", cantidadDisponibleStock, "cantidad", cantidadAVender)
+            );
         }
         return true;
     }
@@ -105,7 +111,10 @@ public class StockServiceImpl implements IStockService {
         final Integer cantidadDisponibleStock = repository.getCantidadStockDisponibleByPresentacionId(presentacionId);
 
         if(cantidadAVender > cantidadDisponibleStock) {
-            throw new RuntimeException("Stock insuficiente del producto PR-"+presentacionId);
+            throw new BusinessRuleException("Presentacion",
+                    EnumVenta.Rules.STOCK_INSUFICIENTE.name() ,
+                    Map.of("id", presentacionId,"disponible", cantidadDisponibleStock, "cantidad", cantidadAVender)
+            );
         }
         return true;
     }

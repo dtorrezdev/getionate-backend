@@ -14,12 +14,10 @@ import java.io.Serializable;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = false)
 public class MarcaRequest implements Serializable {
 
     @NotNull(message = "Nombre no puede ser null")
-    @NotBlank(message = "El nombre no puede estar vacío")
+    @NotBlank(message = "Nombre no puede estar vacío")
     @Size(min = 2, max = 60, message = "Nombre debe ser entre 2 y 60 letras.")
     private String nombre;
 

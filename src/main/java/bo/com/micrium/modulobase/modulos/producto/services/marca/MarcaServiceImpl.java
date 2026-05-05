@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.services.marca;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
@@ -54,7 +55,7 @@ public class MarcaServiceImpl implements IMarcaService {
                 })
                 .map(repository::save)
                 .map(MarcaMapper.toResponse)
-                .orElseThrow(() -> new RuntimeException("Marca no encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Marca", "id", id));
     }
 
     @Override
@@ -63,7 +64,7 @@ public class MarcaServiceImpl implements IMarcaService {
         //Long idDesencriptado = Long.valueOf(id); // ConfigEncriptacion.desencryptIdToConvertLong(id);
         final Marca marca = repository.findById(Long.valueOf(id))
                 .orElseThrow(() ->
-                        new RuntimeException("Marca no existe."));
+                        new EntityNotFoundException("Marca", "id", id));
         marca.setEsActivo(Boolean.FALSE);
         repository.save(marca);
     }

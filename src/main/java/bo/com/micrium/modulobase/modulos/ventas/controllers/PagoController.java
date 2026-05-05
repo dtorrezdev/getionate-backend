@@ -32,7 +32,7 @@ public class PagoController implements
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.save(request),
-                        "Se ha creado correctamente")
+                        "Pagos creado correctamente.")
                 );
     }
 }

@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.cliente;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ClienteRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.cliente.ListClienteRequest;
@@ -51,7 +52,7 @@ public class ClienteServiceImpl implements IClienteService {
                 })
                 .map(repository::save)
                 .map(ClienteMapper.fromEntityToClientResponse)
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Cliente","id",clienteId));
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ClienteServiceImpl implements IClienteService {
                 .ifPresentOrElse(
                         repository::delete,
                         () -> {
-                            throw new RuntimeException("Cliente no encontrada");
+                           throw  new EntityNotFoundException("Cliente","id",clienteId);
                         }
                 );
     }

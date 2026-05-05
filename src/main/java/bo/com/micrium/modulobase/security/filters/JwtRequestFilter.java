@@ -71,8 +71,8 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
     private void peticionesOptionsCors(HttpServletRequest request, HttpServletResponse response) {
         //HttpServletRequest req = (HttpServletRequest) request;
 
-        //response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
         //response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
         response.setHeader("Access-Control-Max-Age", "1500");
@@ -103,7 +103,8 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         LoggerMain.info("+++ UR2: " + request.getRequestURI());
 
         HttpServletResponse httpResp = (HttpServletResponse) response;
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
         httpResp.setHeader("Access-Control-Max-Age", "1500");
 
@@ -136,7 +137,8 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
 
     private void sinPermiso(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        response.setHeader("Access-Control-Allow-Origin", "*");
         //response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
         response.setHeader("Cache-Control", "no-cache, must-understand, no-store, max-age=604800, must-revalidate, private");
         response.setHeader("Access-Control-Max-Age", "1500");

@@ -1,5 +1,8 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.movimiento;
 
+import bo.com.micrium.modulobase.common.enums.EnumVenta;
+import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.DetalleMovimientoVentaRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaResponse;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -59,7 +63,7 @@ public class CreateMovientoVentaServiceImpl implements ICreateMovimientoVentaSer
 
                     //validateDetalleMovimiento(request, dto);
                     Stock stock = stockRepository.findById(dto.getStockId())
-                            .orElseThrow(()-> new RuntimeException("Stock Id no existe"));
+                            .orElseThrow(()-> new EntityNotFoundException("Stock","id", dto.getStockId()));
 
                     this.log.info("model stock: " + stock);
                     detalle.setCantidad(dto.getCantidadStock());
@@ -83,12 +87,12 @@ public class CreateMovientoVentaServiceImpl implements ICreateMovimientoVentaSer
             presentacionRepository.findByIdAndProductoId(
                     detalle.getPresentacionId(), detalle.getProductoId())
                     .orElseThrow(() ->
-                            new RuntimeException("Producto Presentacion no existe."));
+                            new EntityNotFoundException("Presentacion","id", detalle.getPresentacionId()));
 
             detalle.getStocks().forEach(stock-> {
                 stockRepository.findById(stock.getId())
                         .orElseThrow(()->
-                                new RuntimeException("Stock Id no existe"));
+                                new EntityNotFoundException("Stock","id", stock.getId()));
             });
 
             final Integer cantidadStockDisponible = this.stockRepository
@@ -96,7 +100,10 @@ public class CreateMovientoVentaServiceImpl implements ICreateMovimientoVentaSer
                     detalle.getPresentacionId());
             log.info("cantidadAvender: " + detalle.getCantidad() + ", cantidadDisponibleStock: "+cantidadStockDisponible);
             if(detalle.getCantidad() > cantidadStockDisponible) {
-                throw new RuntimeException("Stock insuficiente del producto PR-" + detalle.getPresentacionId());
+                throw new BusinessRuleException("Presentacion",
+                        EnumVenta.Rules.STOCK_INSUFICIENTE.name() ,
+                        Map.of("id", detalle.getPresentacionId(),"disponible", cantidadStockDisponible, "cantidad", detalle.getCantidad())
+                );
             }
         });
     }

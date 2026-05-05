@@ -38,7 +38,7 @@ public class UbicacionStockController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
-                        "se ha listado correctamente")
+                        "Ubicacion Stock listado correctamente.")
                 );
     }
 
@@ -52,7 +52,7 @@ public class UbicacionStockController implements
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),
-                        "se ha creado correctamente.")
+                        "Ubicacion Stock creado correctamente.")
                 );
     }
 
@@ -61,7 +61,7 @@ public class UbicacionStockController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.update(request, id),
-                        "se ha actaulizado correctamente.")
+                        "Ubicacion Stock actaulizado correctamente.")
                 );
     }
 

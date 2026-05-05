@@ -2,6 +2,8 @@ package bo.com.micrium.modulobase.modulos.producto.services.presentacion.create;
 
 import bo.com.micrium.modulobase.common.enums.EnumEvento;
 import bo.com.micrium.modulobase.common.enums.EnumInventario;
+import bo.com.micrium.modulobase.common.exceptions.DuplicateEntityException;
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.evento.services.EventoNotificaconServiceImpl;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.*;
 import bo.com.micrium.modulobase.modulos.producto.mappers.ProductoPresentacionMapper;
@@ -71,20 +73,21 @@ public class CreateProductoPresentacionServiceImpl implements ICreateProductoPre
     private void validateRequest(ProductoPresentacionRequest request) {
 
         productoRepository.findById(request.getProductoId())
-                .orElseThrow(() -> new RuntimeException("Producto Id no existe."));
+                .orElseThrow(() -> new EntityNotFoundException("Producto", "id", request.getProductoId()));
 
         unidadMedidaRepository.findById(request.getUnidadMedidaId())
-                .orElseThrow(()-> new RuntimeException("Unidad Medida Id no existe."));
+                .orElseThrow(()-> new EntityNotFoundException("Unidad Medida", "id", request.getUnidadMedidaId()));
 
         marcaRepository.findById(request.getMarcaId())
-                .orElseThrow(()-> new RuntimeException("Marca Id no existe."));
+                .orElseThrow(()-> new EntityNotFoundException("Marca", "id", request.getMarcaId()));
 
         repository.findByNombreAndProductoIdAndMarcaId(
                 request.getNombre().toUpperCase(),
                 request.getProductoId(),
                 request.getMarcaId())
                 .ifPresent((ele)-> {
-                    throw new RuntimeException("Presentacion ya se encuentra registrada");
+                    throw new DuplicateEntityException("Presentacion",
+                            "nombre,productoId,marcaId,", String.format("%s,%s,%s", request.getNombre(), request.getProductoId(), request.getMarcaId()));
                 });
 
     }

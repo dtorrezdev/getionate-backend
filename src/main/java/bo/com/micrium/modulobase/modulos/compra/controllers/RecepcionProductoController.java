@@ -41,7 +41,7 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.listService.execute(params, pageRequest),
-                        "Se ha listado correctamente")
+                        "Recepcion Productos listado correctamente.")
                 );
     }
 
@@ -54,7 +54,7 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.getService.execute(id),
-                        "Se ha obtenido correctamente")
+                        "Recepcion Producto obtenido correctamente.")
                 );
     }
 
@@ -68,7 +68,7 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.crearService.execute(request),
-                        "Se ha creado correctamente")
+                        "Recepcion Producto creado correctamente.")
                 );
     }
 
@@ -83,7 +83,7 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.updateService.execute(request, id),
-                        "Se ha actualizado correctamente")
+                        "Recepcion Producto actualizado correctamente.")
                 );
     }
 
@@ -110,6 +110,5 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
         this.updateService = updateService;
         this.anularService = anularService;
     }
-
 }
 

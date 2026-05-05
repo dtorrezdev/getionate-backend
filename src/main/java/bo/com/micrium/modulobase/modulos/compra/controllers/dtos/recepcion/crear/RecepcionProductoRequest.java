@@ -24,8 +24,8 @@ public class RecepcionProductoRequest implements Serializable {
     @Min(value = 1, message = "total debe ser mayor a 0")
     private BigDecimal total;
 
-    @NotNull(message = "proveedor Id no puede ser null")
-    private Long proveedorId;
+    @NotNull(message = "Compra Id no puede ser null")
+    private Long compraId;
 
     private String glosa;
 

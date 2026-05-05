@@ -14,5 +14,6 @@ import java.io.Serializable;
 public class CompraResponse implements Serializable {
 
     private Long id;
+    private String mensaje;
 }
 

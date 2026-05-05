@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.venta.get;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
@@ -18,7 +19,7 @@ public class GetVentaServiceImpl implements IGetVentaService {
     @Override
     public GetVentaResponse execute(Long ventaId) {
         final Venta venta =repository.findById(ventaId)
-                .orElseThrow( ()-> new RuntimeException("Venta no existe."));
+                .orElseThrow( ()-> new EntityNotFoundException("Venta","id",ventaId));
         return VentaMapper.entityToGetResponse.apply(venta);
     }
 }

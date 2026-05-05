@@ -25,6 +25,7 @@ public class ListPresentacionResponse implements Serializable {
     private Long marcaId;
     private String marca;
     private BigDecimal precioVenta;
+    private BigDecimal precioUnitario;
     private Long categoriaId;
     private String categoria;
     private Integer cantidadMinimoStock;

@@ -2,6 +2,8 @@ package bo.com.micrium.modulobase.modulos.ventas.services.venta.update;
 
 import bo.com.micrium.modulobase.common.enums.EnumEvento;
 import bo.com.micrium.modulobase.common.enums.EnumVenta;
+import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaResponse;
 import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoVentaService;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -109,13 +112,13 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
     private void validarRequest(VentaUpdateRequest request, Long ventaId) {
 
         repository.findById(ventaId)
-                .orElseThrow(() -> new RuntimeException("Venta Id no existe"));
+                .orElseThrow(() -> new EntityNotFoundException("Venta","id", ventaId));
 
         clienteRepository.findById(request.getClienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente no existe"));
+                .orElseThrow(() -> new EntityNotFoundException("Cliente","id", request.getClienteId()));
 
         if(!this.esEstadoValido(request.getEstado())) {
-            throw new RuntimeException("Estado "+request.getEstado()+" no es valido");
+            throw new EntityNotFoundException("Estado Venta", "nombre" ,request.getEstado());
         }
 
         request.getDetalle().forEach(this::validarDetalleAndGenerarEventoNotificacion);
@@ -123,6 +126,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
 
     // REF: el enun deberia disponer un metodo q valide
     private boolean esEstadoValido(String estado) {
+        // return  EnumVenta.Estado.exists(estado);
         return Arrays.stream(EnumVenta.Estado.values())
                 .anyMatch(e -> e.name().equals(estado));
     }
@@ -130,7 +134,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
     private void validarDetalleAndGenerarEventoNotificacion(DetalleVentaRequest detalle) {
 
         ProductoPresentacion productoPresentacion = productoRepository.findById(detalle.getPresentacionId())
-                .orElseThrow(()-> new RuntimeException("Producto no existe"));
+                .orElseThrow(()-> new EntityNotFoundException("Presentacion","id", detalle.getPresentacionId()));
 
         final Integer cantidadDisponibleEnStock = stockRepository.getCantidadStockDisponibleByProducto(
                 productoPresentacion.getProductoId(), productoPresentacion.getId());
@@ -138,7 +142,10 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
         this.registrarEventoNotificacion(productoPresentacion, cantidadDisponibleEnStock, detalle.getCantidad());
 
         if (cantidadDisponibleEnStock < detalle.getCantidad()) {
-            throw new RuntimeException("Producto PR-"+ productoPresentacion.getId() +" con stock insuficiente.");
+            throw new BusinessRuleException("Presentacion",
+                    EnumVenta.Rules.STOCK_INSUFICIENTE.name(),
+                    Map.of("id", productoPresentacion.getId(),"disponible", cantidadDisponibleEnStock, "cantidad", detalle.getCantidad())
+            );
         }
     }
 
@@ -166,7 +173,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
                 .execute(detalleVenta);
 
         if(Objects.isNull(movimientoResponse) || movimientoResponse.getId() == null) {
-            throw new RuntimeException("Movimiento no se ha creado");
+            throw new EntityNotFoundException("Movimiento", "Venta");
         }
         log.info("movimiento creado -> response: "+ movimientoResponse);
         return movimientoResponse.getId();

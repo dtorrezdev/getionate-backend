@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.services.categoria;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.categoria.CategoriaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.categoria.CategoriaResponse;
 
@@ -44,14 +45,14 @@ public class CategoriaService implements ICategoriaService {
                 })
                 .map(repository::save)
                 .map(CategoriaMapper.toResponse)
-                .orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Categoria", "id", id));
     }
 
     @Override
     public void delete(String id) {
         final Categoria categoria = repository.findById(Long.valueOf(id))
                 .orElseThrow(() ->
-                        new RuntimeException("Categoria no existe."));
+                        new EntityNotFoundException("Categoria", "id", id));
         categoria.setEsActivo(Boolean.FALSE);
         repository.save(categoria);
     }

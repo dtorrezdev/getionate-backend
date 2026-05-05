@@ -152,5 +152,4 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
     private String filterTextoQueryUpperLike(String texto) {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
-
 }

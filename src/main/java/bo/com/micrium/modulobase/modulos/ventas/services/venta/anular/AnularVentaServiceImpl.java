@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.venta.anular;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.AnularVentaRequest;
 import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
 import com.micrium.bd.access.jpa.modulo.venta.repository.IClienteRepository;
@@ -22,10 +23,10 @@ public class AnularVentaServiceImpl implements IAnularVentaService {
     public void execute(AnularVentaRequest request) {
 
         Venta venta = ventaRepository.findById(request.getVentaId())
-                .orElseThrow(() -> new RuntimeException("Venta no existe"));
+                .orElseThrow(() -> new EntityNotFoundException("Venta","id", request.getVentaId()));
 
         clienteRepository.findById(request.getClienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente no existe"));
+                .orElseThrow(() -> new EntityNotFoundException("Cliente","id", request.getClienteId()));
 
         venta.setGlosa(request.getGlosa());
         venta.setEstado("ANULADO");

@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.movimiento;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoResponse;
@@ -83,10 +84,10 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
 
     private void validateMovimiento(MovimientoRequest movimiento) {
         presentacionRepository.findByIdAndProductoId(movimiento.getPresentacionId(), movimiento.getProductoId())
-                .orElseThrow(() -> new RuntimeException("Producto Presentacion no existe."));
+                .orElseThrow(() -> new EntityNotFoundException("Presentacion","id", movimiento.getPresentacionId()));
 
         tipoMovimientoRepository.findById(movimiento.getTipoMovimientoId())
-                .orElseThrow(() -> new RuntimeException("Tipo Movimiento no existe."));
+                .orElseThrow(() -> new EntityNotFoundException("Tipo Movimiento", "id", movimiento.getTipoMovimientoId()));
 
         if (esMovimientoTipoEntrada(movimiento) &&
             Objects.nonNull(movimiento.getUbicacionStockId())) {

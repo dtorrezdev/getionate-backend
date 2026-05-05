@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.services.unidad_medida;
 
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
@@ -57,14 +58,14 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
                 })
                 .map(repository::save)
                 .map(UnidadMedidaMapper.fromEntityToResponse)
-                .orElseThrow(() -> new RuntimeException("Unidad Medida Id no existe."));
+                .orElseThrow(() -> new EntityNotFoundException("Unidad Medida", "id", id));
     }
 
     @Override
     public void delete(Long id) {
         final UnidadMedida unidadMedida = repository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Unidad Medida Id no existe."));
+                        new EntityNotFoundException("Unidad Medida", "id", id));
         unidadMedida.setEsActivo(false);
         repository.save(unidadMedida);
     }
