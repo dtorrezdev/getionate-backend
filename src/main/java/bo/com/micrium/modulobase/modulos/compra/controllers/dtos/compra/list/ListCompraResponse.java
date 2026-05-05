@@ -15,8 +15,11 @@ public class ListCompraResponse implements Serializable {
     private Long id;
     private BigDecimal total;
     private String glosa;
-    private Timestamp fecha;
+    private Timestamp fechaCompra;
+    private Timestamp fechaSolicitud;
     private Long provedorId;
+    private String proveedor;
     private String estado;
+    private Integer nroItems;
+    private String codigo;
 }
-

@@ -15,9 +15,11 @@ public class ListCompraRequest implements Serializable {
 
     private String id;
     private String total;
+    private String codigo;
     private String glosa;
-    private String fecha;
-    private String provedorId;
+    private String provedor;
     private String estado;
+    private String fechaCompra;
+    private String fechaSolicitud;
 }
 

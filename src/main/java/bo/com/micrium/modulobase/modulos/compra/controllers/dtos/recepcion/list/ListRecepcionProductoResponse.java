@@ -13,10 +13,13 @@ import java.sql.Timestamp;
 @ToString
 public class ListRecepcionProductoResponse implements Serializable {
     private Long id;
+    private Long compraId;
     private BigDecimal total;
     private String glosa;
-    private Timestamp fecha;
+    private Timestamp fechaRegistro;
+    private String proveedor;
     private Long proveedorId;
-    private Long movimientoId;
+    private String codigo;
+    private Integer nroItems;
 }
 

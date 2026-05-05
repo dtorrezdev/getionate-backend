@@ -3,8 +3,12 @@ package bo.com.micrium.modulobase.modulos.compra.Mappers;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.DetalleCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
+import com.micrium.bd.access.jpa.modulo.compra.projection.ListCompraProjection;
+import com.micrium.bd.access.jpa.modulo.venta.projection.ListVentaProjection;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -51,5 +55,20 @@ public class CompraMapper {
         return response;
     };
 
+    public static final Function<ListCompraProjection, ListCompraResponse>
+            fromProjectionToListCompraResponse = compra -> {
+        ListCompraResponse response = new ListCompraResponse();
+        response.setId(compra.getId());
+        response.setProveedor(compra.getProveedor());
+        response.setEstado(compra.getEstado());
+        response.setCodigo(compra.getCodigo());
+        response.setGlosa(compra.getGlosa());
+        response.setTotal(compra.getTotal());
+        response.setProvedorId(compra.getProveedorId());
+        response.setFechaCompra(compra.getFechaCompra());
+        response.setFechaSolicitud(compra.getFechaSolicitud());
+        response.setNroItems(compra.getNroItems());
+        return response;
+    };
 
 }

@@ -3,6 +3,9 @@ package bo.com.micrium.modulobase.modulos.compra.services.recepcion.create;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.RecepcionProductoMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.DetalleRecepcionRequest;
+import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
+import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
+import com.micrium.bd.access.jpa.modulo.compra.models.DetalleRecepcion;
 import com.micrium.bd.access.jpa.modulo.compra.models.RecepcionProducto;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.ICompraRepository;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.IRecepcionProductoRepository;
@@ -14,6 +17,9 @@ import org.springframework.stereotype.Service;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.RecepcionProductoRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.RecepcionProductoResponse;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProductoService {
@@ -39,6 +45,12 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
 
         // 2. Mapear request a entity
         final RecepcionProducto newRecepcion = RecepcionProductoMapper.toEntity.apply(request);
+        List<DetalleRecepcion> detalle = this.procesarDetalleCalculos(newRecepcion);
+        newRecepcion.setDetalle(detalle);
+        BigDecimal totalRecepcion = detalle.stream()
+                .map(DetalleRecepcion::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        newRecepcion.setTotal(totalRecepcion);
         log.info("request mapeado a entity");
         // crear movimientos
 
@@ -49,8 +61,18 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
                 .apply(repository.save(newRecepcion));
     }
 
+    private List<DetalleRecepcion> procesarDetalleCalculos(RecepcionProducto recepcion) {
+        return recepcion.getDetalle().stream()
+                .map( (detalle) -> {
+                    BigDecimal precio = detalle.getPrecio();
+                    BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidad()));
+                    detalle.setSubtotal(subtotal);
+                    return detalle;
+                }).toList();
+    }
+
     private void validarRequest(RecepcionProductoRequest request) {
-        // Validar que el proveedor existe
+        // Validar que el compra existe
         final var compraId = request.getCompraId();
         compraRepository.findById(compraId)
                 .orElseThrow(() -> new EntityNotFoundException("Compra", "id", compraId));

@@ -16,8 +16,9 @@ public class ListRecepcionProductoRequest implements Serializable {
     private String id;
     private String total;
     private String glosa;
-    private String fecha;
-    private String proveedorId;
-    private String movimientoId;
+    private String fechaRegistro;
+    private String proveedor;
+//    private String movimientoId;
+    private String codigo;
 }
 
