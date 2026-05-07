@@ -2,14 +2,13 @@ package bo.com.micrium.modulobase.modulos.inventario.services.movimiento;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoResponse;
-import bo.com.micrium.modulobase.modulos.inventario.mapper.MovimientoMapper;
+import bo.com.micrium.modulobase.modulos.inventario.mapper.MovimientoProductoMapper;
 import bo.com.micrium.modulobase.modulos.inventario.services.stock.StockServiceImpl;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Movimiento;
 import com.micrium.bd.access.jpa.modulo.inventario.models.MovimientoProducto;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
-import com.micrium.bd.access.jpa.modulo.inventario.repository.IMovimientoProductoRepository;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IMovimientoRepository;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.ITipoMovimientoRepository;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
-public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
+public class CreateMovimientoProductoServiceImpl implements ICreateMovimientoProductoService {
 
     @Autowired
     private IMovimientoRepository repository;
@@ -39,15 +38,15 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
     @Autowired
     private ITipoMovimientoRepository tipoMovimientoRepository;
 
-    private final Logger log = LogManager.getLogger(CreateMovimientoServiceImpl.class);
+    private final Logger log = LogManager.getLogger(CreateMovimientoProductoServiceImpl.class);
 
     @Override
     @Transactional
-    public MovimientoResponse execute(MovimientoRequest request) {
+    public MovimientoResponse execute(MovimientoProductoRequest request) {
         log.info("execute create");
         this.validateMovimiento(request);
         log.info("is validate create");
-        final Movimiento movimiento = MovimientoMapper.
+        final Movimiento movimiento = MovimientoProductoMapper.
                 fromMovimientoRequestToMovimientoEntity
                 .apply(request);
 
@@ -78,11 +77,11 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
 
         movimiento.setDetalleMovimiento(detalles);
         this.log.info("model movimiento after: " + movimiento);
-        return MovimientoMapper.fromMovimientoEntityToMovimientoResponse
+        return MovimientoProductoMapper.fromMovimientoEntityToMovimientoResponse
                 .apply(repository.save(movimiento));
     }
 
-    private void validateMovimiento(MovimientoRequest movimiento) {
+    private void validateMovimiento(MovimientoProductoRequest movimiento) {
         presentacionRepository.findByIdAndProductoId(movimiento.getPresentacionId(), movimiento.getProductoId())
                 .orElseThrow(() -> new EntityNotFoundException("Presentacion","id", movimiento.getPresentacionId()));
 
@@ -95,11 +94,11 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
         }
     }
 
-    private boolean esMovimientoTipoSalida(MovimientoRequest movimiento) {
+    private boolean esMovimientoTipoSalida(MovimientoProductoRequest movimiento) {
         return movimiento.getTipoMovimientoId().equals(2L);
     }
 
-    private Integer getCantidadBaseConSigno(MovimientoRequest request, DetalleMovimientoRequest dto) {
+    private Integer getCantidadBaseConSigno(MovimientoProductoRequest request, DetalleMovimientoRequest dto) {
         if (esMovimientoTipoEntrada(request)) {
             return dto.getCantidadStockBase();
         } else {
@@ -107,7 +106,7 @@ public class CreateMovimientoServiceImpl implements ICreateMovimientoService {
         }
     }
 
-    private boolean esMovimientoTipoEntrada(MovimientoRequest movimiento) {
+    private boolean esMovimientoTipoEntrada(MovimientoProductoRequest movimiento) {
         return movimiento.getTipoMovimientoId().equals(1L);
     }
 }

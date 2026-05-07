@@ -1,7 +1,7 @@
 package bo.com.micrium.modulobase.modulos.inventario.mapper;
 
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoRequest;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoResponse;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Movimiento;
 import com.micrium.bd.access.jpa.modulo.inventario.models.MovimientoProducto;
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MovimientoMapper {
+public class MovimientoProductoMapper {
 
-    private MovimientoMapper() {
+    private MovimientoProductoMapper() {
         throw new AssertionError();
     }
 
@@ -25,7 +25,7 @@ public class MovimientoMapper {
                     //.stock(null)
                     .build();
 
-    public static final Function<MovimientoRequest, Movimiento>
+    public static final Function<MovimientoProductoRequest, Movimiento>
             fromMovimientoRequestToMovimientoEntity = request -> {
 
         Movimiento movimiento = new Movimiento();

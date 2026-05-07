@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class MovimientoRequest implements Serializable {
+public class MovimientoProductoRequest implements Serializable {
     @NotNull( message = "Tipo Movimiento Id no puede ser nulo.")
     private Long tipoMovimientoId;
 
