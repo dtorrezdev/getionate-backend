@@ -5,8 +5,7 @@ import bo.com.micrium.modulobase.common.enums.EnumVenta;
 import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
-import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.venta.MovimientoVentaResponse;
-import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.ICreateMovimientoVentaService;
+import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.registrar.IRegistrarMovimientoService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
@@ -44,7 +43,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
     // Dominio del Modulo Producto
     private IProductoPresentacionRepository productoRepository; // eliminar dependencia
     // Dominio del Modulo Inventario
-    private final ICreateMovimientoVentaService createMovimientoService;
+    private final IRegistrarMovimientoService registrarMovimientoService;
     private final IStockRepository stockRepository;
 
     // Dominio del Modulo Evento
@@ -65,7 +64,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
 
         /*3. Estoy seguro q va ser venta (no esta demas validar) para movimiento*/
         if(request.getEstado().equals(EnumVenta.Estado.VENTA.name()) ) {
-            final Long movimientoId = this.crearMovimientoAndObtenerId(request.getDetalle());
+            final Long movimientoId = registrarMovimientoService.registrar(request.getDetalle());
             updateVenta.setMovimientoId(movimientoId);
         }
 
@@ -167,19 +166,6 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
     }
 
     // REF: y reutilizar
-    private Long crearMovimientoAndObtenerId(List<DetalleVentaRequest> detalleVenta) {
-        log.info("Es tipo Venta Directa");
-        MovimientoVentaResponse movimientoResponse = this.createMovimientoService
-                .execute(detalleVenta);
-
-        if(Objects.isNull(movimientoResponse) || movimientoResponse.getId() == null) {
-            throw new EntityNotFoundException("Movimiento", "Venta");
-        }
-        log.info("movimiento creado -> response: "+ movimientoResponse);
-        return movimientoResponse.getId();
-    }
-
-    // REF: y reutilizar
     private void crearPagos(PagoRequest pagoRequest, Long ventaId) {
         pagoRequest.setVentaId(ventaId);
         log.info("Creamos Pagos " + pagoRequest);
@@ -193,7 +179,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
             IClienteRepository clienteRepository,
             IPagoService pagoService,
             IProductoPresentacionRepository productoRepository,
-            ICreateMovimientoVentaService createMovimientoService,
+            IRegistrarMovimientoService registrarMovimientoService,
             IStockRepository stockRepository,
             IEventoNotificacionService eventoService
     ) {
@@ -202,7 +188,7 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
         this.clienteRepository = clienteRepository;
         this.pagoService = pagoService;
         this.productoRepository = productoRepository;
-        this.createMovimientoService = createMovimientoService;
+        this.registrarMovimientoService = registrarMovimientoService;
         this.stockRepository = stockRepository;
         this.eventoService = eventoService;
     }

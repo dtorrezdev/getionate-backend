@@ -29,7 +29,7 @@ public class MovimientoInventarioProductoMapper {
                     StockMovimientoDto stock = new StockMovimientoDto();
                     stock.setLote(detalle.getLote());
                     stock.setExpiracion(detalle.getFechaExpiracion());
-                    stock.setCantidad(detalle.getCantidadStock()); // eliminar cantidad Base
+                    stock.setCantidad(detalle.getCantidadStockBase()); // eliminar cantidad Base
                     stock.setRegistroSanitario(detalle.getRegistroSanitario());
                     stock.setUbicacionStockId(productoRequest.getUbicacionStockId());
                     return stock;

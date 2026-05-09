@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear;
 
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.registrar.StockMovimientoDto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,8 +32,6 @@ public class DetalleRecepcionRequest implements Serializable {
     @Min(value = 1, message = "precio debe ser mayor a 0")
     private BigDecimal precio;
 
-    private Date fechaVencimiento;
-
-    private String lote;
+    private List<StockMovimientoDto> stocks;
 }
 

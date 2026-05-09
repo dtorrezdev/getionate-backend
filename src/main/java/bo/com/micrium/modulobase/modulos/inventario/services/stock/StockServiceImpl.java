@@ -91,6 +91,7 @@ public class StockServiceImpl implements IStockService {
             return repository.findById(stockDto.getId())
                     .orElseGet(() -> save2(request, stockDto));
         }
+
         return repository.findByLoteAndProductoIdAndPresentacionId(stockDto.getLote(),
                         request.getProductoId(), request.getPresentacionId())
                 .orElseGet(() -> save2(request, stockDto));

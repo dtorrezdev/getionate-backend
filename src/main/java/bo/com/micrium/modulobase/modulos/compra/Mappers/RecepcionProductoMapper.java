@@ -24,8 +24,6 @@ public class RecepcionProductoMapper {
                     .productoId(dto.getProductoId())
                     .cantidad(dto.getCantidad())
                     .precio(dto.getPrecio())
-                    .fechaVencimiento(dto.getFechaVencimiento())
-                    .lote(dto.getLote())
                     .build();
 
     public static final Function<RecepcionProductoRequest, RecepcionProducto> toEntity = request -> {
@@ -35,7 +33,7 @@ public class RecepcionProductoMapper {
         recepcion.setTotal(request.getTotal());
         recepcion.setGlosa(request.getGlosa());
         recepcion.setCompraId(request.getCompraId());
-        recepcion.setMovimientoId(request.getMovimientoId());
+//        recepcion.setMovimientoId(request.getMovimientoId());
         recepcion.setCodigo(request.getCodigo());
 
         List<DetalleRecepcion> detalles = request.getDetalle().stream()

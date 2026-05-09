@@ -3,6 +3,7 @@ package bo.com.micrium.modulobase.modulos.compra.services.recepcion.create;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.RecepcionProductoMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.DetalleRecepcionRequest;
+import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.registrar.IRegistrarMovimientoService;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleRecepcion;
@@ -33,6 +34,9 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
     @Autowired
     private IProductoPresentacionRepository productoRepository;
 
+    @Autowired
+    private IRegistrarMovimientoService registrarMovimientoService;
+
     private final Logger log = LogManager.getLogger(CreateRecepcionProductoServiceImpl.class);
 
     @Override
@@ -52,9 +56,11 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         newRecepcion.setTotal(totalRecepcion);
         log.info("request mapeado a entity");
-        // crear movimientos
 
-        //newRecepcion.setMovimientoId(null);
+        // crear movimientos
+        final Long movimientoId = registrarMovimientoService.registrarRecepcion(request.getDetalle());
+
+        newRecepcion.setMovimientoId(movimientoId);
 
         // 3. Guardar en repositorio
         return RecepcionProductoMapper.toResponse
