@@ -23,13 +23,12 @@ public class MovimientoInventarioRecepcionMapper {
         final List<ItemMovimientoDto> itemMovimientos = detalleVentaRequests.stream()
                 .map(detalle -> {
                     ItemMovimientoDto item = new ItemMovimientoDto();
-                    item.setCantidad(detalle.getCantidad()); // cantidad a vender
+                    item.setCantidad(detalle.getCantidad()); // cantidad a comprar
                     item.setProductoId(detalle.getProductoId());
                     item.setPresentacionId(detalle.getPresentacionId());
                     final List<StockMovimientoDto> stocks = detalle.getStocks().stream()
                             .map(stock -> {
                                 StockMovimientoDto newStock = new StockMovimientoDto();
-//                                newStock.setId(stock.getId());
                                 newStock.setCantidad(stock.getCantidad());
                                 newStock.setUbicacionStockId(stock.getUbicacionStockId());
                                 newStock.setLote(stock.getLote());
