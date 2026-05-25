@@ -25,6 +25,7 @@ public class ProveedorController implements IListMethod<ProveedorRequest, Provee
     @Override
     public ResponseEntity<ApiResponse<Page<ProveedorResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             ProveedorRequest request,
@@ -38,7 +39,7 @@ public class ProveedorController implements IListMethod<ProveedorRequest, Provee
     }
 
     @Override
-    public ResponseEntity<ApiResponse<ProveedorResponse>> create(String token, String ipClient, String form, ProveedorRequest request) {
+    public ResponseEntity<ApiResponse<ProveedorResponse>> create(String token, String tenantId, String ipClient, String form, ProveedorRequest request) {
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),

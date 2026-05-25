@@ -175,7 +175,7 @@ public class TipoParametroControler extends GenericControler
     }
 
     @Override
-    public ResponseEntity<TipoParametroResponse> create(String token, String ipClient, String form,
+    public ResponseEntity<TipoParametroResponse> create(String token, String tenantId, String ipClient, String form,
             TipoParametroRequest request, BindingResult result) throws URISyntaxException, ApiException {
         ipClient = obtenerIp(ipClient);
 

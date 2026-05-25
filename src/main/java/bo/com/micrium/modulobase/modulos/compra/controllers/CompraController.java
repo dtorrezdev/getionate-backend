@@ -33,6 +33,7 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
     @Override
     public ResponseEntity<ApiResponse<Page<ListCompraResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             ListCompraRequest params,
@@ -61,6 +62,7 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
     @Override
     public ResponseEntity<ApiResponse<CompraResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             CompraRequest request

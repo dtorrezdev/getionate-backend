@@ -30,12 +30,6 @@ public class ProductoPresentacionRequest implements Serializable {
     @NotNull(message = "Unidad Medida Id no puede ser nulo.")
     private Long unidadMedidaId;
 
-    @NotNull(message = "Es unidad minima no puede ser nulo.")
-    private Boolean esUnidadMinima;
-
-    @NotNull(message = "Factor Conversion no puede ser nulo.")
-    private Integer factorConversion;
-
     @NotNull(message = "Precio Unitario no puede ser nulo.")
     private BigDecimal precioUnitario;
 
@@ -53,4 +47,11 @@ public class ProductoPresentacionRequest implements Serializable {
 
     @NotNull(message = "Marca Id no puede ser nulo.")
     private Long marcaId;
+
+    @NotNull(message = "Se Controla Stock no puede ser nulo.")
+    private Boolean seControlaStock;
+
+    @Size(max = 255, message = "Imagen no debe exceder de 255 letras.")
+    private String imagen;
+
 }

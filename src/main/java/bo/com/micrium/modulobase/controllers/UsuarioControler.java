@@ -253,7 +253,7 @@ public class UsuarioControler extends GenericControler
     }
 
     @Override
-    public ResponseEntity<UsuarioResponse> create(String token, String ipClient, String form,
+    public ResponseEntity<UsuarioResponse> create(String token, String tenantId, String ipClient, String form,
             UsuarioRequest request, BindingResult result) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
 
@@ -325,7 +325,7 @@ public class UsuarioControler extends GenericControler
                     pass,
                     request.getTipo(), (short) 0, null,
                     rolRepository.findById(request.getRolId()).get(), UsuarioEstado.HABILITADO,
-                    fechaActualizacion);
+                    fechaActualizacion, Long.valueOf(tenantId));
             LoggerWeb.debug("***** OAC usuario:" + usuario);
             Usuario model = repository.save(usuario);
             LoggerWeb.debug("***** OAC DESUES SAVE:" + usuario);

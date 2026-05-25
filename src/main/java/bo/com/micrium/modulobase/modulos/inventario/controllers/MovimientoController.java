@@ -21,6 +21,7 @@ public class MovimientoController implements
     @Override
     public ResponseEntity<ApiResponse<MovimientoResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             MovimientoProductoRequest request

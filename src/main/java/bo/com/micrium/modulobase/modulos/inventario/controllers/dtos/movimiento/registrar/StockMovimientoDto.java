@@ -2,11 +2,13 @@ package bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.sql.Date;
 
 @Getter
 @Setter
+@ToString
 public class StockMovimientoDto {
     private Long id;
     private String lote;

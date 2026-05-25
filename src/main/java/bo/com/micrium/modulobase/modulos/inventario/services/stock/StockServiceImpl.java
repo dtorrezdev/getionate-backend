@@ -3,6 +3,7 @@ package bo.com.micrium.modulobase.modulos.inventario.services.stock;
 import bo.com.micrium.modulobase.common.enums.EnumVenta;
 import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.registrar.ItemMovimientoDto;
@@ -28,15 +29,15 @@ public class StockServiceImpl implements IStockService {
 
     private final IStockRepository repository;
     private final IUbicacionStockRepository ubicacionStockRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     private final Logger log = LogManager.getLogger(StockServiceImpl.class);
 
     @Override
     public Map<Long, List<StockDisponibleDto>> stockDisponibles() {
         log.info("call stockDisponibles");
-        //
-
-        final List<StockDisponibleDto> stocks = repository.listAll()
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final List<StockDisponibleDto> stocks = repository.listAll(tenantId)
                 .stream()
                 .map(StockMapper.toResponse)
                 .toList();
@@ -50,7 +51,13 @@ public class StockServiceImpl implements IStockService {
 
     @Override
     public Stock save(MovimientoProductoRequest request, DetalleMovimientoRequest detalle) {
-        final Optional<UbicacionStock> byId = ubicacionStockRepository.findById(request.getUbicacionStockId());
+        var ubicacionStock = Optional.<UbicacionStock>empty();
+        final Long tenantId = currentUserProvider.getUserTenantId();
+
+        if(Objects.nonNull(request.getUbicacionStockId())) {
+            ubicacionStock = ubicacionStockRepository.findById(request.getUbicacionStockId());
+        }
+
         log.info("create new stock lote: " + detalle.getLote() + " presentacionId: " + request.getPresentacionId());
         Stock newStock = Stock.builder()
                 .lote(detalle.getLote())
@@ -58,13 +65,19 @@ public class StockServiceImpl implements IStockService {
                 .registroSanitario(detalle.getRegistroSanitario())
                 .productoId(request.getProductoId())
                 .presentacionId(request.getPresentacionId())
-                .ubicacionStock(byId.orElse(null))
+                .ubicacionStock(ubicacionStock.orElse(null))
+                .tenantId(tenantId)
                 .build();
         return repository.save(newStock);
     }
 
     public Stock save2(ItemMovimientoDto request, StockMovimientoDto stockDto) {
-        final Optional<UbicacionStock> ubicacionStock = ubicacionStockRepository.findById(stockDto.getUbicacionStockId());
+        var ubicacionStock = Optional.<UbicacionStock>empty();
+        final Long tenantId = currentUserProvider.getUserTenantId();
+
+        if(Objects.nonNull(stockDto.getUbicacionStockId())) {
+            ubicacionStock = ubicacionStockRepository.findById(stockDto.getUbicacionStockId());
+        }
         log.info("create new stock lote: " + stockDto.getLote() + " presentacionId: " + request.getPresentacionId());
         Stock newStock = Stock.builder()
                 .lote(stockDto.getLote())
@@ -73,6 +86,7 @@ public class StockServiceImpl implements IStockService {
                 .productoId(request.getProductoId())
                 .presentacionId(request.getPresentacionId())
                 .ubicacionStock(ubicacionStock.orElse(null))
+                .tenantId(tenantId)
                 .build();
         return repository.save(newStock);
     }
@@ -100,7 +114,6 @@ public class StockServiceImpl implements IStockService {
     @Override
     public List<StockDisponibleDto> stockDisponibleByPresentacionId(Long presentacionId) {
         log.info("request presentacionId: " + presentacionId);
-        //log.info("result " + stocks);
 
         return repository.findByPresentacionId(presentacionId)
                 .stream()
@@ -146,9 +159,11 @@ public class StockServiceImpl implements IStockService {
 
     public StockServiceImpl(
             IStockRepository repository,
-            IUbicacionStockRepository ubicacionStockRepository
+            IUbicacionStockRepository ubicacionStockRepository,
+            CurrentUserProvider currentUserProvider
     ) {
         this.repository = repository;
         this.ubicacionStockRepository = ubicacionStockRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 }

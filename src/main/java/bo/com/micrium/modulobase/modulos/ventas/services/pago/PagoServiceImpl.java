@@ -36,7 +36,7 @@ public class PagoServiceImpl implements IPagoService {
         this.validateRequest(request);
         final Venta venta = ventarepository.findById(request.getVentaId())
                 .orElseThrow(()-> new EntityNotFoundException("Venta","id", request.getVentaId()));
-
+        log.info("venta: tenatId " + venta.getTenantId());
         //2. transformar a entidades
         final List<Pago> pagos = request.getDetallePago().stream()
                 .map(detalle ->
@@ -44,6 +44,7 @@ public class PagoServiceImpl implements IPagoService {
                             .tipoPago(detalle.getTipo())
                             .total(detalle.getMonto())
                             .venta(venta)
+                            .tenantId(venta.getTenantId())
                             .build()
                 ).toList();
         return PagoMapper

@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.producto.services.unidad_medida;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.unidad_medida.UnidadMedidaResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
@@ -23,11 +24,17 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
     @Autowired
     private IUnidadMedidaRepository repository;
 
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(UnidadMedidaServiceImpl.class);
 
     @Override
     public Page<UnidadMedidaResponse> list(UnidadMedidaRequest request, Pageable pageRequest) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
+
         log.info(" list(): request " + request);
+
         return repository.filter(
                 queryfilterTexto(request.getAbreviatura()),
                 filterTextoQueryUpperLike(request.getAbreviatura()),
@@ -35,16 +42,19 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
                 filterTextoQueryUpperLike(request.getNombre()),
                 queryfilterTexto(request.getEsUnidadMinima()),
                 filterTextoQueryUpperLike(request.getEsUnidadMinima()),
-                pageRequest
+                pageRequest, tenantId
         ).map(UnidadMedidaMapper.fromEntityToResponse);
     }
 
     @Override
     public UnidadMedidaResponse create(UnidadMedidaRequest request) {
-        return UnidadMedidaMapper.fromRequestToEntity
-                .andThen(repository::save)
-                .andThen(UnidadMedidaMapper.fromEntityToResponse)
-                .apply(request);
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final UnidadMedida newUnidadMedida = UnidadMedidaMapper
+                .fromRequestToEntity.apply(request);
+        newUnidadMedida.setTenantId(tenantId);
+
+        return UnidadMedidaMapper.fromEntityToResponse
+                .apply(repository.save(newUnidadMedida));
     }
 
     @Override

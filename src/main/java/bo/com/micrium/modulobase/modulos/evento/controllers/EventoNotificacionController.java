@@ -23,6 +23,7 @@ public class EventoNotificacionController implements
     @Override
     public ResponseEntity<ApiResponse<Page<EventoNotificacionResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             EventoNotificacionRequest request,

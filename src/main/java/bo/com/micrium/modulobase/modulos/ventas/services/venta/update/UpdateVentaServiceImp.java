@@ -4,6 +4,7 @@ import bo.com.micrium.modulobase.common.enums.EnumEvento;
 import bo.com.micrium.modulobase.common.enums.EnumVenta;
 import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
 import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.registrar.IRegistrarMovimientoService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
@@ -49,6 +50,8 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
     // Dominio del Modulo Evento
     private final IEventoNotificacionService eventoService;
 
+    private final CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(UpdateVentaServiceImp.class);
 
     @Override
@@ -60,12 +63,21 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
 
         /*2. transformar la data (Mapping)*/
         final Venta updateVenta = VentaMapper.fromUpdatetoEntity.apply(request);
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        updateVenta.setTenantId(tenantId);
         log.info("request mapeado a entity");
+
 
         /*3. Estoy seguro q va ser venta (no esta demas validar) para movimiento*/
         if(request.getEstado().equals(EnumVenta.Estado.VENTA.name()) ) {
-            final Long movimientoId = registrarMovimientoService.registrar(request.getDetalle());
-            updateVenta.setMovimientoId(movimientoId);
+            final var detalleProductoConStock = request.getDetalle().stream().
+                    filter(DetalleVentaRequest::getSeControlaStock).toList();
+
+            if(!detalleProductoConStock.isEmpty()) {
+                log.info("Es tipo Venta Directa con movimiento");
+                final Long movimientoId = registrarMovimientoService.registrar(detalleProductoConStock);
+                updateVenta.setMovimientoId(movimientoId);
+            }
         }
 
         /*4. procesar Detalle */
@@ -135,16 +147,19 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
         ProductoPresentacion productoPresentacion = productoRepository.findById(detalle.getPresentacionId())
                 .orElseThrow(()-> new EntityNotFoundException("Presentacion","id", detalle.getPresentacionId()));
 
-        final Integer cantidadDisponibleEnStock = stockRepository.getCantidadStockDisponibleByProducto(
-                productoPresentacion.getProductoId(), productoPresentacion.getId());
+        if(detalle.getSeControlaStock()) {
+            log.info(" secontrala Stock");
+            final Integer cantidadDisponibleEnStock = stockRepository.getCantidadStockDisponibleByProducto(
+                    productoPresentacion.getProductoId(), productoPresentacion.getId());
 
-        this.registrarEventoNotificacion(productoPresentacion, cantidadDisponibleEnStock, detalle.getCantidad());
+            this.registrarEventoNotificacion(productoPresentacion, cantidadDisponibleEnStock, detalle.getCantidad());
 
-        if (cantidadDisponibleEnStock < detalle.getCantidad()) {
-            throw new BusinessRuleException("Presentacion",
-                    EnumVenta.Rules.STOCK_INSUFICIENTE.name(),
-                    Map.of("id", productoPresentacion.getId(),"disponible", cantidadDisponibleEnStock, "cantidad", detalle.getCantidad())
-            );
+            if (cantidadDisponibleEnStock < detalle.getCantidad()) {
+                throw new BusinessRuleException("Presentacion",
+                        EnumVenta.Rules.STOCK_INSUFICIENTE.name(),
+                        Map.of("id", productoPresentacion.getId(), "disponible", cantidadDisponibleEnStock, "cantidad", detalle.getCantidad())
+                );
+            }
         }
     }
 
@@ -181,7 +196,8 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
             IProductoPresentacionRepository productoRepository,
             IRegistrarMovimientoService registrarMovimientoService,
             IStockRepository stockRepository,
-            IEventoNotificacionService eventoService
+            IEventoNotificacionService eventoService,
+            CurrentUserProvider currentUserProvider
     ) {
         this.repository = repository;
         this.detalleRepository = detalleRepository;
@@ -191,5 +207,6 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
         this.registrarMovimientoService = registrarMovimientoService;
         this.stockRepository = stockRepository;
         this.eventoService = eventoService;
+        this.currentUserProvider = currentUserProvider;
     }
 }

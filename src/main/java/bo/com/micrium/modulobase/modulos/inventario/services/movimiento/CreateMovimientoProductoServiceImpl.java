@@ -23,6 +23,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * @deprecated  No se usa
+ * */
 @Service
 public class CreateMovimientoProductoServiceImpl implements ICreateMovimientoProductoService {
 

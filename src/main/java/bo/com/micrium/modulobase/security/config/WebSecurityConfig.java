@@ -1,15 +1,11 @@
 package bo.com.micrium.modulobase.security.config;
 
 import java.io.Serializable;
-//import java.util.Arrays;
 
-//import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter; @deprecado
+//import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;// @deprecado
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//import org.springframework.web.cors.CorsConfiguration;
-//import org.springframework.web.cors.CorsConfigurationSource;
-//import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-//import org.springframework.web.filter.CorsFilter;
+
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -17,16 +13,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-//import org.springframework.core.Ordered;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 
 import bo.com.micrium.modulobase.security.controllers.JwtAuthenticationController;
-//import bo.com.micrium.modulobase.security.filters.JwtAuthenticationEntryPoint;
 import bo.com.micrium.modulobase.security.filters.JwtRequestFilter;
 import bo.com.micrium.modulobase.controllers.EtiquetaControler;
 
@@ -61,25 +54,20 @@ public class WebSecurityConfig implements Serializable {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(11);
     }
-
-    // @Bean
-    // @Override
-    // public AuthenticationManager authenticationManagerBean() {
-    //     return new AuthenticationLdapManager();
-    // }
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
             .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authRequest -> authRequest
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers(EtiquetaControler.RESOURCE_BY_LLAVE).permitAll()
-            .requestMatchers(EtiquetaControler.RESOURCE_BY_GRUPO).permitAll()
-            // .requestMatchers(PerfilControler.RESOURCE_CAMBIOLOGIN).permitAll().
-            .requestMatchers(JwtAuthenticationController.METODO_AUTENTICACION).permitAll()
-            .requestMatchers(JwtAuthenticationController.METODO_VERSION).permitAll()            
-            .anyRequest().authenticated())
+            .authorizeHttpRequests(authRequest ->
+                    authRequest.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                            .requestMatchers(EtiquetaControler.RESOURCE_BY_LLAVE).permitAll()
+                            .requestMatchers(EtiquetaControler.RESOURCE_BY_GRUPO).permitAll()
+                            // .requestMatchers(PerfilControler.RESOURCE_CAMBIOLOGIN).permitAll().
+                            .requestMatchers(JwtAuthenticationController.METODO_AUTENTICACION).permitAll()
+                            .requestMatchers(JwtAuthenticationController.METODO_VERSION).permitAll()
+                            .anyRequest().authenticated()
+            )
             .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             //.authenticationProvider(authProvider)
             //.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -89,7 +77,4 @@ public class WebSecurityConfig implements Serializable {
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
-
-  
-
 }

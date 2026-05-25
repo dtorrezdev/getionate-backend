@@ -257,7 +257,7 @@ public class ParametroControler extends GenericControler
     }
 
     @Override
-    public ResponseEntity<ParametroResponse> create(String token, String ipClient, String form,
+    public ResponseEntity<ParametroResponse> create(String token, String tenantId, String ipClient, String form,
             ParametroRequest request, BindingResult result) throws URISyntaxException, ApiException {
 
         HashMap<String, String> map = new HashMap<>();

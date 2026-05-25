@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.producto.services.categoria;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.categoria.CategoriaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.categoria.CategoriaResponse;
 
@@ -17,22 +18,28 @@ public class CategoriaService implements ICategoriaService {
 
     private final ICategoriaRepository repository;
 
+    private final CurrentUserProvider currentUserProvider;
+
     @Override
     public Page<CategoriaResponse> list(CategoriaRequest request, Pageable pageable) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         return repository.filter(
                 queryfilterTexto(request.getNombre()),
                 filterTextoQueryUpperLike(request.getNombre()),
                 queryfilterTexto(request.getDescripcion()),
                 filterTextoQueryUpperLike(request.getDescripcion()),
-                pageable).map(CategoriaMapper.toResponse);
+                pageable, tenantId).map(CategoriaMapper.toResponse);
     }
 
     @Override
     public CategoriaResponse create(CategoriaRequest request) {
-        return CategoriaMapper.toEntity
-                .andThen(repository::save)
-                .andThen(CategoriaMapper.toResponse)
-                .apply(request);
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Categoria newCategoria = CategoriaMapper
+                .toEntity.apply(request);
+        newCategoria.setTenantId(tenantId);
+
+        return CategoriaMapper.toResponse
+                .apply(repository.save(newCategoria));
     }
 
     @Override
@@ -69,7 +76,10 @@ public class CategoriaService implements ICategoriaService {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
 
-    public CategoriaService(ICategoriaRepository repository) {
+    public CategoriaService(
+            ICategoriaRepository repository,
+            CurrentUserProvider currentUserProvider) {
         this.repository = repository;
+        this.currentUserProvider = currentUserProvider;
     }
 }

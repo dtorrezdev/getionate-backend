@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.producto.services.marca;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.marca.MarcaResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
@@ -18,11 +19,12 @@ import java.util.Map;
 public class MarcaServiceImpl implements IMarcaService {
 
     private final IMarcaRepository repository;
+    private final CurrentUserProvider currentUserProvider;
     // private final Logger log = LogManager.getLogger(IMarcaServiceImpl.class);
 
     @Override
     public Page<MarcaResponse> list(Map<String, String> params, Pageable pageRequest) {
-
+        final Long tenantId = currentUserProvider.getUserTenantId();
         final String nombre = params.get("nombre");
         final String descripcion = params.get("descripcion");
 
@@ -31,16 +33,17 @@ public class MarcaServiceImpl implements IMarcaService {
                 filterTextoQueryUpperLike(nombre),
                 queryfilterTexto(descripcion),
                 filterTextoQueryUpperLike(descripcion),
-                pageRequest).map(MarcaMapper.toResponse);
+                pageRequest, tenantId).map(MarcaMapper.toResponse);
     }
 
     @Override
     public MarcaResponse create(MarcaRequest request) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Marca marca = MarcaMapper.toEntity.apply(request);
+        marca.setTenantId(tenantId);
 
-        return MarcaMapper.toEntity
-                .andThen(repository::save)
-                .andThen(MarcaMapper.toResponse)
-                .apply(request);
+        return MarcaMapper.toResponse
+                .apply(repository.save(marca));
     }
 
     @Override
@@ -81,7 +84,11 @@ public class MarcaServiceImpl implements IMarcaService {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
 
-    public MarcaServiceImpl(IMarcaRepository repository) {
+    public MarcaServiceImpl(
+            IMarcaRepository repository,
+            CurrentUserProvider currentUserProvider
+    ) {
         this.repository = repository;
+        this.currentUserProvider = currentUserProvider;
     }
 }

@@ -33,6 +33,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
     @Override
     public ResponseEntity<ApiResponse<Page<ListVentaResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             ListVentaRequest params,
@@ -61,6 +62,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
     @Override
     public ResponseEntity<ApiResponse<VentaResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             VentaRequest request

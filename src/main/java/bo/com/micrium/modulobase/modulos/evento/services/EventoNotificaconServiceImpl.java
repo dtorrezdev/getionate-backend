@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.evento.services;
 
 import bo.com.micrium.modulobase.common.enums.EnumEvento;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionRequest;
 import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionResponse;
 import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
@@ -24,11 +25,13 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
 
     private final INotificacionRepository notificacionRepository;
 
+    private final CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(EventoNotificaconServiceImpl.class);
 
     @Override
     public Page<EventoNotificacionResponse> list(EventoNotificacionRequest request, Pageable page) {
-
+        final Long tenantId = currentUserProvider.getUserTenantId();
         log.info("list request "+ request);
 
         return repository.filter(
@@ -42,7 +45,7 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
                         filterTextoQueryUpperLike(request.getNotificacionId()),
                         queryfilterTexto(request.getTipoNotificacion()),
                         filterTextoQueryUpperLike(request.getTipoNotificacion()),
-                        page)
+                        page, tenantId)
                 .map(ele -> {
                     EventoNotificacionResponse resp = new EventoNotificacionResponse();
                     resp.setId(ele.getId());
@@ -67,17 +70,17 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
             log.info("registrarEvento ya existe: " + eventExist.get());
             return eventExist.get();
         }
-
+        final Long tenantId = currentUserProvider.getUserTenantId();
         EventoNotificacion event = new EventoNotificacion();
         event.setTipoEvento(typeEvento);
         event.setEstado(EnumEvento.NotificacionStatus.PENDIENTE.name());
         event.setPresentacionId(presentacionId);
+        event.setTenantId(tenantId);
 
         return repository.save(event);
     }
 
     public void registrarEventoYNotificacionProducto(String typeEvento, Long presentacionId) {
-
         EventoNotificacion newEvento = this.registrarEvento(typeEvento, presentacionId);
         this.crearNotificacionProducto(newEvento);
         newEvento.setEstado(EnumEvento.NotificacionStatus.PROCESADO.name());
@@ -102,6 +105,7 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
     }
 
     private void crearNotificacionVentaProducto(EventoNotificacion eventoNotificacion) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
@@ -116,12 +120,14 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
                 EnumEvento.NotificacionTipo.RECORDATORIO.name();
 
         notificacion.setTipo(tipoNotificacion);
+        notificacion.setTenantId(tenantId);
         //notificacion.setUsuarioId(null);
         log.info("CreandoNotificacion: " + notificacion);
         this.notificacionRepository.save(notificacion);
     }
 
     private void crearNotificacionProducto(EventoNotificacion eventoNotificacion) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
@@ -131,14 +137,19 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         notificacion.setDescripcion("Este producto no esta configurado adecuadamente");
 
         notificacion.setTipo(EnumEvento.NotificacionTipo.RECOMENDACION.name());
+        notificacion.setTenantId(tenantId);
         //notificacion.setUsuarioId(null);
         log.info("CreandoNotificacion: " + notificacion);
         this.notificacionRepository.save(notificacion);
     }
 
-    public EventoNotificaconServiceImpl(IEventoNotificacionRepository repository, INotificacionRepository notificacionRepository) {
+    public EventoNotificaconServiceImpl(
+            IEventoNotificacionRepository repository,
+            INotificacionRepository notificacionRepository,
+            CurrentUserProvider currentUserProvider) {
         this.repository = repository;
         this.notificacionRepository = notificacionRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     private boolean isBlanck(String dato) {

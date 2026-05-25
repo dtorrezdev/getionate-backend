@@ -33,6 +33,7 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
     @Override
     public ResponseEntity<ApiResponse<Page<ListRecepcionProductoResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             ListRecepcionProductoRequest params,
@@ -61,6 +62,7 @@ public class RecepcionProductoController implements IListMethod<ListRecepcionPro
     @Override
     public ResponseEntity<ApiResponse<RecepcionProductoResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             RecepcionProductoRequest request

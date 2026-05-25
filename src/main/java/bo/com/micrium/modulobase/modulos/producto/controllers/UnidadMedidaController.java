@@ -25,7 +25,14 @@ public class UnidadMedidaController implements
     private final IUnidadMedidaService service;
 
     @Override
-    public ResponseEntity<ApiResponse<Page<UnidadMedidaResponse>>> list(String token, String ipClient, String form, UnidadMedidaRequest request, Pageable pageRequest) {
+    public ResponseEntity<ApiResponse<Page<UnidadMedidaResponse>>> list(
+            String token,
+            String tenantId,
+            String ipClient,
+            String form,
+            UnidadMedidaRequest request,
+            Pageable pageRequest
+    ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
@@ -34,7 +41,7 @@ public class UnidadMedidaController implements
     }
 
     @Override
-    public ResponseEntity<ApiResponse<UnidadMedidaResponse>> create(String token, String ipClient, String form, UnidadMedidaRequest request) {
+    public ResponseEntity<ApiResponse<UnidadMedidaResponse>> create(String token, String tenantId, String ipClient, String form, UnidadMedidaRequest request) {
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),

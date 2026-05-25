@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.List;
 
 import bo.com.micrium.modulobase.commons.RolEstado;
+import bo.com.micrium.modulobase.security.controllers.dto.UserContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import bo.com.micrium.modulobase.security.controllers.JwtAuthenticationController;
-import bo.com.micrium.modulobase.security.services.JwtUserDetailsService;
 import bo.com.micrium.modulobase.security.services.RateLimiterService;
 
 import com.micrium.bd.access.jpa.modulo.administracion.repositories.IRolAccionRepository;
@@ -59,8 +62,8 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
     @Autowired
     private transient IAccionRepository accionRepository;
 
-    @Autowired
-    private transient JwtUserDetailsService jwtUserDetailsService;
+//    @Autowired
+//    private transient JwtUserDetailsService jwtUserDetailsService;
     
     @Autowired
     private transient JwtTokenUtil jwtTokenUtil;
@@ -182,7 +185,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         }
 
         Bucket bucket = rateLimiterService.resolveBucket("S/N"); // peticones sin token
-               
+        String rolNombre = null;
         // printAllHeaders(request);
         if (!request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_AUTENTICACION)
                 && !request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_VERSION)
@@ -190,9 +193,6 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 //&& !request.getRequestURI().equals(request.getContextPath() + "/notificacion")
                 && !request.getRequestURI().equals(request.getContextPath() + EtiquetaControler.RESOURCE_BY_GRUPO)) {
             String requestTokenHeader = request.getHeader(JwtTokenUtil.KEY_TOKEN);
-
-
-            String rolNombre = null;
 
             if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")) {
                 tokenInvalido(request, response);
@@ -227,7 +227,6 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 return;
             }
             Rol rol = rolRepository.findByNombreAndEstado(rolNombre, RolEstado.HABILITADO);
-
             if (rol == null) {
                 tokenInvalido(request, response);
                 return;
@@ -262,14 +261,21 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
                 return;
             }
 
-            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(rolNombre);
+            //UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(rolNombre);
+            UserContext userDetails = jwtTokenUtil.getUserContextFromToken(requestTokenHeader);
+            List<String> permisos = jwtTokenUtil.getPermisosFromToken(requestTokenHeader);
+            List<SimpleGrantedAuthority> authorities =
+                    permisos.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .toList();
 
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            usernamePasswordAuthenticationToken
-                    .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            UsernamePasswordAuthenticationToken autenticadoUser =
+                    new UsernamePasswordAuthenticationToken(
+                    userDetails, null, authorities);
+            autenticadoUser.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                             
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            SecurityContextHolder.getContext()
+                    .setAuthentication(autenticadoUser);
         }
         // Aplicar control de tasa
         if (!bucket.tryConsume(1)) {

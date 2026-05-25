@@ -1,12 +1,12 @@
 package bo.com.micrium.modulobase.modulos.producto.services.presentacion.list;
 
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.ListPresentacionRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.ListPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.ProductoPresentacionMapper;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,17 +14,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class ListProductoPresentacionServiceImpl implements IListProductoPresentacionService {
 
-    @Autowired
-    private IProductoPresentacionRepository repository;
+    private final IProductoPresentacionRepository repository;
+
+    private final CurrentUserProvider currentUserProvider;
 
     private final Logger log = LogManager.getLogger(ListProductoPresentacionServiceImpl.class);
 
+    public ListProductoPresentacionServiceImpl(
+            IProductoPresentacionRepository repository,
+            CurrentUserProvider currentUserProvider
+    ) {
+        this.repository = repository;
+        this.currentUserProvider = currentUserProvider;
+    }
+
     @Override
-    public Page<ListPresentacionResponse> execute(ListPresentacionRequest request, Pageable page) {
+    public Page<ListPresentacionResponse> execute(
+            ListPresentacionRequest request, Pageable page) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         log.info("params: " + request);
         log.info("page: " + page);
 
-        return repository.filterV2(
+        return repository.filter(
                 queryfilterTexto(request.getProductoId()),
                 filterTextoQueryUpperLike(request.getProductoId()),
                 queryfilterTexto(request.getProducto()),
@@ -43,7 +54,7 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
                 filterTextoQueryUpperLike(request.getMarca()),
                 queryfilterTexto(request.getCategoria()),
                 filterTextoQueryUpperLike(request.getCategoria()),
-                page)
+                page, tenantId)
                 .map(ProductoPresentacionMapper.fromProjectionToListPresentacionResponse);
     }
 

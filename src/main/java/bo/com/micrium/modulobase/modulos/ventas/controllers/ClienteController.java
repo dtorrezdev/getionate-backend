@@ -29,6 +29,7 @@ public class ClienteController implements
     @Override
     public ResponseEntity<ApiResponse<Page<ClienteResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             ListClienteRequest params,
@@ -43,6 +44,7 @@ public class ClienteController implements
     @Override
     public ResponseEntity<ApiResponse<ClienteResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             ClienteRequest request

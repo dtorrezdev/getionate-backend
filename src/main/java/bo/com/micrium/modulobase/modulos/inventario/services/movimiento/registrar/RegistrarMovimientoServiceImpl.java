@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.movimiento.registrar;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.MovimientoInventarioRecepcionMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.DetalleRecepcionRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoProductoRequest;
@@ -43,6 +44,9 @@ public class RegistrarMovimientoServiceImpl implements IRegistrarMovimientoServi
 
     @Autowired
     private IProductoPresentacionRepository presentacionRepository;
+
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
 
     private final Logger log = LogManager.getLogger(RegistrarMovimientoServiceImpl.class);
 
@@ -92,9 +96,13 @@ public class RegistrarMovimientoServiceImpl implements IRegistrarMovimientoServi
         validar(request);
         log.info("Valido request");
 
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long userId = currentUserProvider.getUserId();
         final Movimiento movimiento = RegistrarMovimientoMapper.
                 fromMovimientoRequestToMovimientoEntity
                 .apply(request);
+        movimiento.setTenantId(tenantId);
+        movimiento.setUsuarioId(userId);
         log.info("mapping to  entity");
         final List<MovimientoProducto> movimientoProductos = procesarStock(request, movimiento);
         movimiento.setDetalleMovimiento(movimientoProductos);
@@ -105,7 +113,8 @@ public class RegistrarMovimientoServiceImpl implements IRegistrarMovimientoServi
     }
 
     private List<MovimientoProducto> procesarStock(RegistrarMovimientoRequest request, Movimiento move) {
-        System.out.println("procesar Caso " + request.getMotivo());
+        log.info("procesar Caso " + request.getMotivo());
+
         return switch (request.getMotivo()) {
             case "REGISTRO PRODUCTO", "RECEPCION PRODUCTOS" ->
                     procesarStockFromIngresoProducto(request.getItemMovimientos(), move); // cantidad +
@@ -118,14 +127,18 @@ public class RegistrarMovimientoServiceImpl implements IRegistrarMovimientoServi
         };
     }
 
-    private List<MovimientoProducto> procesarStockFromIngresoProducto(List<ItemMovimientoDto> itemsMovimientos, Movimiento move) {
+    private List<MovimientoProducto> procesarStockFromIngresoProducto(
+            List<ItemMovimientoDto> itemsMovimientos, Movimiento move) {
             log.info(" procesarStockFromIngresoProducto ");
           return itemsMovimientos.stream()
                 .flatMap(item ->
+
                     item.getStocks().stream()
                             .map(stockDto -> {
+                                log.info("item find/new " +  item);
                                 Stock stock = stockService.resolverStock2(item, stockDto);
-
+//                                stock.setTenantId(move.getTenantId());
+                                log.info("stock find/new " +  stock);
                                 return MovimientoProducto.builder()
                                         .cantidad(stockDto.getCantidad()) // base positivo
                                         .cantidadBase(stockDto.getCantidad()) // base positivo
@@ -136,7 +149,8 @@ public class RegistrarMovimientoServiceImpl implements IRegistrarMovimientoServi
                 ).toList();
     }
 
-    private List<MovimientoProducto> procesarStockFromVentaProductos(List<ItemMovimientoDto> itemsMovimientos, Movimiento move) {
+    private List<MovimientoProducto> procesarStockFromVentaProductos(
+            List<ItemMovimientoDto> itemsMovimientos, Movimiento move) {
         log.info(" procesarStockFromVentaProductos ");
         List<MovimientoProducto> newMovimientos = new ArrayList<>();
 
@@ -160,9 +174,15 @@ public class RegistrarMovimientoServiceImpl implements IRegistrarMovimientoServi
         return newMovimientos;
     }
 
-    private MovimientoProducto crearMovimientoProducto(ItemMovimientoDto item, StockMovimientoDto stockDto, int cantidad, Movimiento move) {
+    private MovimientoProducto crearMovimientoProducto(
+            ItemMovimientoDto item,
+            StockMovimientoDto stockDto,
+            int cantidad,
+            Movimiento move
+    ) {
         Stock stock =
                 stockService.resolverStock2(item, stockDto);
+//        stock.setTenantId(move.getTenantId());
 
         return MovimientoProducto.builder()
                 .cantidad(cantidad)

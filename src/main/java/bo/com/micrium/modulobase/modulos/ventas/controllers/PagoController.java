@@ -24,6 +24,7 @@ public class PagoController implements
     @Override
     public ResponseEntity<ApiResponse<PagoResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             PagoRequest request

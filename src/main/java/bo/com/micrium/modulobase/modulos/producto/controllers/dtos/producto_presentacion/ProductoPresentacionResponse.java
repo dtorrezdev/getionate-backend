@@ -19,12 +19,12 @@ public class ProductoPresentacionResponse implements Serializable {
     private String concepto;
     private String descripcion;
     private Long unidadMedidaId;
-    private Boolean esUnidadMinima;
-    private Integer factorConversion;
     private BigDecimal precioUnitario;
     private BigDecimal precioVenta;
     private Integer cantidadMinimoStock;
     private Integer cantidadDisponibleStock;
     private Integer diasAntesExpiracion;
     private Long marcaId;
+    private Boolean seControlaStock;
+    private String imagen;
 }

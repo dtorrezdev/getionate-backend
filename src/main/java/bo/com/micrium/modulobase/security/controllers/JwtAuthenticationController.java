@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import bo.com.micrium.modulobase.security.controllers.dto.UserContext;
 import jakarta.validation.Valid;
 
 import org.apache.logging.log4j.LogManager;
@@ -141,10 +142,12 @@ public class JwtAuthenticationController extends GenericControler {
                     new AbstractMap.SimpleEntry<>("request ", authenticationRequest)).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             Rol rol = null;
+            Usuario user = null;
 
             try {
                 rol = authenticationManager.validarCredenciales(authenticationRequest.getNombreUsuario(),
                         authenticationRequest.getContrasena());
+                user = usuarioRepository.findBynombreUsuario(authenticationRequest.getNombreUsuario());
             } catch (BadCredentialsException | InsufficientAuthenticationException | AccountStatusException e) {
                 //LoggerMain.error(e.getMessage(), e);
                 //LoggerMain.error("ABC", "AAA", AbstractLogger.getMsgError(e));
@@ -153,8 +156,10 @@ public class JwtAuthenticationController extends GenericControler {
                 //return ResponseEntity.badRequest().body(new ExceptionResponse(HttpStatus.BAD_REQUEST, "Error procesamiento", e.getMessage()));
                 return ResponseEntity.badRequest().body(new ExceptionResponse(HttpStatus.UNAUTHORIZED, "Error procesamiento", e.getMessage()));
             }
+            UserContext userContext = new UserContext(user.getId(), user.getNombreUsuario(), rol.getNombre(), rol.getTenantId());
+            final String token = jwtTokenUtil.generateToken(userContext, new ArrayList<>());
+            //final String token = jwtTokenUtil.generateToken(authenticationRequest.getNombreUsuario(), rol.getNombre());
 
-            final String token = jwtTokenUtil.generateToken(authenticationRequest.getNombreUsuario(), rol.getNombre());
             List<ModuloResponse> modulos = new ArrayList<>();
             List<Long> formularios = new ArrayList<>();
             Map<Long, Boolean> formVisible = new HashMap<>();
@@ -245,7 +250,7 @@ public class JwtAuthenticationController extends GenericControler {
                 String tipoAuth = tipoAD.getValor().equals(TipoAutenticacion.HIBRIDO.getId())? "1": tipoAD.getValor();
                 ResponseEntity<AutenticacionResponse> out = ResponseEntity.ok(new AutenticacionResponse(
                         usuario.getId(), token, rol.getId(), rol.getNombre(),
-                        modulos, usuario.getNombreCompleto(),
+                        modulos, usuario.getNombreCompleto(), usuario.getTenantId(),
                         inactivityTime.getValor(), timeoutBackend.getValor(),
                         urlNoTimeoutBackend.getValor(), tipoAuth,
                         ConfigEncriptacion.btoa(fraseSecreta.getValor())));

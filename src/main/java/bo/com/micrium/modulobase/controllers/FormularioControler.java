@@ -164,7 +164,7 @@ public class FormularioControler extends GenericControler
     }
 
     @Override
-    public ResponseEntity<FormularioResponse2> create(String token, String ipClient, String form,
+    public ResponseEntity<FormularioResponse2> create(String token, String tenantId, String ipClient, String form,
             FormularioRequest2 request, BindingResult result) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<>();
         try {
@@ -191,7 +191,7 @@ public class FormularioControler extends GenericControler
             // request.getTipo(), request.getUrl(), request.getIcono(),
             // moduloRepository.findById(request.getModuloId()).get()));
             Formulario model = repository.save(new Formulario(null, request.getNombre(), request.getOrden(),
-                    request.getModuloId(), request.getUrl(), request.getIcono()));
+                    request.getModuloId(), request.getUrl(), request.getIcono(), Long.valueOf(tenantId)));
 
             map.put(TiposComunes.ModuloBase.FORMULARIO, ConvercionUtil.toJson(model));
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.FORMULARIO_CREAR, null, map);

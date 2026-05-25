@@ -1,6 +1,8 @@
 package bo.com.micrium.modulobase.modulos.compra.services.recepcion.create;
 
+import bo.com.micrium.modulobase.common.exceptions.DuplicateEntityException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.RecepcionProductoMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.DetalleRecepcionRequest;
 import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.registrar.IRegistrarMovimientoService;
@@ -37,6 +39,9 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
     @Autowired
     private IRegistrarMovimientoService registrarMovimientoService;
 
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(CreateRecepcionProductoServiceImpl.class);
 
     @Override
@@ -48,7 +53,9 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
         log.info("request valido");
 
         // 2. Mapear request a entity
+        final Long tenantId = currentUserProvider.getUserTenantId();
         final RecepcionProducto newRecepcion = RecepcionProductoMapper.toEntity.apply(request);
+        newRecepcion.setTenantId(tenantId);
         List<DetalleRecepcion> detalle = this.procesarDetalleCalculos(newRecepcion);
         newRecepcion.setDetalle(detalle);
         BigDecimal totalRecepcion = detalle.stream()
@@ -82,6 +89,12 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
         final var compraId = request.getCompraId();
         compraRepository.findById(compraId)
                 .orElseThrow(() -> new EntityNotFoundException("Compra", "id", compraId));
+
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)
+                .ifPresent(compra -> {
+                    throw new DuplicateEntityException("Compra","codigo", request.getCodigo());
+                });
         // Validar todos los detalles
         request.getDetalle().forEach(this::validarDetalle);
     }

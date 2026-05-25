@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.ubicacion_stock;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.ubicacion_stock.*;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.UbicacionStockMapper;
 import bo.com.micrium.modulobase.modulos.producto.mappers.MarcaMapper;
@@ -20,10 +21,14 @@ public class UbicacionStockServiceImpl implements IUbicacionStockService {
     @Autowired
     private IUbicacionStockRepository repository;
 
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(UbicacionStockServiceImpl.class);
 
     @Override
     public Page<UbicacionStockResponse> list(UbicacionStockRequest request, Pageable page) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         log.info("params: " + request);
         log.info("page: " + page);
 
@@ -34,16 +39,18 @@ public class UbicacionStockServiceImpl implements IUbicacionStockService {
                 filterTextoQueryUpperLike(request.getEstante()),
                 queryfilterTexto(request.getNivel()),
                 filterTextoQueryUpperLike(request.getNivel()),
-                page)
+                page, tenantId)
                 .map(UbicacionStockMapper.fromEntityToResponse);
     }
 
     @Override
     public UbicacionStockResponse create(UbicacionStockRequest request) {
-        return UbicacionStockMapper.toEntity
-                .andThen(repository::save)
-                .andThen(UbicacionStockMapper.fromEntityToResponse)
-                .apply(request);
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final UbicacionStock newUbicacion = UbicacionStockMapper.toEntity.apply(request);
+        newUbicacion.setTenantId(tenantId);
+
+        return UbicacionStockMapper.fromEntityToResponse
+                .apply(repository.save(newUbicacion));
     }
 
     @Override

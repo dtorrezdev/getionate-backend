@@ -1,7 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.mappers;
 
 import bo.com.micrium.modulobase.common.enums.EnumInventario;
-import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.CreateProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionResponse;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.list.ListPresentacionResponse;
@@ -22,21 +21,34 @@ public class ProductoPresentacionMapper {
                 .precioUnitario(request.getPrecioUnitario())
                 .precioVenta(request.getPrecioVenta())
                 .unidadMedidaId(request.getUnidadMedidaId())
-                .esUnidadMinima(request.getEsUnidadMinima())
-                .factorConversion(request.getFactorConversion())
                 .marcaId(request.getMarcaId())
                 .nombre(request.getNombre())
                 .cantidadDisponibleStock(request.getCantidadDisponibleStock())
                 .cantidadMinimoStock(request.getCantidadMinimoStock())
                 .diasAntesExpiracion(request.getDiasAntesExpiracion())
                 .esActivo(Boolean.TRUE)
+                .seControlaStock(request.getSeControlaStock())
+                .imagen(request.getImagen())
                 .build()
      ;
 
-    public static final Function<ProductoPresentacion, CreateProductoPresentacionResponse>
+    public static final Function<ProductoPresentacion, ProductoPresentacionResponse>
             toResponse = entity -> {
-        CreateProductoPresentacionResponse response = new CreateProductoPresentacionResponse();
+        ProductoPresentacionResponse response = new ProductoPresentacionResponse();
         response.setId(entity.getId());
+        response.setProductoId(entity.getProductoId());
+        response.setNombre(entity.getNombre());
+        response.setConcepto(entity.getConcepto());
+        response.setDescripcion(entity.getDescripcion());
+        response.setPrecioUnitario(entity.getPrecioUnitario());
+        response.setPrecioVenta(entity.getPrecioVenta());
+        response.setUnidadMedidaId(entity.getUnidadMedidaId());
+        response.setMarcaId(entity.getMarcaId());
+        response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
+        response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
+        response.setDiasAntesExpiracion(entity.getDiasAntesExpiracion());
+        response.setSeControlaStock(entity.getSeControlaStock());
+        response.setImagen(entity.getImagen());
         return response;
     };
 
@@ -61,8 +73,12 @@ public class ProductoPresentacionMapper {
         response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
         response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
         response.setDiasAntesExpiracion(entity.getDiasAntesExpiracion());
+        response.setSeControlaStock(entity.getSeControlaStock());
+        response.setImagen(entity.getImagen());
         // no es buena practica poner logica del negocio en Mapper BAD
-        if(entity.getCantidadDisponibleStock() <= 0) {
+        if(!entity.getSeControlaStock()) {
+            response.setEstadoStock(EnumInventario.StockStatus.NO_APLICA.name());
+        }else if(entity.getCantidadDisponibleStock() <= 0) {
             response.setEstadoStock(EnumInventario.StockStatus.AGOTADO.name());
         } else
         if(entity.getCantidadDisponibleStock() <= entity.getCantidadMinimoStock()) {
@@ -84,13 +100,13 @@ public class ProductoPresentacionMapper {
         response.setPrecioUnitario(entity.getPrecioUnitario());
         response.setPrecioVenta(entity.getPrecioVenta());
         response.setUnidadMedidaId(entity.getUnidadMedidaId());
-        response.setEsUnidadMinima(entity.getEsUnidadMinima());
-        response.setFactorConversion(entity.getFactorConversion());
         response.setMarcaId(entity.getMarcaId());
         response.setNombre(entity.getNombre());
         response.setCantidadDisponibleStock(entity.getCantidadDisponibleStock());
         response.setCantidadMinimoStock(entity.getCantidadMinimoStock());
         response.setDiasAntesExpiracion(entity.getDiasAntesExpiracion());
+        response.setSeControlaStock(entity.getSeControlaStock());
+        response.setImagen(entity.getImagen());
         return response;
     };
 }

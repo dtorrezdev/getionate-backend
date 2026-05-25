@@ -16,6 +16,7 @@ public interface IListMethod<R extends Serializable, T extends Serializable> {
     @GetMapping
     ResponseEntity<ApiResponse<Page<T>>> list(
             @RequestHeader(value = JwtTokenUtil.KEY_TOKEN) String token,
+            @RequestHeader(value = JwtTokenUtil.TENANT_ID, required = true) String tenantId,
             @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
             @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
             @ModelAttribute R request,

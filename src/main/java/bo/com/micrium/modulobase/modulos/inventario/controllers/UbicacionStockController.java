@@ -30,6 +30,7 @@ public class UbicacionStockController implements
     @Override
     public ResponseEntity<ApiResponse<Page<UbicacionStockResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             UbicacionStockRequest request,
@@ -45,6 +46,7 @@ public class UbicacionStockController implements
     @Override
     public ResponseEntity<ApiResponse<UbicacionStockResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             UbicacionStockRequest request

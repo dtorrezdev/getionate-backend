@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.ventas.services.venta.list;
 
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
@@ -17,10 +18,14 @@ public class ListVentaServiceImpl implements IListVentaService {
     @Autowired
     private IVentaRepository repository;
 
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
+
      private final Logger log = LogManager.getLogger(ListVentaServiceImpl.class);
 
     @Override
     public Page<ListVentaResponse> execute(ListVentaRequest request, Pageable page) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         log.info("params: " + request);
         log.info("page: " + page);
         return repository.filter(
@@ -38,7 +43,7 @@ public class ListVentaServiceImpl implements IListVentaService {
                 filterTextoQueryUpperLike(request.getCliente()),
                 queryfilterTexto(request.getEstado()),
                 filterTextoQueryUpperLike(request.getEstado()),
-                page)
+                page, tenantId)
                 .map(VentaMapper.fromProjectionToListVentaResponse);
     }
 

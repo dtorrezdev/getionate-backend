@@ -228,7 +228,7 @@ public class EtiquetaControler extends GenericControler
     }
 
     @Override
-    public ResponseEntity<EtiquetaResponse> create(String token, String ipClient, String form,
+    public ResponseEntity<EtiquetaResponse> create(String token, String tenantId, String ipClient, String form,
             EtiquetaRequest request, BindingResult result) throws URISyntaxException, ApiException {
 
         HashMap<String, String> map = new HashMap<String, String>();
@@ -254,7 +254,7 @@ public class EtiquetaControler extends GenericControler
             }
 
             Etiqueta model = repository.save(
-                    new Etiqueta(null, request.getLlave(), request.getValor(), request.getGrupo(), ESTADO_ACTIVO));
+                    new Etiqueta(null, request.getLlave(), request.getValor(), request.getGrupo(), ESTADO_ACTIVO, Long.valueOf(tenantId)));
             map.put(TiposComunes.ModuloBase.ROL, ConvercionUtil.toJson(model));
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.ETIQUETA_CREAR, null, map);
 

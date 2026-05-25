@@ -24,6 +24,7 @@ public class AutenticacionResponse implements Serializable {
     private final String rol;
     private final List<ModuloResponse> modulos;
     private final String nombre;
+    private final Long tenantId;
 
     private final String inactivityTime;
     private final String timeoutBackend;

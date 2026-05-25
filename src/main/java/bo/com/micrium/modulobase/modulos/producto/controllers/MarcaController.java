@@ -24,6 +24,7 @@ public class MarcaController implements
     @Override
     public ResponseEntity<ApiResponse<Page<MarcaResponse>>> list(
            String token,
+           String tenantId,
            String ipClient,
            String form,
            Map<String, String> params,
@@ -44,6 +45,7 @@ public class MarcaController implements
     @Override
     public ResponseEntity<ApiResponse<MarcaResponse>> create(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             MarcaRequest request

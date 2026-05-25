@@ -181,7 +181,7 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
     }
 
     @Override
-    public ResponseEntity<RolResponse> create(String token, String ipClient, String form,
+    public ResponseEntity<RolResponse> create(String token, String tenantId, String ipClient, String form,
             RolRequest request, BindingResult result) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<String, String>();
 
@@ -206,7 +206,7 @@ public class RolControler extends GenericControler implements ICrudControler<Rol
             }
 
             Rol model = repository
-                    .save(new Rol(null, request.getNombre(), request.getDescripcion(), RolEstado.HABILITADO));
+                    .save(new Rol(null, request.getNombre(), request.getDescripcion(), RolEstado.HABILITADO, Long.valueOf(tenantId)));
             map.put(TiposComunes.ModuloBase.ROL, ConvercionUtil.toJson(model));
             List<RolTipoParametroPermiso> temp = new ArrayList<>();
 

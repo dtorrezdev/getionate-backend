@@ -3,6 +3,7 @@ package bo.com.micrium.modulobase.modulos.compra.services.compra.create;
 import bo.com.micrium.modulobase.common.enums.EnumCompra;
 import bo.com.micrium.modulobase.common.exceptions.DuplicateEntityException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.CompraMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.DetalleCompraRequest;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
@@ -29,6 +30,9 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
     @Autowired
     private ICompraRepository repository;
 
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(CreateCompraServiceImpl.class);
 
     @Override
@@ -37,8 +41,9 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
         // 1. Validar request
         this.validarRequest(request);
         log.info("request valido");
-
+        final Long tenantId = currentUserProvider.getUserTenantId();
         final Compra newCompra = CompraMapper.toEntity.apply(request);
+        newCompra.setTenantId(tenantId);
         List<DetalleCompra> detalle = this.procesarDetalleCalculos(newCompra);
         newCompra.setDetalle(detalle);
         BigDecimal totalCompra = detalle.stream()
@@ -72,11 +77,13 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
     private IProveedorRepository proveedorRepository;
 
     private void validarRequest(CompraRequest request) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
         final var proveedorId = request.getProveedorId();
+
         proveedorRepository.findById(proveedorId)
                 .orElseThrow(() -> new EntityNotFoundException("Proveedor","id", proveedorId));
 
-        repository.findByCodigo(request.getCodigo())
+        repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)
                 .ifPresent(compra -> {
                     throw new DuplicateEntityException("Compra","codigo", request.getCodigo());
                 });

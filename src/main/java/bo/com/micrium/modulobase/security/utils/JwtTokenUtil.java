@@ -1,12 +1,14 @@
 package bo.com.micrium.modulobase.security.utils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.function.Function;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
 
+import bo.com.micrium.modulobase.security.controllers.dto.UserContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +37,9 @@ public class JwtTokenUtil implements Serializable {
     public static final String IP_CLIENT = "Forwarded-For";//  Forwarded: for=192.0.2.60;proto=http;by=203.0.113.43
     public static final String FORM = "Referer";// Forwarded: for=192.0.2.60;proto=http;by=203.0.113.43
     public static final String ROUTE = "Route";
+    public static final String TENANT_ID = "Tenant-Id";
 
     private static final long serialVersionUID = -2550185165626007488L;
-
-
 
     @Autowired
     transient ParametroService parametroService; // 33646 coverity
@@ -71,6 +72,40 @@ public class JwtTokenUtil implements Serializable {
         return (String) getAllClaimsFromToken(token.substring(7)).get("rol");
     }
 
+    public Integer getTenantIdFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        return (Integer) getAllClaimsFromToken(token.substring(7)).get("tenantId");
+    }
+
+    public Integer getUsuarioIdFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        return (Integer) getAllClaimsFromToken(token.substring(7)).get("usuarioId");
+    }
+
+    public UserContext getUserContextFromToken(String token) {
+        Long usuarioId = Long.valueOf(this.getUsuarioIdFromToken(token));
+        String userName = this.getUsernameFromToken(token);
+        Long tenantId = Long.valueOf(this.getTenantIdFromToken(token));
+        String rolName = this.getRolNombreFromToken(token);
+
+        return new UserContext(usuarioId, userName, rolName, tenantId);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getPermisosFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        return (List<String>) getAllClaimsFromToken(token.substring(7)).get("permisos");
+    }
+
     private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         //log.info("getClaimFromToken ");
         final Claims claims = getAllClaimsFromToken(token);
@@ -79,7 +114,6 @@ public class JwtTokenUtil implements Serializable {
 
     // for retrieveing any information from token we will need the secret key
     private Claims getAllClaimsFromToken(String token) {
-        //return Jwts.parser().setSigningKey(secret.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(token).getBody();        
         return Jwts.parserBuilder()
         .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
         .build()
@@ -102,6 +136,23 @@ public class JwtTokenUtil implements Serializable {
         return doGenerateToken(claims, nombreUsuario);
     }
 
+    public String generateToken(UserContext user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("rol", user.getRolName());
+        claims.put("usuarioId", user.getUserId());
+        claims.put("tenantId", user.getTenantId());
+        return doGenerateToken(claims, user.getUserName());
+    }
+
+    public String generateToken(UserContext user, List<String> permissions) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("rol", user.getRolName());
+        claims.put("tenantId", user.getTenantId());
+        claims.put("usuarioId", user.getUserId());
+        claims.put("permisos", permissions);
+        return doGenerateToken(claims, user.getUserName());
+    }
+
     // while creating the token -
     // 1. Define claims of the token, like Issuer, Expiration, Subject, and the ID
     // 2. Sign the JWT using the HS512 algorithm and secret key.
@@ -110,13 +161,12 @@ public class JwtTokenUtil implements Serializable {
     // compaction of the JWT to a URL-safe string
     // para que token expire en minutos seria 30min/60 *1000 *60*60
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-        Integer tokenTime = Integer.valueOf(parametroService.getParametroByNombre(Parametro.DelSistema.TOKEN_TIME.name()).getValor());
-        /*return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (((tokenTime) * 1000) * 60)))
-                .signWith(SignatureAlgorithm.HS512, secret.getBytes(StandardCharsets.UTF_8)).compact();*/
+        long tokenTime = Long.parseLong(parametroService.getParametroByNombre(Parametro.DelSistema.TOKEN_TIME.name()).getValor());
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
+//                .setIssuer("micrium.com.bo")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + (((tokenTime) * 1000) * 60)))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256) // Firma el token con la clave y el algoritmo HS256

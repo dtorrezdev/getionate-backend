@@ -146,7 +146,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
     }
 
     @Override
-    public ResponseEntity<GrupoResponse> create(String token, String ipClient, String form,
+    public ResponseEntity<GrupoResponse> create(String token, String tenantId, String ipClient, String form,
             GrupoRequest request, BindingResult result) throws URISyntaxException, ApiException {
         HashMap<String, String> map = new HashMap<>();
         try {
@@ -169,7 +169,7 @@ public class GrupoControler extends GenericControler implements ICrudControler<G
             }
 
             Grupo model = repository.save(new Grupo(null, request.getNombre(), request.getDescripcion(),
-                    rolRepository.findById(request.getRolId()).get(), GrupoEstado.HABILITADO));
+                    rolRepository.findById(request.getRolId()).get(), GrupoEstado.HABILITADO, Long.valueOf(tenantId)));
 
             map.put(TiposComunes.ModuloBase.GRUPO, ConvercionUtil.toJson(model));
             bitacoraService.guardarBitacora(token, ipClient, form, Acciones.GRUPO_CREAR, null, map);

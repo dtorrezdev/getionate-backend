@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * @deprecated no se usa
+ */
 @Service
 public class CreateMovientoVentaServiceImpl implements ICreateMovimientoVentaService {
 

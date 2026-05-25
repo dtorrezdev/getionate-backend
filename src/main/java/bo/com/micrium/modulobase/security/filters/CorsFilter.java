@@ -1,7 +1,9 @@
 package bo.com.micrium.modulobase.security.filters;
 
 import bo.com.micrium.logger.LoggerMain;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.security.interceptor.LoggerInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -14,6 +16,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CorsFilter implements WebMvcConfigurer {
 
+    private final CurrentUserProvider currentUserProvider;
+
+    public CorsFilter(CurrentUserProvider currentUserProvider) {
+        this.currentUserProvider = currentUserProvider;
+    }
 
     @Value("${spring.client.url}")
     private String clientUrl;
@@ -31,6 +38,6 @@ public class CorsFilter implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoggerInterceptor());
+        registry.addInterceptor(new LoggerInterceptor(currentUserProvider));
     }
 }

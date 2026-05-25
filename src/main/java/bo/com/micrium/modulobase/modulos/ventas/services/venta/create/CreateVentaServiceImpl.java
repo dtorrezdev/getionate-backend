@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.common.enums.EnumVenta;
 import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
 import bo.com.micrium.modulobase.common.exceptions.DuplicateEntityException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
 import bo.com.micrium.modulobase.modulos.inventario.services.movimiento.registrar.IRegistrarMovimientoService;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoRequest;
@@ -48,6 +49,8 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
     // Dominio del Modulo Evento
     private final IEventoNotificacionService eventoService;
 
+    private final CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(CreateVentaServiceImpl.class);
 
     @Override
@@ -56,16 +59,23 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
         
         this.validarRequest(request);
         log.info("request valido");
-
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long userId = currentUserProvider.getUserId();
         final Venta newVenta = VentaMapper.toEntity.apply(request);
+        newVenta.setTenantId(tenantId);
+        newVenta.setUsuarioId(userId);
         log.info("request mapeado a entity");
         
         if(request.getEstado().equals(EnumVenta.Estado.VENTA.name()) ) {
-            log.info("Es tipo Venta Directa");
-            final Long movimientoId = registrarMovimientoService.registrar(request.getDetalle());
-            newVenta.setMovimientoId(movimientoId);
-        }
+            final var detalleProductoConStock = request.getDetalle().stream().
+                    filter(DetalleVentaRequest::getSeControlaStock).toList();
 
+            if(!detalleProductoConStock.isEmpty()) {
+                log.info("Es tipo Venta Directa con movimiento");
+                final Long movimientoId = registrarMovimientoService.registrar(detalleProductoConStock);
+                newVenta.setMovimientoId(movimientoId);
+            }
+        }
         List<DetalleVenta> detalles = this.procesarDetalleCalculos(newVenta);
 
         newVenta.setDetalle(detalles);
@@ -99,11 +109,11 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
 
     // REF: reulizado
     private void validarRequest(VentaRequest request) {
-
+        final Long tenantId =  currentUserProvider.getUserTenantId();
         clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() -> new EntityNotFoundException("Cliente","id", request.getClienteId()));
 
-        repository.findByCodigo(request.getCodigo())
+        repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)
                 .ifPresent(venta -> {
                     throw new DuplicateEntityException("Venta","codigo", request.getCodigo());
                 });
@@ -127,16 +137,19 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
         ProductoPresentacion productoPresentacion = productoRepository.findById(detalle.getPresentacionId())
                 .orElseThrow(()-> new EntityNotFoundException("Presentacion","id",detalle.getPresentacionId()));
 
-        final Integer cantidadDisponibleEnStock = stockRepository.getCantidadStockDisponibleByProducto(
-                productoPresentacion.getProductoId(), productoPresentacion.getId());
+        if(detalle.getSeControlaStock()) {
+            log.info("seControlaStock "+ " para presentacion " + productoPresentacion.getId());
+            final Integer cantidadDisponibleEnStock = stockRepository.getCantidadStockDisponibleByProducto(
+                    productoPresentacion.getProductoId(), productoPresentacion.getId());
 
-        this.registrarEventoNotificacion(productoPresentacion, cantidadDisponibleEnStock, detalle.getCantidad());
+            this.registrarEventoNotificacion(productoPresentacion, cantidadDisponibleEnStock, detalle.getCantidad());
 
-        if (cantidadDisponibleEnStock < detalle.getCantidad()) {
-            throw new BusinessRuleException("Presentacion",
-                    EnumVenta.Rules.STOCK_INSUFICIENTE.name() ,
-                    Map.of("id", productoPresentacion.getId(),"disponible", cantidadDisponibleEnStock, "cantidad", detalle.getCantidad())
-            );
+            if (cantidadDisponibleEnStock < detalle.getCantidad()) {
+                throw new BusinessRuleException("Presentacion",
+                        EnumVenta.Rules.STOCK_INSUFICIENTE.name() ,
+                        Map.of("id", productoPresentacion.getId(),"disponible", cantidadDisponibleEnStock, "cantidad", detalle.getCantidad())
+                );
+            }
         }
     }
 
@@ -166,21 +179,21 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
 
     public CreateVentaServiceImpl(
             IVentaRepository repository,
-//            IDetalleVenta detalleRepository,
             IClienteRepository clienteRepository,
             IPagoService pagoService,
             IProductoPresentacionRepository productoRepository,
             IRegistrarMovimientoService registrarMovimientoService,
             IStockRepository stockRepository,
-            IEventoNotificacionService eventoService
+            IEventoNotificacionService eventoService,
+            CurrentUserProvider currentUserProvider
     ) {
         this.repository = repository;
-//        this.detalleRepository = detalleRepository;
         this.clienteRepository = clienteRepository;
         this.pagoService = pagoService;
         this.productoRepository = productoRepository;
         this.registrarMovimientoService = registrarMovimientoService;
         this.stockRepository = stockRepository;
         this.eventoService = eventoService;
+        this.currentUserProvider = currentUserProvider;
     }
 }

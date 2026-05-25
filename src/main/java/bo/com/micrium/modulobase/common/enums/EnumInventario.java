@@ -4,7 +4,8 @@ public class EnumInventario {
     public enum StockStatus {
        HAY_STOCK,
         AGOTADO,
-        POCO_STOCK;
+        POCO_STOCK,
+        NO_APLICA;
 
         @Override
         public String toString() {

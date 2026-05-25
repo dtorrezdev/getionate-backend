@@ -25,6 +25,7 @@ public class CategoriaController implements IListMethod<CategoriaRequest, Catego
     @Override
     public ResponseEntity<ApiResponse<Page<CategoriaResponse>>> list(
             String token,
+            String tenantId,
             String ipClient,
             String form,
             CategoriaRequest request,
@@ -38,7 +39,7 @@ public class CategoriaController implements IListMethod<CategoriaRequest, Catego
     }
 
     @Override
-    public ResponseEntity<ApiResponse<CategoriaResponse>> create(String token, String ipClient, String form, CategoriaRequest request) {
+    public ResponseEntity<ApiResponse<CategoriaResponse>> create(String token, String tenantId, String ipClient, String form, CategoriaRequest request) {
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
                         this.service.create(request),

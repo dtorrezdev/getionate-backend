@@ -34,4 +34,7 @@ public class DetalleVentaRequest implements Serializable {
     private BigDecimal precio;
 
     private List<StockRequest> stocks;
+
+    @NotNull(message = "SeControlaStock no puede ser null")
+    private Boolean seControlaStock;
 }

@@ -32,4 +32,6 @@ public class ListPresentacionResponse implements Serializable {
     private Integer cantidadDisponibleStock;
     private Integer diasAntesExpiracion;
     private String estadoStock; // computado: {EN_STOCK, BAJO_STOCK, SIN_STOCK}
+    private Boolean seControlaStock;
+    private String imagen;
 }
