@@ -75,6 +75,7 @@ public class VentaMapper {
         response.setClienteId(venta.getClienteId());
         response.setFechaRegistro(venta.getFechaRegistro());
         response.setMovimientoId(venta.getMovimientoId());
+        response.setVendedor(venta.getVendedor());
         return response;
     };
 

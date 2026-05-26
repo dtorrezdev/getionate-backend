@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.common.exceptions;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -94,8 +95,31 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now().toString(),
                 status, // 409
                 "DATABASE_ERROR",
-                "Error de integridad de datos en la BD.",
+                "Error de integridad de datos.",
                 details,
+                ""
+        );
+        return ResponseEntity.status(status).body(apiError);
+    }
+
+    /**
+     * Captura errores: tabla inexistente, columna inexistente, query mal formada, JPQL inválido
+     *    BadSqlGrammarException: errores de sintaxis SQL
+     *    InvalidResultSetAccessException: columna invalida/ inexistente
+     *    TypeMismatchDataAccessException:  incompatibilidad de tipos entre el valor que Java intenta enviar/recibir
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(InvalidDataAccessResourceUsageException.class)
+    public ResponseEntity<ApiError> handleSqlGrammar(InvalidDataAccessResourceUsageException ex) {
+        int status = HttpStatus.BAD_REQUEST.value();
+
+        ApiError apiError = new ApiError(
+                LocalDateTime.now().toString(),
+                status, // 400
+                "DATABASE_ERROR",
+                "Error al obtener los datos.",
+                ex.getMessage(),
                 ""
         );
         return ResponseEntity.status(status).body(apiError);

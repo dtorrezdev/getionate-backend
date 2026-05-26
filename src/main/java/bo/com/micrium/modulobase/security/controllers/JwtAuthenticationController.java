@@ -115,7 +115,6 @@ public class JwtAuthenticationController extends GenericControler {
 
         try {
             // *** dtn cambios
-            //authenticationRequest = new ObjectMapper().readValue(authenticationRequestString, AuteticacionRequest.class);
             authenticationRequest = Serializador.convertStringJsonToObject(authenticationRequestString, bo.com.micrium.modulobase.security.controllers.dto.AutenticacionRequest.class);
         } catch (SerializeException e) {
             LoggerMain.error("ERROR: ", e);
@@ -154,7 +153,7 @@ public class JwtAuthenticationController extends GenericControler {
                 map.put(TiposComunes.MENSAJE_ERROR, "Autenticacion fallida, " + e.getMessage());
                 bitacoraService.guardarBitacora(null, ipClient, form, Acciones.AUTENTICACION, null, map);
                 //return ResponseEntity.badRequest().body(new ExceptionResponse(HttpStatus.BAD_REQUEST, "Error procesamiento", e.getMessage()));
-                return ResponseEntity.badRequest().body(new ExceptionResponse(HttpStatus.UNAUTHORIZED, "Error procesamiento", e.getMessage()));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ExceptionResponse(HttpStatus.UNAUTHORIZED, "Usuario/password no autorizado.", e.getMessage()));
             }
             UserContext userContext = new UserContext(user.getId(), user.getNombreUsuario(), rol.getNombre(), rol.getTenantId());
             final String token = jwtTokenUtil.generateToken(userContext, new ArrayList<>());

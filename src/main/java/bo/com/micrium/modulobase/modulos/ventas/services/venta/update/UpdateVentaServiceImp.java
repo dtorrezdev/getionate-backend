@@ -64,7 +64,9 @@ public class UpdateVentaServiceImp implements IUpdateVentaService {
         /*2. transformar la data (Mapping)*/
         final Venta updateVenta = VentaMapper.fromUpdatetoEntity.apply(request);
         final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long usuarioId = currentUserProvider.getUserId();
         updateVenta.setTenantId(tenantId);
+        updateVenta.setVendedorId(usuarioId);
         log.info("request mapeado a entity");
 
 

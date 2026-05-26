@@ -63,7 +63,7 @@ public class CreateVentaServiceImpl implements ICreateVentaService {
         final Long userId = currentUserProvider.getUserId();
         final Venta newVenta = VentaMapper.toEntity.apply(request);
         newVenta.setTenantId(tenantId);
-        newVenta.setUsuarioId(userId);
+        newVenta.setVendedorId(userId);
         log.info("request mapeado a entity");
         
         if(request.getEstado().equals(EnumVenta.Estado.VENTA.name()) ) {

@@ -21,4 +21,5 @@ public class ListVentaResponse implements Serializable {
     private String estado;
     private Long movimientoId;
     private Long clienteId;
+    private String vendedor;
 }

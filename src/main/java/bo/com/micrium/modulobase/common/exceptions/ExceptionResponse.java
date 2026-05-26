@@ -19,13 +19,13 @@ public class ExceptionResponse implements Serializable {
 
     private static final long serialVersionUID = 1321060619595537832L;
 
-    private HttpStatus estatus;
-    private String mensaje;
+    private HttpStatus error;
+    private String message;
     private List<String> errores;
 
     public ExceptionResponse(HttpStatus estatus, String mensaje, String errores) {
-        this.estatus = estatus;
-        this.mensaje = mensaje;
+        this.error = estatus;
+        this.message = mensaje;
         this.errores = Arrays.asList(errores);
     }
 }
