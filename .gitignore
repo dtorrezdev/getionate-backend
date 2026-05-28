@@ -15,6 +15,7 @@ target/
 
 logs/
 log/
+*.log
 
 ### IntelliJ IDEA ###
 .idea

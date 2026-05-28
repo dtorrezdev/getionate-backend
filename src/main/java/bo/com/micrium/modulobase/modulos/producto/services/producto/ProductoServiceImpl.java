@@ -34,7 +34,7 @@ public class ProductoServiceImpl implements IProductoService {
                 filterTextoQueryUpperLike(nombre),
                 queryfilterTexto(descripcion),
                 filterTextoQueryUpperLike(descripcion),
-                pageRequest, tenantId).map(ProductoMapper.toResponse);
+                pageRequest, tenantId).map(ProductoMapper.fromProjectiontoResponse);
     }
 
     @Override

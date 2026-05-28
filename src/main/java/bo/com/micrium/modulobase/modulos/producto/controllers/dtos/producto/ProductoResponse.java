@@ -19,4 +19,5 @@ public class ProductoResponse implements Serializable {
     private String nombre;
     private String descripcion;
     private Long categoriaId;
+    private String categoria;
 }
