@@ -2,8 +2,10 @@ package bo.com.micrium.modulobase.modulos.ventas.mapper;
 
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.DetallePagoResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.pago.PagoResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.DetalleVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetDetalleResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.HeaderVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.DetalleVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.VentaRequest;
@@ -11,9 +13,12 @@ import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.Ven
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.update.VentaUpdateRequest;
 import com.micrium.bd.access.jpa.modulo.venta.models.DetalleVenta;
 import com.micrium.bd.access.jpa.modulo.venta.models.Venta;
+import com.micrium.bd.access.jpa.modulo.venta.projection.DetalleVentaProjection;
+import com.micrium.bd.access.jpa.modulo.venta.projection.HeaderVentaProjection;
 import com.micrium.bd.access.jpa.modulo.venta.projection.ListVentaProjection;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -142,4 +147,32 @@ public class VentaMapper {
 
         return venta;
     };
+
+    // Nota de Venta
+    public static final Function<HeaderVentaProjection, HeaderVentaResponse> toHeaderVenta = venta -> {
+        HeaderVentaResponse response = new HeaderVentaResponse();
+        response.setId(venta.getId());
+        response.setCliente(venta.getCliente());
+        response.setEstado(venta.getEstado());
+        response.setCodigo(venta.getCodigo());
+        response.setFechaRegistro(venta.getFechaRegistro());
+        response.setClienteId(venta.getClienteId());
+        response.setTotal(venta.getTotal());
+        return response;
+    };
+
+    public static final Function<List<DetalleVentaProjection>, List<DetalleVentaResponse>>
+            toDetalleVenta = venta ->
+        venta.stream().map(
+                detalle -> {
+                    DetalleVentaResponse det = new DetalleVentaResponse();
+                    det.setId(detalle.getId());
+                    det.setCantidad(detalle.getCantidad());
+                    det.setPrecio(detalle.getPrecio());
+                    det.setProducto(detalle.getProducto());
+                    det.setSubtotal(detalle.getSubtotal());
+                    return det;
+                }
+        ).toList()
+    ;
 }

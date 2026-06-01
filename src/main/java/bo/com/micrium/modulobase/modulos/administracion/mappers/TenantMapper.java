@@ -25,8 +25,7 @@ public class TenantMapper {
                     t.getLogoUrl(),
                     t.getDireccion(),
                     t.getCelular(),
-                    t.getCiudad(),
-                    t.getEsActivo()
+                    t.getCiudad()
             );
 }
 

@@ -2,13 +2,16 @@ package bo.com.micrium.modulobase.modulos.ventas.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.*;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleDto;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetNotaVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.update.VentaUpdateRequest;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.anular.IAnularVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.ICreateVentaService;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetNotaVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.IListVentaService;
 
@@ -17,6 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/ventas")
@@ -29,6 +35,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
     private final ICreateVentaService crearService;
     private final IUpdateVentaService updateService;
     private final IAnularVentaService anularService;
+    private final IGetNotaVentaService getNotaVentaService;
 
     @Override
     public ResponseEntity<ApiResponse<Page<ListVentaResponse>>> list(
@@ -99,17 +106,28 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         return ResponseEntity.status(204).build();
     }
 
+    @GetMapping("/nota/{id}")
+    public ResponseEntity<ApiResponse<GetNotaVentaResponse>> notaVenta(@PathVariable Long id) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        this.getNotaVentaService.execute(id),
+                        "Nota Venta obtenida correctamente.")
+                );
+    }
+
     public VentaController(
             IListVentaService listService,
             IGetVentaService getService,
             ICreateVentaService crearService,
             IUpdateVentaService updateService,
-            IAnularVentaService anularService
+            IAnularVentaService anularService,
+            IGetNotaVentaService getNotaVentaService
     ){
         this.listService = listService;
         this.getService = getService;
         this.crearService = crearService;
         this.updateService = updateService;
         this.anularService = anularService;
+        this.getNotaVentaService = getNotaVentaService;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 public interface ITenantService {
 
     Page<TenantResponse> list(TenantRequest params, Pageable pageable);
+    TenantResponse get(Long id);
     TenantResponse create(TenantRequest request);
     TenantResponse update(TenantRequest request, Long id);
     void delete(String id);

@@ -22,6 +22,15 @@ public class TenantService implements ITenantService {
     }
 
     @Override
+    public TenantResponse get(Long id) {
+        var tenant = repository.findById(id).orElseThrow(
+                ()-> new EntityNotFoundException("Tenant","id", id)
+        );
+        return TenantMapper.toResponse.apply(tenant);
+    }
+
+
+    @Override
     public TenantResponse create(TenantRequest request) {
         final Tenant newTenant = TenantMapper
                 .toEntity.apply(request);
