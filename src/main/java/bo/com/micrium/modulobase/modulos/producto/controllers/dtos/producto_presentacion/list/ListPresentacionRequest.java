@@ -21,4 +21,5 @@ public class ListPresentacionRequest implements Serializable {
     private String unidadMedida;
     private String marca;
     private String categoria;
+    private String seControlaStock;
 }

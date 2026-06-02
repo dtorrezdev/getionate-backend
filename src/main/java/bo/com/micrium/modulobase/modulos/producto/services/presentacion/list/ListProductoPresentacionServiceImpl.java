@@ -54,6 +54,8 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
                 filterTextoQueryUpperLike(request.getMarca()),
                 queryfilterTexto(request.getCategoria()),
                 filterTextoQueryUpperLike(request.getCategoria()),
+                queryfilterTexto(request.getSeControlaStock()),
+                        filterTextoQuery(request.getSeControlaStock()),
                 page, tenantId)
                 .map(ProductoPresentacionMapper.fromProjectionToListPresentacionResponse);
     }
@@ -68,5 +70,9 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
 
     private String filterTextoQueryUpperLike(String texto) {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
+    }
+
+    private String filterTextoQuery(String texto) {
+        return this.isBlanck(texto) ? "" : texto.trim().toUpperCase();
     }
 }
