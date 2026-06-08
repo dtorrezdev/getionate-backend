@@ -17,4 +17,5 @@ public class TenantResponse implements Serializable {
     private String direccion;
     private String celular;
     private String ciudad;
+    private ThemeRequest theme;
 }

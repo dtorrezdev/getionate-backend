@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties
 @ToString
 public class ListPresentacionRequest implements Serializable {
     private String productoId;
