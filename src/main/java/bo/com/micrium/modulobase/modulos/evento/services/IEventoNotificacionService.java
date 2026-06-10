@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificac
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
+import com.micrium.bd.access.jpa.modulo.eventos.models.Notificacion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,5 +16,7 @@ public interface IEventoNotificacionService {
     EventoNotificacion registrarEvento(String typeEvento, Long productoId);
 
     void procesarEventosPendientes();
+
+    EventoNotificacionResponse notificacionLeido(Long notificacionId);
 
 }

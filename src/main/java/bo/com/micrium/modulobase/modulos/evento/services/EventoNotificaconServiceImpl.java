@@ -104,14 +104,35 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         // this.repository.saveAll(eventosNotificacion);
     }
 
+    @Override
+    public EventoNotificacionResponse notificacionLeido(Long notificacionId) {
+        final Optional<Notificacion> notificacionOpt = notificacionRepository.findById(notificacionId);
+        if(notificacionOpt.isPresent()) {
+            Notificacion notificacion = notificacionOpt.get();
+            notificacion.setFechaLeido(new Timestamp(System.currentTimeMillis()));
+            var notificacionUpdate = notificacionRepository.save(notificacion);
+            var response = new EventoNotificacionResponse();
+            response.setId(notificacionUpdate.getEventoNotificacionId());
+            response.setNotificacionId(notificacionUpdate.getId());
+            response.setTitulo(notificacionUpdate.getTitulo());
+            response.setMensaje(notificacionUpdate.getMensaje());
+            response.setDescripcion(notificacionUpdate.getDescripcion());
+            response.setTipoNotificacion(notificacionUpdate.getTipo());
+            return response;
+        } else {
+            log.warn("notificacionLeido no se encontro la notificacion con id: " + notificacionId);
+            return null;
+        }
+    }
+
     private void crearNotificacionVentaProducto(EventoNotificacion eventoNotificacion) {
         final Long tenantId = currentUserProvider.getUserTenantId();
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
-        notificacion.setTitulo("Notificacion Producto PR-" + eventoNotificacion.getPresentacionId());
+        notificacion.setTitulo("El Producto PR-" + eventoNotificacion.getPresentacionId());
 
-        notificacion.setMensaje("El producto esta " + eventoNotificacion.getTipoEvento());
+        notificacion.setMensaje(" esta " + eventoNotificacion.getTipoEvento());
         notificacion.setDescripcion("es una descripcion cualquiera");
 
         final String tipoNotificacion = eventoNotificacion.
@@ -131,9 +152,9 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
-        notificacion.setTitulo("Notificacion Producto PR-" + eventoNotificacion.getPresentacionId());
+        notificacion.setTitulo("El Producto PR-" + eventoNotificacion.getPresentacionId());
 
-        notificacion.setMensaje("El producto esta " + eventoNotificacion.getTipoEvento());
+        notificacion.setMensaje(" esta " + eventoNotificacion.getTipoEvento());
         notificacion.setDescripcion("Este producto no esta configurado adecuadamente");
 
         notificacion.setTipo(EnumEvento.NotificacionTipo.RECOMENDACION.name());

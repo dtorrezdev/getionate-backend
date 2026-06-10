@@ -2,6 +2,7 @@ package bo.com.micrium.modulobase.modulos.evento.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
+import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
 import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionRequest;
 import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionResponse;
 import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/evento_notificacion")
 public class EventoNotificacionController implements
-        IListMethod<EventoNotificacionRequest, EventoNotificacionResponse> {
+        IListMethod<EventoNotificacionRequest, EventoNotificacionResponse>,
+        IUpdateMethod<EventoNotificacionRequest, EventoNotificacionResponse , Long>
+{
 
     @Autowired
     private IEventoNotificacionService service;
@@ -33,6 +36,20 @@ public class EventoNotificacionController implements
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
                         "Notificaciones listado correctamente.")
+                );
+    }
+
+    public ResponseEntity<ApiResponse<EventoNotificacionResponse>> update(
+            String token,
+            String ipClient,
+            String form,
+            EventoNotificacionRequest request,
+            Long id
+    ) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        this.service.notificacionLeido(id),
+                        "Notificacion actualizado.")
                 );
     }
 }

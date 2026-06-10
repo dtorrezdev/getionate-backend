@@ -12,7 +12,8 @@ public class EnumEvento {
         STOCK_BAJO,
         STOCK_SIN_EXPIRACION,
         PROD_SIN_MIN_STOCK_DISPONIBLE,
-        PROD_SIN_DIAS_ANTES_EXPIRACION;
+        PROD_SIN_DIAS_ANTES_EXPIRACION,
+        PROD_PROXIMO_A_EXPIRAR;
 
     }
 

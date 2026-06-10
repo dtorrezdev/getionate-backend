@@ -1,35 +1,40 @@
 package bo.com.micrium.modulobase.modulos.inventario.services.stock;
 
+import bo.com.micrium.modulobase.common.enums.EnumEvento;
 import bo.com.micrium.modulobase.common.enums.EnumVenta;
 import bo.com.micrium.modulobase.common.exceptions.BusinessRuleException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
+import bo.com.micrium.modulobase.modulos.evento.services.IEventoNotificacionService;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.registrar.ItemMovimientoDto;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.registrar.StockMovimientoDto;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleDto;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.StockMapper;
+import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
 import com.micrium.bd.access.jpa.modulo.inventario.models.UbicacionStock;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IStockRepository;
 import com.micrium.bd.access.jpa.modulo.inventario.repository.IUbicacionStockRepository;
+import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class StockServiceImpl implements IStockService {
 
     private final IStockRepository repository;
+    private final IProductoPresentacionRepository presentacionRepository;
     private final IUbicacionStockRepository ubicacionStockRepository;
     private final CurrentUserProvider currentUserProvider;
+
+    // Dominio del Modulo Evento
+    private final IEventoNotificacionService eventoService;
 
     private final Logger log = LogManager.getLogger(StockServiceImpl.class);
 
@@ -115,10 +120,30 @@ public class StockServiceImpl implements IStockService {
     public List<StockDisponibleDto> stockDisponibleByPresentacionId(Long presentacionId) {
         log.info("request presentacionId: " + presentacionId);
 
-        return repository.findByPresentacionId(presentacionId)
+        var presentacion = presentacionRepository.findById(presentacionId)
+                .orElseThrow(() -> new EntityNotFoundException("Presentacion", "id", presentacionId));
+
+        final List<StockDisponibleDto> list = repository.findByPresentacionId(presentacionId)
                 .stream()
                 .map(StockMapper.toResponse)
                 .toList();
+        list.forEach(stock-> {
+            var fechaExp = stock.getExpiracion();
+            var hoy = new Date(System.currentTimeMillis());
+            if(Objects.nonNull(fechaExp)) {
+                int diffInDays = (int)( (fechaExp.getTime() - hoy.getTime())
+                        / (1000 * 60 * 60 * 24) );
+                if(diffInDays <= presentacion.getDiasAntesExpiracion()) {
+                    System.out.println("Alerta stock fecha proxima a vencer");
+                 // TODO: llamar a servicio notificacion y registras
+                 // * tomar en cuenta si ya se ha registrado esta notificacion
+                    EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.PROD_PROXIMO_A_EXPIRAR.name(), presentacion.getId());
+                    log.info("Se creado evento type PROD_PROXIMO_A_EXPIRAR: " + event);
+                }
+            }
+        });
+        eventoService.procesarEventosPendientes();
+        return list;
     }
 
     @Override
@@ -159,11 +184,15 @@ public class StockServiceImpl implements IStockService {
 
     public StockServiceImpl(
             IStockRepository repository,
+            IProductoPresentacionRepository presentacionRepository,
             IUbicacionStockRepository ubicacionStockRepository,
+            IEventoNotificacionService eventoService,
             CurrentUserProvider currentUserProvider
     ) {
         this.repository = repository;
+        this.presentacionRepository = presentacionRepository;
         this.ubicacionStockRepository = ubicacionStockRepository;
+        this.eventoService = eventoService;
         this.currentUserProvider = currentUserProvider;
     }
 }
