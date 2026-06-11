@@ -11,6 +11,8 @@ import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.registrar.ItemMovimientoDto;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.registrar.StockMovimientoDto;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleDto;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleResponse;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockUpdateRequest;
 import bo.com.micrium.modulobase.modulos.inventario.mapper.StockMapper;
 import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
@@ -180,6 +182,31 @@ public class StockServiceImpl implements IStockService {
             );
         }
         return true;
+    }
+
+    @Override
+    public StockDisponibleResponse update(StockUpdateRequest request, Long presentacionId) {
+        log.info("update stocks: " + request);
+
+        this.presentacionRepository.findById(presentacionId)
+                .orElseThrow(() -> new EntityNotFoundException("Presentacion", "id", presentacionId));
+
+        final UbicacionStock ubicacionStock = this.ubicacionStockRepository.findById(request.getUbicacionStockId())
+                .orElseThrow(() -> new EntityNotFoundException("Ubicacion Stock", "id", request.getUbicacionStockId()));
+
+        log.info("valid request true");
+        final List<Stock> list = request.getStocks().stream()
+                .map(stock -> {
+                    final Stock stockUpdated = this.repository.findById(stock.getId())
+                            .orElseThrow(() -> new EntityNotFoundException("Stock", "id", stock.getId()));
+                    stockUpdated.setExpiracion(stock.getExpiracion());
+                    stockUpdated.setRegistroSanitario(stock.getRegistroSanitario());
+                    stockUpdated.setUbicacionStock(ubicacionStock);
+                    return stockUpdated;
+                }).toList();
+
+         this.repository.saveAll(list);
+        return new StockDisponibleResponse();
     }
 
     public StockServiceImpl(

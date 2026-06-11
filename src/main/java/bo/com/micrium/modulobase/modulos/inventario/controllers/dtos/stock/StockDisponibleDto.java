@@ -18,9 +18,11 @@ public class StockDisponibleDto {
     private String lote;
     private Date expiracion;
     private Integer cantidad;
+    private Long ubicacionStockId;
     private String seccion;
     private String estante;
     private String nivel;
     private Long presentacionId;
+    private String registroSanitario;
 //    private String estadoExpiracion; // VIGENTE, POR_VENCER, VENCIDO
 }

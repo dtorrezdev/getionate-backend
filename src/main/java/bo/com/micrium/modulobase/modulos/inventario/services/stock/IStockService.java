@@ -3,6 +3,8 @@ package bo.com.micrium.modulobase.modulos.inventario.services.stock;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.DetalleMovimientoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.producto.MovimientoProductoRequest;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleDto;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleResponse;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockUpdateRequest;
 import com.micrium.bd.access.jpa.modulo.inventario.models.Stock;
 
 import java.util.List;
@@ -28,5 +30,7 @@ public interface IStockService {
     boolean hayStockDisponibleByProductoId(Long productoId, Long presentacionId, Integer cantidadAVender);
 
     boolean hayStockDisponibleByPresentacionId(Long presentacionId, Integer cantidadAVender);
+
+    StockDisponibleResponse update(StockUpdateRequest request, Long presentacionId);
 
 }
