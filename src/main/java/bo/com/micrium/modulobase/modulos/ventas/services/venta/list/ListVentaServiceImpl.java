@@ -37,12 +37,13 @@ public class ListVentaServiceImpl implements IListVentaService {
                 filterTextoQueryUpperLike(request.getGlosa()),
                 queryfilterTexto(request.getTotal()),
                 filterTextoQueryUpperLike(request.getTotal()),
-                queryfilterTexto(request.getFechaRegistro()),
-                filterTextoQueryUpperLike(request.getFechaRegistro()),
                 queryfilterTexto(request.getCliente()),
                 filterTextoQueryUpperLike(request.getCliente()),
                 queryfilterTexto(request.getEstado()),
                 filterTextoQueryUpperLike(request.getEstado()),
+                queryfilterTexto(request.getFechaInicio(), request.getFechaFin()),
+                filterTextoQuery(request.getFechaInicio()),
+                filterTextoQuery(request.getFechaFin()),
                 page, tenantId)
                 .map(VentaMapper.fromProjectionToListVentaResponse);
     }
@@ -55,7 +56,15 @@ public class ListVentaServiceImpl implements IListVentaService {
         return this.isBlanck(texto) ? -1 : 0;
     }
 
+    private int queryfilterTexto(String texto, String texto2) {
+        return this.isBlanck(texto) &&  this.isBlanck(texto2) ? -1 : 0;
+    }
+
     private String filterTextoQueryUpperLike(String texto) {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
+    }
+
+    private String filterTextoQuery(String texto) {
+        return this.isBlanck(texto) ? "" : texto.trim().toUpperCase();
     }
 }

@@ -17,7 +17,8 @@ public class ListVentaRequest implements Serializable {
     private String codigo;
     private String glosa;
     private String total;
-    private String fechaRegistro;
     private String cliente;
     private String estado;
+    private String fechaInicio;
+    private String fechaFin;
 }
