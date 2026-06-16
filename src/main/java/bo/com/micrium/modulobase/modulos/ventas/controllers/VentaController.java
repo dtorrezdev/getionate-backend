@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.stock.StockDisponibleDto;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetNotaVentaResponse;
+import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaRecienteResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.*;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.crear.*;
@@ -12,6 +13,7 @@ import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.update.Ve
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.anular.IAnularVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.ICreateVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetNotaVentaService;
+import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaRecienteService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaService;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.IListVentaService;
 
@@ -36,6 +38,7 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
     private final IUpdateVentaService updateService;
     private final IAnularVentaService anularService;
     private final IGetNotaVentaService getNotaVentaService;
+    private final IGetVentaRecienteService getVentaRecienteService;
 
     @Override
     public ResponseEntity<ApiResponse<Page<ListVentaResponse>>> list(
@@ -115,13 +118,23 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
                 );
     }
 
+    @GetMapping("/reciente")
+    public ResponseEntity<ApiResponse<List<GetVentaRecienteResponse>>> recientes() {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        this.getVentaRecienteService.execute(),
+                        "Ventas Recientes obtenida correctamente.")
+                );
+    }
+
     public VentaController(
             IListVentaService listService,
             IGetVentaService getService,
             ICreateVentaService crearService,
             IUpdateVentaService updateService,
             IAnularVentaService anularService,
-            IGetNotaVentaService getNotaVentaService
+            IGetNotaVentaService getNotaVentaService,
+            IGetVentaRecienteService getVentaRecienteService
     ){
         this.listService = listService;
         this.getService = getService;
@@ -129,5 +142,6 @@ public class VentaController implements IListMethod<ListVentaRequest, ListVentaR
         this.updateService = updateService;
         this.anularService = anularService;
         this.getNotaVentaService = getNotaVentaService;
+        this.getVentaRecienteService = getVentaRecienteService;
     }
 }
