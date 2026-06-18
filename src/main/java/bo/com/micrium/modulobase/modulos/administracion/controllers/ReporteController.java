@@ -4,11 +4,12 @@ import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.modulos.administracion.controllers.dtos.reporte.EstadisticaResponse;
 import bo.com.micrium.modulobase.modulos.administracion.controllers.dtos.reporte.ProductoMasVendidoResponse;
 import bo.com.micrium.modulobase.modulos.administracion.services.reporte.IReporteService;
+import bo.com.micrium.modulobase.modulos.inventario.controllers.dtos.movimiento.list.MovimientoProductoResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.get.GetVentaRecienteResponse;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.get.IGetVentaRecienteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +47,15 @@ public class ReporteController {
                 .body(ApiResponse.ok(
                         reporteService.getProductoMasVendidos(),
                         "Productos mas vendidos obtenida correctamente.")
+                );
+    }
+
+    @GetMapping("/kadex-producto/{id}")
+    public ResponseEntity<ApiResponse<List<MovimientoProductoResponse>>> kardex(@PathVariable Long id) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.ok(
+                        reporteService.getKardexProducto(id),
+                        "Kardex Producto obtenida correctamente.")
                 );
     }
 
