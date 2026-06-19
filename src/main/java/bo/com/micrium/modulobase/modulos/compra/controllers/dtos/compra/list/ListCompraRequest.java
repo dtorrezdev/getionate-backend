@@ -21,5 +21,6 @@ public class ListCompraRequest implements Serializable {
     private String estado;
     private String fechaCompra;
     private String fechaSolicitud;
+    private String tipo;
 }
 

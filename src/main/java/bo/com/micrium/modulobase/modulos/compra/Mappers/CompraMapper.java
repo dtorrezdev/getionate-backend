@@ -3,6 +3,8 @@ package bo.com.micrium.modulobase.modulos.compra.Mappers;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.DetalleCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetDetalleCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraResponse;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
@@ -71,4 +73,31 @@ public class CompraMapper {
         return response;
     };
 
+    // Get Compra Response
+        public static final Function<Compra, GetCompraResponse> fromEntityToGetCompraResponse = compra -> {
+            GetCompraResponse response = new GetCompraResponse();
+            response.setId(compra.getId());
+            response.setProveedorId(compra.getProveedorId());
+            response.setEstado(compra.getEstado());
+            response.setCodigo(compra.getCodigo());
+            response.setGlosa(compra.getGlosa());
+            response.setTotal(compra.getTotal());
+            response.setProveedorId(compra.getProveedorId());
+            response.setFechaCompra(compra.getFechaCompra());
+            response.setFechaSolicitud(compra.getFechaSolicitud());
+
+            List<GetDetalleCompraResponse> detalles = compra.getDetalle().stream()
+                    .map(detalle -> {
+                        GetDetalleCompraResponse detalleResponse = new GetDetalleCompraResponse();
+                        detalleResponse.setProductoId(detalle.getProductoId());
+                        detalleResponse.setPresentacionId(detalle.getPresentacionId());
+                        detalleResponse.setCantidad(detalle.getCantidad());
+                        detalleResponse.setPrecio(detalle.getPrecio());
+                        return detalleResponse;
+                    }).collect(Collectors.toList());
+
+            response.setDetalle(detalles);
+
+            return response;
+        };
 }

@@ -18,11 +18,13 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class GetCompraResponse implements Serializable {
     private Long id;
+    private String codigo;
     private BigDecimal total;
-    private Timestamp fecha;
+    private Timestamp fechaSolicitud;
+    private Timestamp fechaCompra;
     private String estado;
     private String glosa;
-    private Long provedorId;
+    private Long proveedorId;
     private List<GetDetalleCompraResponse> detalle;
 }
 

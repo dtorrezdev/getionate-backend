@@ -19,7 +19,8 @@ public class GetVentaServiceImpl implements IGetVentaService {
     @Override
     public GetVentaResponse execute(Long ventaId) {
         final Venta venta =repository.findById(ventaId)
-                .orElseThrow( ()-> new EntityNotFoundException("Venta","id",ventaId));
+                .orElseThrow( ()-> new EntityNotFoundException("Venta", "id", ventaId));
+
         return VentaMapper.entityToGetResponse.apply(venta);
     }
 }

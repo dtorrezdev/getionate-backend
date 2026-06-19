@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.compra.services.compra.list;
 
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.CompraMapper;
 import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
 import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.ListVentaServiceImpl;
@@ -22,12 +23,16 @@ public class ListCompraServiceImpl implements IListCompraService {
     @Autowired
     private ICompraRepository repository;
 
+    @Autowired
+    private CurrentUserProvider currentUserProvider;
+
     private final Logger log = LogManager.getLogger(ListCompraServiceImpl.class);
 
     @Override
     public Page<ListCompraResponse> execute(ListCompraRequest request, Pageable page) {
         log.info("params: " + request);
         log.info("page: " + page);
+        long tenantId = currentUserProvider.getUserTenantId();
         return repository.filter(
                         queryfilterTexto(request.getId()),
                         filterTextoQueryUpperLike(request.getId()),
@@ -45,7 +50,9 @@ public class ListCompraServiceImpl implements IListCompraService {
                         filterTextoQueryUpperLike(request.getProvedor()),
                         queryfilterTexto(request.getEstado()),
                         filterTextoQueryUpper(request.getEstado()),
-                        page)
+                        queryfilterTexto(request.getTipo()),
+                        filterTextoQueryUpper(request.getTipo()),
+                        page, tenantId)
                 .map(CompraMapper.fromProjectionToListCompraResponse);
     }
 
