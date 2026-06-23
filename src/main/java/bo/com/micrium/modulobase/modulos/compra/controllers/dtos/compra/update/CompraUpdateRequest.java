@@ -29,9 +29,13 @@ public class CompraUpdateRequest implements Serializable {
     private BigDecimal total;
 
     @NotNull(message = "proveedor Id no puede ser null.")
-    private Long provedorId;
+    private Long proveedorId;
 
     private String glosa;
+
+    private String codigo;
+
+    private String tipo;
 
     private String estado;
 

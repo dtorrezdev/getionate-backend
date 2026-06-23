@@ -56,7 +56,7 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
                 .apply(repository.save(newCompra));
         // 3. Registrar
         log.info("create entity");
-        if(request.getEstado().equals(EnumCompra.Estado.SOLICITUD.name())) {
+        if(request.getEstado().equals(EnumCompra.TIPO.SOLICITUD.name())) {
             final String mensaje = response.getMensaje();
             response.setMensaje("Solicitud " + mensaje);
         }

@@ -31,6 +31,8 @@ public class CompraRequest implements Serializable {
 
     private String glosa;
 
+    private String tipo;
+
     private String estado;
 
     @NotEmpty(message = "Debe existir al menos una fila en detalle")

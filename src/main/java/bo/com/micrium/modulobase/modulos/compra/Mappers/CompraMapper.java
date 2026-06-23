@@ -6,6 +6,7 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.De
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetDetalleCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
@@ -34,6 +35,7 @@ public class CompraMapper {
 //        compra.setId(null);
         compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
         compra.setEstado(request.getEstado());
+        compra.setTipo(compra.getTipo());
         compra.setTotal(request.getTotal());
         compra.setGlosa(request.getGlosa());
         compra.setCodigo(request.getCodigo());
@@ -73,31 +75,56 @@ public class CompraMapper {
         return response;
     };
 
+    // Update Compra Response
+    public static final Function<CompraUpdateRequest, Compra> fromUpdatetoEntity = request -> {
+
+        Compra compra = new Compra();
+        compra.setId(compra.getId());
+        compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
+        compra.setTipo(compra.getTipo());
+        compra.setEstado(request.getEstado());
+        compra.setTotal(request.getTotal());
+        compra.setGlosa(request.getGlosa());
+        compra.setCodigo(request.getCodigo());
+        compra.setProveedorId(request.getProveedorId());
+
+        List<DetalleCompra> detalles = request.getDetalle().stream()
+                .map(toDetalleEntity)
+                .collect(Collectors.toList());
+
+        compra.setDetalle(detalles);
+
+        detalles.forEach(d -> d.setCompra(compra));
+
+        return compra;
+    };
+
+
     // Get Compra Response
-        public static final Function<Compra, GetCompraResponse> fromEntityToGetCompraResponse = compra -> {
-            GetCompraResponse response = new GetCompraResponse();
-            response.setId(compra.getId());
-            response.setProveedorId(compra.getProveedorId());
-            response.setEstado(compra.getEstado());
-            response.setCodigo(compra.getCodigo());
-            response.setGlosa(compra.getGlosa());
-            response.setTotal(compra.getTotal());
-            response.setProveedorId(compra.getProveedorId());
-            response.setFechaCompra(compra.getFechaCompra());
-            response.setFechaSolicitud(compra.getFechaSolicitud());
+    public static final Function<Compra, GetCompraResponse> fromEntityToGetCompraResponse = compra -> {
+        GetCompraResponse response = new GetCompraResponse();
+        response.setId(compra.getId());
+        response.setProveedorId(compra.getProveedorId());
+        response.setEstado(compra.getEstado());
+        response.setCodigo(compra.getCodigo());
+        response.setGlosa(compra.getGlosa());
+        response.setTotal(compra.getTotal());
+        response.setProveedorId(compra.getProveedorId());
+        response.setFechaCompra(compra.getFechaCompra());
+        response.setFechaSolicitud(compra.getFechaSolicitud());
 
-            List<GetDetalleCompraResponse> detalles = compra.getDetalle().stream()
-                    .map(detalle -> {
-                        GetDetalleCompraResponse detalleResponse = new GetDetalleCompraResponse();
-                        detalleResponse.setProductoId(detalle.getProductoId());
-                        detalleResponse.setPresentacionId(detalle.getPresentacionId());
-                        detalleResponse.setCantidad(detalle.getCantidad());
-                        detalleResponse.setPrecio(detalle.getPrecio());
-                        return detalleResponse;
-                    }).collect(Collectors.toList());
+        List<GetDetalleCompraResponse> detalles = compra.getDetalle().stream()
+                .map(detalle -> {
+                    GetDetalleCompraResponse detalleResponse = new GetDetalleCompraResponse();
+                    detalleResponse.setProductoId(detalle.getProductoId());
+                    detalleResponse.setPresentacionId(detalle.getPresentacionId());
+                    detalleResponse.setCantidad(detalle.getCantidad());
+                    detalleResponse.setPrecio(detalle.getPrecio());
+                    return detalleResponse;
+                }).collect(Collectors.toList());
 
-            response.setDetalle(detalles);
+        response.setDetalle(detalles);
 
-            return response;
-        };
+        return response;
+    };
 }
