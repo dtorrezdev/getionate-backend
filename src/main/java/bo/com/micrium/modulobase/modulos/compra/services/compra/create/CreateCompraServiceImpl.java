@@ -67,7 +67,7 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
         return compra.getDetalle().stream()
                 .map( (detalle) -> {
                     BigDecimal precio = detalle.getPrecio();
-                    BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidad()));
+                    BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidadSolicitado()));
                     detalle.setSubtotal(subtotal);
                     return detalle;
                 }).toList();
@@ -83,7 +83,7 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
         proveedorRepository.findById(proveedorId)
                 .orElseThrow(() -> new EntityNotFoundException("Proveedor","id", proveedorId));
 
-        repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)
+        repository.findByCodigoCompraAndTenantId(request.getCodigo(), tenantId)
                 .ifPresent(compra -> {
                     throw new DuplicateEntityException("Compra","codigo", request.getCodigo());
                 });

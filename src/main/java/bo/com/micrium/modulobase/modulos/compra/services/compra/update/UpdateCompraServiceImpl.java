@@ -86,7 +86,7 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
         return compra.getDetalle().stream()
                 .map( (detalle) -> {
                     BigDecimal precio = detalle.getPrecio();
-                    BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidad()));
+                    BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidadSolicitado()));
                     detalle.setSubtotal(subtotal);
                     return detalle;
                 }).toList();

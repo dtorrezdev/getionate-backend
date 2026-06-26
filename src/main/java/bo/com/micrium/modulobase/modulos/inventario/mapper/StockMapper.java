@@ -20,6 +20,7 @@ public class StockMapper {
         resp.setEstante(entity.getEstante());
         resp.setNivel(entity.getNivel());
         resp.setPresentacionId(entity.getPresentacionId());
+        resp.setRegistroSanitario(entity.getRegistroSanitario());
         return resp;
     };
 }

@@ -25,7 +25,8 @@ public class CompraMapper {
             DetalleCompra.builder()
                     .presentacionId(dto.getPresentacionId())
                     .productoId(dto.getProductoId())
-                    .cantidad(dto.getCantidad())
+                    .cantidadRecibido(dto.getCantidad())
+                    .cantidadSolicitado(dto.getCantidad())
                     .precio(dto.getPrecio())
                     .build();
 
@@ -35,10 +36,10 @@ public class CompraMapper {
 //        compra.setId(null);
         compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
         compra.setEstado(request.getEstado());
-        compra.setTipo(compra.getTipo());
+        compra.setTipoCompra(request.getTipo());
         compra.setTotal(request.getTotal());
         compra.setGlosa(request.getGlosa());
-        compra.setCodigo(request.getCodigo());
+        compra.setCodigoCompra(request.getCodigo());
         compra.setProveedorId(request.getProveedorId());
 
         List<DetalleCompra> detalles = request.getDetalle().stream()
@@ -81,11 +82,11 @@ public class CompraMapper {
         Compra compra = new Compra();
         compra.setId(compra.getId());
         compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
-        compra.setTipo(compra.getTipo());
+        compra.setTipoCompra(request.getTipo());
         compra.setEstado(request.getEstado());
         compra.setTotal(request.getTotal());
         compra.setGlosa(request.getGlosa());
-        compra.setCodigo(request.getCodigo());
+        compra.setCodigoCompra(request.getCodigo());
         compra.setProveedorId(request.getProveedorId());
 
         List<DetalleCompra> detalles = request.getDetalle().stream()
@@ -106,7 +107,7 @@ public class CompraMapper {
         response.setId(compra.getId());
         response.setProveedorId(compra.getProveedorId());
         response.setEstado(compra.getEstado());
-        response.setCodigo(compra.getCodigo());
+        response.setCodigo(compra.getCodigoCompra());
         response.setGlosa(compra.getGlosa());
         response.setTotal(compra.getTotal());
         response.setProveedorId(compra.getProveedorId());
@@ -118,7 +119,7 @@ public class CompraMapper {
                     GetDetalleCompraResponse detalleResponse = new GetDetalleCompraResponse();
                     detalleResponse.setProductoId(detalle.getProductoId());
                     detalleResponse.setPresentacionId(detalle.getPresentacionId());
-                    detalleResponse.setCantidad(detalle.getCantidad());
+                    detalleResponse.setCantidad(detalle.getCantidadRecibido());
                     detalleResponse.setPrecio(detalle.getPrecio());
                     return detalleResponse;
                 }).collect(Collectors.toList());

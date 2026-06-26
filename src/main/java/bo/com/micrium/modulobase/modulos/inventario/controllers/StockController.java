@@ -56,7 +56,7 @@ public class StockController implements
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                                 this.service.update(request, id),
-                        "Stocks listado correctamente.")
+                        "Stocks Producto actualizado correctamente.")
                 );
     }
 
