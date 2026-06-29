@@ -1,24 +1,22 @@
 package bo.com.micrium.modulobase.modulos.compra.Mappers;
 
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.DetalleCompraRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetCompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetDetalleCompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.update.CompraUpdateRequest;
-import bo.com.micrium.modulobase.modulos.ventas.controllers.dtos.venta.list.ListVentaResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetDetalleCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.OrdenCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
 import com.micrium.bd.access.jpa.modulo.compra.projection.ListCompraProjection;
-import com.micrium.bd.access.jpa.modulo.venta.projection.ListVentaProjection;
 
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CompraMapper {
+public class OrdenCompraMapper {
 
     public static final Function<DetalleCompraRequest, DetalleCompra> toDetalleEntity
             = dto ->
@@ -60,18 +58,20 @@ public class CompraMapper {
         return response;
     };
 
-    public static final Function<ListCompraProjection, ListCompraResponse>
+    public static final Function<ListCompraProjection, OrdenCompraResponse>
             fromProjectionToListCompraResponse = compra -> {
-        ListCompraResponse response = new ListCompraResponse();
+        OrdenCompraResponse response = new OrdenCompraResponse();
         response.setId(compra.getId());
         response.setProveedor(compra.getProveedor());
         response.setEstado(compra.getEstado());
-        response.setCodigo(compra.getCodigo());
+        response.setCodigo(compra.getCodigoCompra());
         response.setGlosa(compra.getGlosa());
         response.setTotal(compra.getTotal());
+        response.setTipoCompra(compra.getTipoCompra());
+        response.setSolicitante(compra.getSolicitante());
+        response.setAprobador(compra.getAprobador());
         response.setProvedorId(compra.getProveedorId());
-        response.setFechaCompra(compra.getFechaCompra());
-        response.setFechaSolicitud(compra.getFechaSolicitud());
+        response.setFecha(compra.getFechaCompra());
         response.setNroItems(compra.getNroItems());
         return response;
     };

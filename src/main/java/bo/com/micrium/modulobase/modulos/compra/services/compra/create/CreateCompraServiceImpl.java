@@ -4,22 +4,19 @@ import bo.com.micrium.modulobase.common.enums.EnumCompra;
 import bo.com.micrium.modulobase.common.exceptions.DuplicateEntityException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
-import bo.com.micrium.modulobase.modulos.compra.Mappers.CompraMapper;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.DetalleCompraRequest;
-import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.create.CreateVentaServiceImpl;
+import bo.com.micrium.modulobase.modulos.compra.Mappers.OrdenCompraMapper;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.ICompraRepository;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.IProveedorRepository;
-import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.CompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -42,7 +39,7 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
         this.validarRequest(request);
         log.info("request valido");
         final Long tenantId = currentUserProvider.getUserTenantId();
-        final Compra newCompra = CompraMapper.toEntity.apply(request);
+        final Compra newCompra = OrdenCompraMapper.toEntity.apply(request);
         newCompra.setTenantId(tenantId);
         List<DetalleCompra> detalle = this.procesarDetalleCalculos(newCompra);
         newCompra.setDetalle(detalle);
@@ -52,7 +49,7 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
         newCompra.setTotal(totalCompra);
         log.info("request mapeado a entity");
         // 2. Mappear
-        final CompraResponse response = CompraMapper.toResponse
+        final CompraResponse response = OrdenCompraMapper.toResponse
                 .apply(repository.save(newCompra));
         // 3. Registrar
         log.info("create entity");

@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list;
+package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list;
 
 import lombok.*;
 
@@ -11,15 +11,17 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ListCompraResponse implements Serializable {
+public class OrdenCompraResponse implements Serializable {
     private Long id;
+    private String codigo;
     private BigDecimal total;
     private String glosa;
-    private Timestamp fechaCompra;
-    private Timestamp fechaSolicitud;
+    private Timestamp fecha;
     private Long provedorId;
     private String proveedor;
     private String estado;
+    private String tipoCompra;
     private Integer nroItems;
-    private String codigo;
+    private String solicitante;
+    private String aprobador;
 }

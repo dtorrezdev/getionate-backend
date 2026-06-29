@@ -1,20 +1,15 @@
 package bo.com.micrium.modulobase.modulos.compra.services.recepcion.list;
 
-import bo.com.micrium.modulobase.modulos.compra.Mappers.CompraMapper;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.RecepcionProductoMapper;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.ListVentaServiceImpl;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.IRecepcionProductoRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.list.ListRecepcionProductoRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.list.ListRecepcionProductoResponse;
-
-import java.util.ArrayList;
 
 @Service
 public class ListRecepcionProductoServiceImpl implements IListRecepcionProductoService {

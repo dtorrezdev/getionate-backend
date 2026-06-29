@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get;
+package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list;
+package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
 @ToString
-public class ListCompraRequest implements Serializable {
+public class OrdenCompraRequest implements Serializable {
 
     private String id;
     private String total;
@@ -19,8 +19,9 @@ public class ListCompraRequest implements Serializable {
     private String glosa;
     private String provedor;
     private String estado;
-    private String fechaCompra;
-    private String fechaSolicitud;
-    private String tipo;
+    private String fecha;
+    private String tipoCompra;
+    private String solicitante;
+    private String aprobador;
 }
 

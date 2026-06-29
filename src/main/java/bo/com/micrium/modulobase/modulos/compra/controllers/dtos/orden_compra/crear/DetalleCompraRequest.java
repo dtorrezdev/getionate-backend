@@ -1,4 +1,4 @@
-package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear;
+package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

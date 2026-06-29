@@ -1,6 +1,6 @@
 package bo.com.micrium.modulobase.modulos.compra.services.compra.anular;
 
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.AnularCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.AnularCompraRequest;
 
 public interface IAnularCompraService {
 

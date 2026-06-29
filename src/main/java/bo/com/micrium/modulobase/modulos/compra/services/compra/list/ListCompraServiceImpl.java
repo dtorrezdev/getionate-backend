@@ -1,21 +1,19 @@
 package bo.com.micrium.modulobase.modulos.compra.services.compra.list;
 
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
-import bo.com.micrium.modulobase.modulos.compra.Mappers.CompraMapper;
-import bo.com.micrium.modulobase.modulos.ventas.mapper.VentaMapper;
-import bo.com.micrium.modulobase.modulos.ventas.services.venta.list.ListVentaServiceImpl;
+import bo.com.micrium.modulobase.modulos.compra.Mappers.OrdenCompraMapper;
+import bo.com.micrium.modulobase.modulos.compra.Mappers.SolicitudCompraMapper;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraResponse;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.ICompraRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraResponse;
-
-import java.util.ArrayList;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.OrdenCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.OrdenCompraResponse;
 
 @Service
 public class ListCompraServiceImpl implements IListCompraService {
@@ -29,31 +27,54 @@ public class ListCompraServiceImpl implements IListCompraService {
     private final Logger log = LogManager.getLogger(ListCompraServiceImpl.class);
 
     @Override
-    public Page<ListCompraResponse> execute(ListCompraRequest request, Pageable page) {
+    public Page<OrdenCompraResponse> listOrdenCompra(OrdenCompraRequest request, Pageable page) {
         log.info("params: " + request);
         log.info("page: " + page);
         long tenantId = currentUserProvider.getUserTenantId();
-        return repository.filter(
-                        queryfilterTexto(request.getId()),
-                        filterTextoQueryUpperLike(request.getId()),
+
+        return repository.filterOrdenCompra(
                         queryfilterTexto(request.getCodigo()),
                         filterTextoQueryUpperLike(request.getCodigo()),
                         queryfilterTexto(request.getGlosa()),
                         filterTextoQueryUpperLike(request.getGlosa()),
-                        queryfilterTexto(request.getTotal()),
-                        filterTextoQueryUpperLike(request.getTotal()),
-                        queryfilterTexto(request.getFechaCompra()),
-                        filterTextoQueryUpperLike(request.getFechaCompra()),
-                        queryfilterTexto(request.getFechaSolicitud()),
-                        filterTextoQueryUpperLike(request.getFechaSolicitud()),
+                        queryfilterTexto(request.getFecha()),
+                        filterTextoQueryUpperLike(request.getFecha()),
                         queryfilterTexto(request.getProvedor()),
                         filterTextoQueryUpperLike(request.getProvedor()),
                         queryfilterTexto(request.getEstado()),
                         filterTextoQueryUpper(request.getEstado()),
-                        queryfilterTexto(request.getTipo()),
-                        filterTextoQueryUpper(request.getTipo()),
+                        queryfilterTexto(request.getTipoCompra()),
+                        filterTextoQueryUpper(request.getTipoCompra()),
+                        queryfilterTexto(request.getSolicitante()),
+                        filterTextoQueryUpper(request.getSolicitante()),
+                        queryfilterTexto(request.getAprobador()),
+                        filterTextoQueryUpper(request.getAprobador()),
                         page, tenantId)
-                .map(CompraMapper.fromProjectionToListCompraResponse);
+                .map(OrdenCompraMapper.fromProjectionToListCompraResponse);
+    }
+
+    @Override
+    public Page<SolicitudCompraResponse> listSolicitudCompra(SolicitudCompraRequest request, Pageable page) {
+        // fromProjectionToSolicitudCompraResponse
+        long tenantId = currentUserProvider.getUserTenantId();
+        log.info("params: " + request);
+        log.info("page: " + page);
+
+        return repository.filterSolicitud(
+                        queryfilterTexto(request.getCodigo()),
+                        filterTextoQueryUpperLike(request.getCodigo()),
+                        queryfilterTexto(request.getGlosa()),
+                        filterTextoQueryUpperLike(request.getGlosa()),
+                        queryfilterTexto(request.getFecha()),
+                        filterTextoQueryUpperLike(request.getFecha()),
+                        queryfilterTexto(request.getEstado()),
+                        filterTextoQueryUpper(request.getEstado()),
+                        queryfilterTexto(request.getSolicitante()),
+                        filterTextoQueryUpper(request.getSolicitante()),
+                        queryfilterTexto(request.getAprobador()),
+                        filterTextoQueryUpper(request.getAprobador()),
+                        page, tenantId)
+                .map(SolicitudCompraMapper.fromProjectionToSolicitudCompraResponse);
     }
 
     private boolean isBlanck(String dato) {

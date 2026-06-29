@@ -2,11 +2,11 @@ package bo.com.micrium.modulobase.modulos.compra.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.*;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.*;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.*;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.get.GetCompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.*;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.update.CompraUpdateRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.*;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.*;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.*;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.anular.IAnularCompraService;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.create.ICreateCompraService;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.get.IGetCompraService;
@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/compras")
-public class CompraController implements IListMethod<ListCompraRequest, ListCompraResponse>,
+@RequestMapping(value = "/compras/orden")
+public class OrdenCompraController implements IListMethod<OrdenCompraRequest, OrdenCompraResponse>,
         IGetMethod<GetCompraResponse, Long>, ICreateMethod<CompraRequest, CompraResponse>,
         IUpdateMethod<CompraUpdateRequest, CompraResponse, Long>, IDeleteMethod<AnularCompraRequest>
 {
@@ -31,18 +31,18 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
     private final IAnularCompraService anularService;
 
     @Override
-    public ResponseEntity<ApiResponse<Page<ListCompraResponse>>> list(
+    public ResponseEntity<ApiResponse<Page<OrdenCompraResponse>>> list(
             String token,
             String tenantId,
             String ipClient,
             String form,
-            ListCompraRequest params,
+            OrdenCompraRequest params,
             Pageable pageRequest
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.listService.execute(params, pageRequest),
-                        "Compras listado correctamente.")
+                        this.listService.listOrdenCompra(params, pageRequest),
+                        "Orden de Compras listado correctamente.")
                 );
     }
 
@@ -100,7 +100,7 @@ public class CompraController implements IListMethod<ListCompraRequest, ListComp
         return ResponseEntity.status(204).build();
     }
 
-    public CompraController(
+    public OrdenCompraController(
             IListCompraService listService,
             IGetCompraService getService,
             ICreateCompraService crearService,

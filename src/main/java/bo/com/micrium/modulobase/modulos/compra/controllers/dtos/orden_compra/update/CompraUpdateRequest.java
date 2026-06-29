@@ -1,6 +1,6 @@
-package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.update;
+package bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update;
 
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.crear.DetalleCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

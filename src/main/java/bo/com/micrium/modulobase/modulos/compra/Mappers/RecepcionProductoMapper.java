@@ -1,13 +1,11 @@
 package bo.com.micrium.modulobase.modulos.compra.Mappers;
 
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.compra.list.ListCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.DetalleRecepcionRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.RecepcionProductoRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.RecepcionProductoResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.list.ListRecepcionProductoResponse;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleRecepcion;
 import com.micrium.bd.access.jpa.modulo.compra.models.RecepcionProducto;
-import com.micrium.bd.access.jpa.modulo.compra.projection.ListCompraProjection;
 import com.micrium.bd.access.jpa.modulo.compra.projection.ListRecepcionProjection;
 
 import java.sql.Timestamp;
