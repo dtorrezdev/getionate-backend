@@ -55,7 +55,7 @@ public class OrdenCompraController implements IListMethod<OrdenCompraRequest, Or
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.getService.execute(id),
-                        "Compra obtenido correctamente.")
+                        "Orden Compra obtenido correctamente.")
                 );
     }
 
@@ -67,12 +67,11 @@ public class OrdenCompraController implements IListMethod<OrdenCompraRequest, Or
             String form,
             CompraRequest request
     ) {
-        final var response = this.crearService.execute(request);
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
-                        response,
-                        response.getMensaje())
-                );
+                        this.crearService.createOrden(request),
+                        "Orden Compra registrado correctamente."
+                ));
     }
 
     @Override

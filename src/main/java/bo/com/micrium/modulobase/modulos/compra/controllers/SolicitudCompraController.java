@@ -59,7 +59,7 @@ public class SolicitudCompraController implements IListMethod<SolicitudCompraReq
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.getService.execute(id),
-                        "Compra obtenido correctamente.")
+                        "Solicitud Compra obtenido correctamente.")
                 );
     }
 
@@ -71,12 +71,11 @@ public class SolicitudCompraController implements IListMethod<SolicitudCompraReq
             String form,
             CompraRequest request
     ) {
-        final var response = this.crearService.execute(request);
         return ResponseEntity.status(201)
                 .body(ApiResponse.ok(
-                        response,
-                        response.getMensaje())
-                );
+                        this.crearService.createSolicitud(request),
+                        "Solicitud Compra registrado correctamente."
+                ));
     }
 
     @Override

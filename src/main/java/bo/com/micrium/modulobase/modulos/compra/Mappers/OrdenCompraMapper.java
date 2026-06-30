@@ -24,7 +24,7 @@ public class OrdenCompraMapper {
                     .presentacionId(dto.getPresentacionId())
                     .productoId(dto.getProductoId())
                     .cantidadRecibido(dto.getCantidad())
-                    .cantidadSolicitado(dto.getCantidad())
+//                    .cantidadSolicitado(dto.getCantidad())
                     .precio(dto.getPrecio())
                     .build();
 
@@ -32,7 +32,7 @@ public class OrdenCompraMapper {
 
         Compra compra = new Compra();
 //        compra.setId(null);
-        compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
+        compra.setFechaCompra(new Timestamp(System.currentTimeMillis()));
         compra.setEstado(request.getEstado());
         compra.setTipoCompra(request.getTipo());
         compra.setTotal(request.getTotal());
@@ -54,7 +54,7 @@ public class OrdenCompraMapper {
     public static final Function<Compra, CompraResponse> toResponse = compra -> {
         CompraResponse response = new CompraResponse();
         response.setId(compra.getId());
-        response.setMensaje("Compra creado exitosamente.");
+        response.setCodigo(compra.getCodigoCompra());
         return response;
     };
 

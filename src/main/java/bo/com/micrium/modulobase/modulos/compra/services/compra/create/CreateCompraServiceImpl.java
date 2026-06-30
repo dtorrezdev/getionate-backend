@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.common.exceptions.DuplicateEntityException;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.OrdenCompraMapper;
+import bo.com.micrium.modulobase.modulos.compra.Mappers.SolicitudCompraMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
@@ -20,6 +21,7 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.cr
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CreateCompraServiceImpl implements ICreateCompraService {
@@ -33,38 +35,59 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
     private final Logger log = LogManager.getLogger(CreateCompraServiceImpl.class);
 
     @Override
-    public CompraResponse execute(CompraRequest request) {
+    public CompraResponse createOrden(CompraRequest request) {
 
         // 1. Validar request
-        this.validarRequest(request);
+        this.validarRequest(request, Boolean.FALSE);
         log.info("request valido");
         final Long tenantId = currentUserProvider.getUserTenantId();
         final Compra newCompra = OrdenCompraMapper.toEntity.apply(request);
         newCompra.setTenantId(tenantId);
-        List<DetalleCompra> detalle = this.procesarDetalleCalculos(newCompra);
+        List<DetalleCompra> detalle = this.procesarDetalleCalculos(newCompra, Boolean.FALSE);
         newCompra.setDetalle(detalle);
         BigDecimal totalCompra = detalle.stream()
                 .map(DetalleCompra::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         newCompra.setTotal(totalCompra);
+        newCompra.setEsSolicitud(Boolean.FALSE);
         log.info("request mapeado a entity");
-        // 2. Mappear
-        final CompraResponse response = OrdenCompraMapper.toResponse
+        // 2. Mappear & Registrar
+        return OrdenCompraMapper.toResponse
                 .apply(repository.save(newCompra));
-        // 3. Registrar
-        log.info("create entity");
-        if(request.getEstado().equals(EnumCompra.TIPO.SOLICITUD.name())) {
-            final String mensaje = response.getMensaje();
-            response.setMensaje("Solicitud " + mensaje);
-        }
-        return response;
     }
 
-    private List<DetalleCompra> procesarDetalleCalculos(Compra compra) {
+    @Override
+    public CompraResponse createSolicitud(CompraRequest request) {
+        this.validarRequest(request, Boolean.TRUE);
+        log.info("request valido");
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long usuarioId = currentUserProvider.getUserId();
+
+        final Compra newCompra = SolicitudCompraMapper.toEntity.apply(request);
+        newCompra.setTenantId(tenantId);
+        List<DetalleCompra> detalle = this.procesarDetalleCalculos(newCompra, Boolean.TRUE);
+        newCompra.setDetalle(detalle);
+        BigDecimal totalCompra = detalle.stream()
+                .map(DetalleCompra::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        newCompra.setTotal(totalCompra);
+        newCompra.setEsSolicitud(Boolean.TRUE);
+        newCompra.setSolicitanteId(usuarioId);
+        log.info("request mapeado a entity");
+
+        // 2. Mappear & Registrar
+        return SolicitudCompraMapper.toResponse
+                .apply(repository.save(newCompra));
+    }
+
+    private List<DetalleCompra> procesarDetalleCalculos(Compra compra, Boolean esSolicitud) {
         return compra.getDetalle().stream()
                 .map( (detalle) -> {
                     BigDecimal precio = detalle.getPrecio();
-                    BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detalle.getCantidadSolicitado()));
+                    BigDecimal subtotal = precio.multiply(
+                            BigDecimal.valueOf( esSolicitud ? detalle.getCantidadSolicitado() :
+                                    detalle.getCantidadRecibido())
+                    );
                     detalle.setSubtotal(subtotal);
                     return detalle;
                 }).toList();
@@ -73,19 +96,31 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
     @Autowired
     private IProveedorRepository proveedorRepository;
 
-    private void validarRequest(CompraRequest request) {
+    private void validarRequest(CompraRequest request, Boolean isSolicitud) {
         final Long tenantId = currentUserProvider.getUserTenantId();
         final var proveedorId = request.getProveedorId();
 
-        proveedorRepository.findById(proveedorId)
-                .orElseThrow(() -> new EntityNotFoundException("Proveedor","id", proveedorId));
+        if(Objects.nonNull(proveedorId)) {
+            proveedorRepository.findById(proveedorId)
+                    .orElseThrow(() -> new EntityNotFoundException("Proveedor","id", proveedorId));
+        }
 
-        repository.findByCodigoCompraAndTenantId(request.getCodigo(), tenantId)
+        if(isSolicitud) {
+            repository.findByCodigoSolicitudAndTenantId(request.getCodigo(), tenantId)
                 .ifPresent(compra -> {
-                    throw new DuplicateEntityException("Compra","codigo", request.getCodigo());
+                    throw new DuplicateEntityException("SolicitudCompra","codigo", request.getCodigo());
                 });
-        if(!EnumCompra.Estado.exists(request.getEstado())) {
-            throw new EntityNotFoundException("EstadoCompra", "nombre", request.getEstado());
+        } else {
+            repository.findByCodigoCompraAndTenantId(request.getCodigo(), tenantId)
+                .ifPresent(compra -> {
+                    throw new DuplicateEntityException("OrdenCompra","codigo", request.getCodigo());
+                });
+        }
+
+        if(Objects.nonNull(request.getEstado())) {
+            if (!EnumCompra.EstadoSolicitud.exists(request.getEstado())) {
+                throw new EntityNotFoundException("EstadoSolicitud", "nombre", request.getEstado());
+            }
         }
         request.getDetalle().forEach(this::validarDetalle);
     }

@@ -5,6 +5,8 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.cr
 
 public interface ICreateCompraService {
 
-    CompraResponse execute(CompraRequest request);
+    CompraResponse createOrden(CompraRequest request);
+
+    CompraResponse createSolicitud(CompraRequest request);
 
 }

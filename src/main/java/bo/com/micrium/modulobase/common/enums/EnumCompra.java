@@ -1,11 +1,11 @@
 package bo.com.micrium.modulobase.common.enums;
 
 public class EnumCompra {
-    public enum Estado {
-        ABIERTA, PENDIENTE, APROBADO, RECHAZADO;
+    public enum EstadoSolicitud {
+        BORRADOR, APROBADO, ENVIADO, CANCELADO;
 
         public static boolean exists(String name) {
-            for (EnumCompra.Estado s : values())
+            for (EnumCompra.EstadoSolicitud s : values())
                 if (s.name().equals(name))
                     return true;
             return false;

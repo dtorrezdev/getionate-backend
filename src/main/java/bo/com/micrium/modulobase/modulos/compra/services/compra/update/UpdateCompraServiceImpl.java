@@ -66,15 +66,11 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
         updateCompra.setTotal(totalCompra);
         log.info("request processed " + updateCompra);
 
-        // Guardar compra
+        // Guardar compra & Registrar
         final CompraResponse response = OrdenCompraMapper.toResponse
                 .apply(repository.save(updateCompra));
-        // 3. Registrar
-        log.info("create entity");
-        if(request.getTipo().equals(EnumCompra.TIPO.SOLICITUD.name())) {
-            final String mensaje = response.getMensaje();
-            response.setMensaje("Solicitud updated " + mensaje);
-        }
+        log.info("created entity");
+
         return response;
     }
 
