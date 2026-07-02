@@ -4,6 +4,7 @@ import bo.com.micrium.modulobase.common.enums.EnumCompra;
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.OrdenCompraMapper;
+import bo.com.micrium.modulobase.modulos.compra.Mappers.SolicitudCompraMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
@@ -11,6 +12,7 @@ import com.micrium.bd.access.jpa.modulo.compra.repositories.ICompraRepository;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.IDetalleCompraRepository;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.IProveedorRepository;
 import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.up
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UpdateCompraServiceImpl implements IUpdateCompraService {
@@ -43,14 +46,16 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
     private final Logger log = LogManager.getLogger(UpdateCompraServiceImpl.class);
 
     @Override
-    public CompraResponse execute(CompraUpdateRequest request, Long id) {
-        // TODO: Implementar lógica de negocio
+    @Transactional
+    public CompraResponse updateOrder(CompraUpdateRequest request, Long id) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long usuarioId = currentUserProvider.getUserId();
+
         // validar Request
-        this.validarRequest(request, id);
+        this.validarRequest(request, id, Boolean.FALSE);
         log.info("request valido");
 
         // transformar la data (Mapping)
-        final Long tenantId = currentUserProvider.getUserTenantId();
         final Compra updateCompra = OrdenCompraMapper.fromUpdatetoEntity.apply(request);
         updateCompra.setTenantId(tenantId);
         updateCompra.setId(id);
@@ -64,14 +69,58 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
                 .map(DetalleCompra::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         updateCompra.setTotal(totalCompra);
+        updateCompra.setEsSolicitud(Boolean.FALSE);
+        updateCompra.setSolicitanteId(usuarioId);
         log.info("request processed " + updateCompra);
 
         // Guardar compra & Registrar
-        final CompraResponse response = OrdenCompraMapper.toResponse
+        return OrdenCompraMapper.toResponse
                 .apply(repository.save(updateCompra));
-        log.info("created entity");
+    }
 
-        return response;
+    @Override
+    public CompraResponse updateSolicitud(CompraUpdateRequest request, Long id) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long usuarioId = currentUserProvider.getUserId();
+
+        // validar Request
+        this.validarRequest(request, id, Boolean.TRUE);
+        log.info("request valido");
+
+        // transformar la data (Mapping)
+        final Compra updateCompra = SolicitudCompraMapper.fromUpdatetoEntity.apply(request);
+        updateCompra.setTenantId(tenantId);
+        updateCompra.setId(id);
+        log.info("request mapeado a entity " + updateCompra);
+
+        // procesar Detalle
+        this.eliminarDetalleCompraExistente(id);
+        List<DetalleCompra> detalle = this.procesarDetalleCalculos(updateCompra);
+        updateCompra.setDetalle(detalle);
+        BigDecimal totalCompra = detalle.stream()
+                .map(DetalleCompra::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        updateCompra.setTotal(totalCompra);
+        updateCompra.setEsSolicitud(Boolean.TRUE);
+        updateCompra.setSolicitanteId(usuarioId);
+        log.info("request processed " + updateCompra);
+
+        // Guardar compra & Registrar
+        return OrdenCompraMapper.toResponse
+                .apply(repository.save(updateCompra));
+    }
+
+    @Override
+    @Transactional
+    public void aprobar(Long id) {
+
+        final var usuarioId = currentUserProvider.getUserId();
+        var compra = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Compra","id", id));
+
+        compra.setEstado(EnumCompra.EstadoSolicitud.APROBADO.name());
+        compra.setAprobadorId(usuarioId);
+        repository.save(compra);
     }
 
     private List<DetalleCompra> procesarDetalleCalculos(Compra compra) {
@@ -84,23 +133,26 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
                 }).toList();
     }
 
-    private void validarRequest(CompraUpdateRequest request, Long compraId) {
-
+    private void validarRequest(CompraUpdateRequest request, Long compraId, Boolean isSolicitud) {
         final var proveedorId = request.getProveedorId();
 
         repository.findById(compraId)
                 .orElseThrow(() -> new EntityNotFoundException("Compra","id", compraId));
 
-        proveedorRepository.findById(proveedorId)
-                .orElseThrow(() -> new EntityNotFoundException("Proveedor","id", proveedorId));
-
-//        repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)
-//                .ifPresent(compra -> {
-//                    throw new DuplicateEntityException("Compra","codigo", request.getCodigo());
-//                });
-//        if(!EnumCompra.Estado.exists(request.getEstado())) {
-//            throw new EntityNotFoundException("EstadoCompra", "nombre", request.getEstado());
-//        }
+        if(Objects.nonNull(proveedorId)) {
+            proveedorRepository.findById(proveedorId)
+                    .orElseThrow(() -> new EntityNotFoundException("Proveedor", "id", proveedorId));
+        }
+        if(Objects.nonNull(request.getEstado())) {
+            if(!EnumCompra.EstadoSolicitud.exists(request.getEstado())) {
+                throw new EntityNotFoundException("Estado", "nombre", request.getEstado());
+            }
+        }
+        if(Objects.nonNull(request.getTipo())) {
+            if (!EnumCompra.TIPO.exists(request.getTipo())) {
+                throw new EntityNotFoundException("TipoCompra", "nombre", request.getTipo());
+            }
+        }
         request.getDetalle().forEach(this::validarDetalle);
     }
 
@@ -112,6 +164,5 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
     private void eliminarDetalleCompraExistente(Long compraId) {
         detalleRepository.deleteByCompraId(compraId);
     }
-
 }
 

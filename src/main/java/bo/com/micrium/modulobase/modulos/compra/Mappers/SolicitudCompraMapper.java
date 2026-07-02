@@ -4,6 +4,7 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.cr
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetDetalleCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.GetSolicitudCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraResponse;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
@@ -68,6 +69,27 @@ public class SolicitudCompraMapper {
         response.setFecha(compra.getFechaSolicitud());
         response.setNroItems(compra.getNroItems());
         return response;
+    };
+
+    // Update Compra Response
+    public static final Function<CompraUpdateRequest, Compra> fromUpdatetoEntity = request -> {
+
+        Compra compra = new Compra();
+        compra.setId(compra.getId());
+        compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
+        compra.setEstado(request.getEstado());
+        compra.setTotal(request.getTotal());
+        compra.setGlosa(request.getGlosa());
+        compra.setCodigoSolicitud(request.getCodigo());
+
+        List<DetalleCompra> detalles = request.getDetalle().stream()
+                .map(toDetalleEntity)
+                .collect(Collectors.toList());
+
+        compra.setDetalle(detalles);
+        detalles.forEach(d -> d.setCompra(compra));
+
+        return compra;
     };
 
     // Get Compra Response

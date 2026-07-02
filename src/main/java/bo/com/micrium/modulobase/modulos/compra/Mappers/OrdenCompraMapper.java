@@ -23,8 +23,8 @@ public class OrdenCompraMapper {
             DetalleCompra.builder()
                     .presentacionId(dto.getPresentacionId())
                     .productoId(dto.getProductoId())
-                    .cantidadRecibido(dto.getCantidad())
-//                    .cantidadSolicitado(dto.getCantidad())
+//                    .cantidadRecibido(dto.getCantidad())
+                    .cantidadSolicitado(dto.getCantidad())
                     .precio(dto.getPrecio())
                     .build();
 
@@ -38,6 +38,7 @@ public class OrdenCompraMapper {
         compra.setTotal(request.getTotal());
         compra.setGlosa(request.getGlosa());
         compra.setCodigoCompra(request.getCodigo());
+        compra.setCodigoSolicitud(request.getCodigoSolicitud());
         compra.setProveedorId(request.getProveedorId());
 
         List<DetalleCompra> detalles = request.getDetalle().stream()
@@ -81,7 +82,7 @@ public class OrdenCompraMapper {
 
         Compra compra = new Compra();
         compra.setId(compra.getId());
-        compra.setFechaSolicitud(new Timestamp(System.currentTimeMillis()));
+        compra.setFechaCompra(new Timestamp(System.currentTimeMillis()));
         compra.setTipoCompra(request.getTipo());
         compra.setEstado(request.getEstado());
         compra.setTotal(request.getTotal());

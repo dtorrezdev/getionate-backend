@@ -5,7 +5,6 @@ import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.AnularCompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetOrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.GetSolicitudCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraRequest;
@@ -18,8 +17,8 @@ import bo.com.micrium.modulobase.modulos.compra.services.compra.update.IUpdateCo
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping(value = "/compras/solicitud")
@@ -87,7 +86,7 @@ public class SolicitudCompraController implements IListMethod<SolicitudCompraReq
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.updateService.execute(request, id),
+                        this.updateService.updateOrder(request, id),
                         "Compra actualizado correctamente.")
                 );
     }
@@ -99,6 +98,12 @@ public class SolicitudCompraController implements IListMethod<SolicitudCompraReq
             String form,
             AnularCompraRequest request) {
         this.anularService.execute(request);
+        return ResponseEntity.status(204).build();
+    }
+
+    @PostMapping("/aprobar/{id}")
+    public ResponseEntity<?> aprobarSolicitud(@PathVariable Long id) {
+        this.updateService.aprobar(id);
         return ResponseEntity.status(204).build();
     }
 

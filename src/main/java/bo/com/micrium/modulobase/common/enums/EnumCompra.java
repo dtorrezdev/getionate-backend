@@ -2,7 +2,8 @@ package bo.com.micrium.modulobase.common.enums;
 
 public class EnumCompra {
     public enum EstadoSolicitud {
-        BORRADOR, APROBADO, ENVIADO, CANCELADO;
+        BORRADOR, APROBADO, // Solicitud
+        PENDIENTE, ENVIADO, CANCELADO; // Orden
 
         public static boolean exists(String name) {
             for (EnumCompra.EstadoSolicitud s : values())
@@ -13,7 +14,7 @@ public class EnumCompra {
     }
 
     public enum TIPO {
-        SOLICITUD, COMPRA;
+        SOLICITUD, COMPRA, REPOSICION;
 
         public static boolean exists(String name) {
             for (EnumCompra.TIPO s : values())

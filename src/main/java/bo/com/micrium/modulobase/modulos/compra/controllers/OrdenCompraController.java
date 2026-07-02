@@ -84,7 +84,7 @@ public class OrdenCompraController implements IListMethod<OrdenCompraRequest, Or
     ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.updateService.execute(request, id),
+                        this.updateService.updateOrder(request, id),
                         "Orden Compra actualizado correctamente.")
                 );
     }

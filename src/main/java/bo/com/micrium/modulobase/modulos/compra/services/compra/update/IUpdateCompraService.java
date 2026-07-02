@@ -4,6 +4,10 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.cr
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 
 public interface IUpdateCompraService {
-    CompraResponse execute(CompraUpdateRequest request, Long id);
+    CompraResponse updateOrder(CompraUpdateRequest request, Long id);
+
+    CompraResponse updateSolicitud(CompraUpdateRequest request, Long id);
+
+    void aprobar(Long id);
 }
 

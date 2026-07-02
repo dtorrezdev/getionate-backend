@@ -35,6 +35,8 @@ public class CompraRequest implements Serializable {
 
     private String estado;
 
+    private String codigoSolicitud;
+
     @NotEmpty(message = "Debe existir al menos una fila en detalle")
     @Valid
     private List<DetalleCompraRequest> detalle;

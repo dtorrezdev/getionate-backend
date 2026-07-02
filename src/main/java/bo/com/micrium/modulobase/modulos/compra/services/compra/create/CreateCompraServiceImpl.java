@@ -36,11 +36,13 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
 
     @Override
     public CompraResponse createOrden(CompraRequest request) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final Long usuarioId = currentUserProvider.getUserId();
 
         // 1. Validar request
         this.validarRequest(request, Boolean.FALSE);
         log.info("request valido");
-        final Long tenantId = currentUserProvider.getUserTenantId();
+
         final Compra newCompra = OrdenCompraMapper.toEntity.apply(request);
         newCompra.setTenantId(tenantId);
         List<DetalleCompra> detalle = this.procesarDetalleCalculos(newCompra, Boolean.FALSE);
@@ -50,6 +52,7 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         newCompra.setTotal(totalCompra);
         newCompra.setEsSolicitud(Boolean.FALSE);
+        newCompra.setSolicitanteId(usuarioId);
         log.info("request mapeado a entity");
         // 2. Mappear & Registrar
         return OrdenCompraMapper.toResponse
@@ -58,10 +61,11 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
 
     @Override
     public CompraResponse createSolicitud(CompraRequest request) {
-        this.validarRequest(request, Boolean.TRUE);
-        log.info("request valido");
         final Long tenantId = currentUserProvider.getUserTenantId();
         final Long usuarioId = currentUserProvider.getUserId();
+
+        this.validarRequest(request, Boolean.TRUE);
+        log.info("request valido");
 
         final Compra newCompra = SolicitudCompraMapper.toEntity.apply(request);
         newCompra.setTenantId(tenantId);
@@ -84,10 +88,8 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
         return compra.getDetalle().stream()
                 .map( (detalle) -> {
                     BigDecimal precio = detalle.getPrecio();
-                    BigDecimal subtotal = precio.multiply(
-                            BigDecimal.valueOf( esSolicitud ? detalle.getCantidadSolicitado() :
-                                    detalle.getCantidadRecibido())
-                    );
+                    BigDecimal subtotal = precio.multiply(BigDecimal.
+                            valueOf(detalle.getCantidadSolicitado()));
                     detalle.setSubtotal(subtotal);
                     return detalle;
                 }).toList();
@@ -119,7 +121,13 @@ public class CreateCompraServiceImpl implements ICreateCompraService {
 
         if(Objects.nonNull(request.getEstado())) {
             if (!EnumCompra.EstadoSolicitud.exists(request.getEstado())) {
-                throw new EntityNotFoundException("EstadoSolicitud", "nombre", request.getEstado());
+                throw new EntityNotFoundException("Estado", "nombre", request.getEstado());
+            }
+        }
+
+        if(Objects.nonNull(request.getTipo())) {
+            if (!EnumCompra.TIPO.exists(request.getTipo())) {
+                throw new EntityNotFoundException("TipoCompra", "nombre", request.getTipo());
             }
         }
         request.getDetalle().forEach(this::validarDetalle);
