@@ -3,7 +3,7 @@ package bo.com.micrium.modulobase.modulos.compra.Mappers;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetOrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetDetalleCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.OrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
@@ -102,8 +102,8 @@ public class OrdenCompraMapper {
 
 
     // Get Compra Response
-    public static final Function<Compra, GetCompraResponse> fromEntityToGetCompraResponse = compra -> {
-        GetCompraResponse response = new GetCompraResponse();
+    public static final Function<Compra, GetOrdenCompraResponse> fromEntityToGetCompraResponse = compra -> {
+        GetOrdenCompraResponse response = new GetOrdenCompraResponse();
         response.setId(compra.getId());
         response.setProveedorId(compra.getProveedorId());
         response.setEstado(compra.getEstado());
@@ -111,8 +111,8 @@ public class OrdenCompraMapper {
         response.setGlosa(compra.getGlosa());
         response.setTotal(compra.getTotal());
         response.setProveedorId(compra.getProveedorId());
-        response.setFechaCompra(compra.getFechaCompra());
-        response.setFechaSolicitud(compra.getFechaSolicitud());
+        response.setFecha(compra.getFechaCompra());
+        response.setTipoCompra(compra.getTipoCompra());
 
         List<GetDetalleCompraResponse> detalles = compra.getDetalle().stream()
                 .map(detalle -> {

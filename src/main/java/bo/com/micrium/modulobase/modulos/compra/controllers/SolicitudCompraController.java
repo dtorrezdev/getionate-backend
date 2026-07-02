@@ -5,10 +5,9 @@ import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.AnularCompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetCompraResponse;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.OrdenCompraRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.OrdenCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetOrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.GetSolicitudCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.anular.IAnularCompraService;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/compras/solicitud")
 public class SolicitudCompraController implements IListMethod<SolicitudCompraRequest, SolicitudCompraResponse>,
-        IGetMethod<GetCompraResponse, Long>, ICreateMethod<CompraRequest, CompraResponse>,
+        IGetMethod<GetSolicitudCompraResponse, Long>, ICreateMethod<CompraRequest, CompraResponse>,
         IUpdateMethod<CompraUpdateRequest, CompraResponse, Long>, IDeleteMethod<AnularCompraRequest>
 {
     private final IListCompraService listService;
@@ -51,14 +50,14 @@ public class SolicitudCompraController implements IListMethod<SolicitudCompraReq
     }
 
     @Override
-    public ResponseEntity<ApiResponse<GetCompraResponse>> get(
+    public ResponseEntity<ApiResponse<GetSolicitudCompraResponse>> get(
             String token,
             String ipClient,
             String form,
             Long id) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.getService.execute(id),
+                        this.getService.getSolicitud(id),
                         "Solicitud Compra obtenido correctamente.")
                 );
     }

@@ -4,7 +4,7 @@ import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.*;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetOrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.anular.IAnularCompraService;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/compras/orden")
 public class OrdenCompraController implements IListMethod<OrdenCompraRequest, OrdenCompraResponse>,
-        IGetMethod<GetCompraResponse, Long>, ICreateMethod<CompraRequest, CompraResponse>,
+        IGetMethod<GetOrdenCompraResponse, Long>, ICreateMethod<CompraRequest, CompraResponse>,
         IUpdateMethod<CompraUpdateRequest, CompraResponse, Long>, IDeleteMethod<AnularCompraRequest>
 {
     private final IListCompraService listService;
@@ -47,14 +47,14 @@ public class OrdenCompraController implements IListMethod<OrdenCompraRequest, Or
     }
 
     @Override
-    public ResponseEntity<ApiResponse<GetCompraResponse>> get(
+    public ResponseEntity<ApiResponse<GetOrdenCompraResponse>> get(
             String token,
             String ipClient,
             String form,
             Long id) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
-                        this.getService.execute(id),
+                        this.getService.getOrden(id),
                         "Orden Compra obtenido correctamente.")
                 );
     }
@@ -85,7 +85,7 @@ public class OrdenCompraController implements IListMethod<OrdenCompraRequest, Or
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.updateService.execute(request, id),
-                        "Compra actualizado correctamente.")
+                        "Orden Compra actualizado correctamente.")
                 );
     }
 

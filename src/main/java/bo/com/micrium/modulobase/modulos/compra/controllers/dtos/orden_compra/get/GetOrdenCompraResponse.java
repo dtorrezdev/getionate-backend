@@ -16,12 +16,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = false)
-public class GetCompraResponse implements Serializable {
+public class GetOrdenCompraResponse implements Serializable {
     private Long id;
     private String codigo;
     private BigDecimal total;
-    private Timestamp fechaSolicitud;
-    private Timestamp fechaCompra;
+    private Timestamp fecha;
+    private String tipoCompra;
     private String estado;
     private String glosa;
     private Long proveedorId;
