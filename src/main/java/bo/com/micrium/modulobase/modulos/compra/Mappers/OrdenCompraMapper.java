@@ -111,8 +111,8 @@ public class OrdenCompraMapper {
         response.setCodigo(compra.getCodigoCompra());
         response.setGlosa(compra.getGlosa());
         response.setTotal(compra.getTotal());
-        response.setProveedorId(compra.getProveedorId());
         response.setFecha(compra.getFechaCompra());
+        response.setCodigoSolicitud(compra.getCodigoSolicitud());
         response.setTipoCompra(compra.getTipoCompra());
 
         List<GetDetalleCompraResponse> detalles = compra.getDetalle().stream()
@@ -120,7 +120,7 @@ public class OrdenCompraMapper {
                     GetDetalleCompraResponse detalleResponse = new GetDetalleCompraResponse();
                     detalleResponse.setProductoId(detalle.getProductoId());
                     detalleResponse.setPresentacionId(detalle.getPresentacionId());
-                    detalleResponse.setCantidad(detalle.getCantidadRecibido());
+                    detalleResponse.setCantidad(detalle.getCantidadSolicitado());
                     detalleResponse.setPrecio(detalle.getPrecio());
                     return detalleResponse;
                 }).collect(Collectors.toList());

@@ -25,6 +25,7 @@ public class GetOrdenCompraResponse implements Serializable {
     private String estado;
     private String glosa;
     private Long proveedorId;
+    private String codigoSolicitud;
     private List<GetDetalleCompraResponse> detalle;
 }
 
