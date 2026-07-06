@@ -6,6 +6,7 @@ import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.OrdenCompraMapper;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.SolicitudCompraMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.DetalleCompraRequest;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.ChangeStateRequest;
 import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleCompra;
 import com.micrium.bd.access.jpa.modulo.compra.repositories.ICompraRepository;
@@ -112,13 +113,16 @@ public class UpdateCompraServiceImpl implements IUpdateCompraService {
 
     @Override
     @Transactional
-    public void aprobar(Long id) {
+    public void cambiarEstado(ChangeStateRequest request) {
 
         final var usuarioId = currentUserProvider.getUserId();
-        var compra = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Compra","id", id));
+        var compra = repository.findById(request.getId())
+                .orElseThrow(() -> new EntityNotFoundException("SolicitudCompra","id", request.getId()));
 
-        compra.setEstado(EnumCompra.EstadoSolicitud.APROBADO.name());
+        if(!EnumCompra.EstadoSolicitud.exists(request.getEstado())) {
+            throw new EntityNotFoundException("EstadoCompra","estado", request.getEstado());
+        }
+        compra.setEstado(request.getEstado());
         compra.setAprobadorId(usuarioId);
         repository.save(compra);
     }

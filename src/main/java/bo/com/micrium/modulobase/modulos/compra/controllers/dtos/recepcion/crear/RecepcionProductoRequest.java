@@ -32,6 +32,8 @@ public class RecepcionProductoRequest implements Serializable {
 
     private String glosa;
 
+    private String tipo;
+
 //    private Long movimientoId;
 
     @NotEmpty(message = "Debe existir al menos una fila en detalle")

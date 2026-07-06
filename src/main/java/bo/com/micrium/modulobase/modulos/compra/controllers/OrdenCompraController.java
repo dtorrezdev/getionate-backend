@@ -6,6 +6,7 @@ import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetOrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.list.*;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.ChangeStateRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.anular.IAnularCompraService;
 import bo.com.micrium.modulobase.modulos.compra.services.compra.create.ICreateCompraService;
@@ -15,8 +16,7 @@ import bo.com.micrium.modulobase.modulos.compra.services.compra.update.IUpdateCo
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/compras/orden")
@@ -96,6 +96,12 @@ public class OrdenCompraController implements IListMethod<OrdenCompraRequest, Or
             String form,
             AnularCompraRequest request) {
         this.anularService.execute(request);
+        return ResponseEntity.status(204).build();
+    }
+
+    @PostMapping("/enviar")
+    public ResponseEntity<?> enviarOrden(@RequestBody ChangeStateRequest request) {
+        this.updateService.cambiarEstado(request);
         return ResponseEntity.status(204).build();
     }
 

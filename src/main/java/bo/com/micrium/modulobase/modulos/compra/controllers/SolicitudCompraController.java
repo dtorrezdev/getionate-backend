@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.AnularCompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.crear.CompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.ChangeStateRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.update.CompraUpdateRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.GetSolicitudCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.solicitud.SolicitudCompraRequest;
@@ -101,9 +102,9 @@ public class SolicitudCompraController implements IListMethod<SolicitudCompraReq
         return ResponseEntity.status(204).build();
     }
 
-    @PostMapping("/aprobar/{id}")
-    public ResponseEntity<?> aprobarSolicitud(@PathVariable Long id) {
-        this.updateService.aprobar(id);
+    @PostMapping("/aprobar")
+    public ResponseEntity<?> aprobarSolicitud(@RequestBody ChangeStateRequest request) {
+        this.updateService.cambiarEstado(request);
         return ResponseEntity.status(204).build();
     }
 

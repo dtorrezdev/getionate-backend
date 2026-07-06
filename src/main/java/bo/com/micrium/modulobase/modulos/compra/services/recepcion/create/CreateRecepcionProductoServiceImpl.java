@@ -50,6 +50,8 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
 
         // 1. Validar request
         this.validarRequest(request);
+        final Compra compra1 = compraRepository.findById(request.getCompraId())
+                .orElseThrow(() -> new EntityNotFoundException("Compra", "id", request.getCompraId()));
         log.info("request valido");
 
         // 2. Mapear request a entity
@@ -70,6 +72,8 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
         newRecepcion.setMovimientoId(movimientoId);
 
         // 3. Guardar en repositorio
+        compra1.setEstado(request.getTipo());
+        compraRepository.save(compra1);
         return RecepcionProductoMapper.toResponse
                 .apply(repository.save(newRecepcion));
     }
@@ -86,9 +90,6 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
 
     private void validarRequest(RecepcionProductoRequest request) {
         // Validar que el compra existe
-        final var compraId = request.getCompraId();
-        compraRepository.findById(compraId)
-                .orElseThrow(() -> new EntityNotFoundException("Compra", "id", compraId));
 
         final Long tenantId = currentUserProvider.getUserTenantId();
         repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)

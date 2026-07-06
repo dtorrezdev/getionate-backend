@@ -62,6 +62,8 @@ public class RecepcionProductoMapper {
         response.setTotal(recepcion.getTotal());
         response.setFechaRegistro(recepcion.getFechaRegistro());
         response.setCompraId(recepcion.getCompraId());
+        response.setCodigoCompra(recepcion.getCodigoCompra());
+        response.setCompraEstado(recepcion.getCompraEstado());
         response.setNroItems(recepcion.getNroItems());
 
         return response;

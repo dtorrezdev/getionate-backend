@@ -14,6 +14,8 @@ import java.sql.Timestamp;
 public class ListRecepcionProductoResponse implements Serializable {
     private Long id;
     private Long compraId;
+    private String codigoCompra;
+    private String compraEstado;
     private BigDecimal total;
     private String glosa;
     private Timestamp fechaRegistro;
