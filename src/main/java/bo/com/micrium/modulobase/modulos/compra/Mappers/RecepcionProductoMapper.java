@@ -1,9 +1,14 @@
 package bo.com.micrium.modulobase.modulos.compra.Mappers;
 
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetDetalleCompraResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.orden_compra.get.GetOrdenCompraResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.DetalleRecepcionRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.RecepcionProductoRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.crear.RecepcionProductoResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.get.GetDetalleRecepcionResponse;
+import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.get.GetRecepcionProductoResponse;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.recepcion.list.ListRecepcionProductoResponse;
+import com.micrium.bd.access.jpa.modulo.compra.models.Compra;
 import com.micrium.bd.access.jpa.modulo.compra.models.DetalleRecepcion;
 import com.micrium.bd.access.jpa.modulo.compra.models.RecepcionProducto;
 import com.micrium.bd.access.jpa.modulo.compra.projection.ListRecepcionProjection;
@@ -65,6 +70,31 @@ public class RecepcionProductoMapper {
         response.setCodigoCompra(recepcion.getCodigoCompra());
         response.setCompraEstado(recepcion.getCompraEstado());
         response.setNroItems(recepcion.getNroItems());
+
+        return response;
+    };
+
+    // Get Compra Response
+    public static final Function<RecepcionProducto, GetRecepcionProductoResponse> fromEntityToGetRecepcionResponse = recepcion -> {
+        GetRecepcionProductoResponse response = new GetRecepcionProductoResponse();
+        response.setId(recepcion.getId());
+        response.setCompraId(recepcion.getCompraId());
+        response.setGlosa(recepcion.getGlosa());
+        response.setTotal(recepcion.getTotal());
+        response.setFecha(recepcion.getFecha());
+        response.setCodigo(recepcion.getCodigo());
+
+        List<GetDetalleRecepcionResponse> detalles = recepcion.getDetalle().stream()
+                .map(detalle -> {
+                    GetDetalleRecepcionResponse detalleResponse = new GetDetalleRecepcionResponse();
+                    detalleResponse.setProductoId(detalle.getProductoId());
+                    detalleResponse.setPresentacionId(detalle.getPresentacionId());
+                    detalleResponse.setCantidad(detalle.getCantidad());
+                    detalleResponse.setPrecio(detalle.getPrecio());
+                    return detalleResponse;
+                }).collect(Collectors.toList());
+
+        response.setDetalle(detalles);
 
         return response;
     };

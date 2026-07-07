@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Date;
 
 @Getter
@@ -20,6 +21,6 @@ public class GetDetalleRecepcionResponse implements Serializable {
     private Date fechaVencimiento;
     private String lote;
     private Integer cantidad;
-    private Double precio;
+    private BigDecimal precio;
 }
 
