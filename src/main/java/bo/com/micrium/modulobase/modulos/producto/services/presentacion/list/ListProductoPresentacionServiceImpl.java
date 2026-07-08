@@ -32,8 +32,8 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
     public Page<ListPresentacionResponse> execute(
             ListPresentacionRequest request, Pageable page) {
         final Long tenantId = currentUserProvider.getUserTenantId();
-        log.info("params: " + request);
-        log.info("page: " + page);
+//        log.info("params: " + request);
+//        log.info("page: " + page);
 
         return repository.filter(
                 queryfilterTexto(request.getProductoId()),
