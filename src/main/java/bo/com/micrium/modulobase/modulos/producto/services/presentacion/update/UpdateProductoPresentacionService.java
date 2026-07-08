@@ -38,6 +38,7 @@ public class UpdateProductoPresentacionService implements IUpdateProductoPresent
                 .map(producto -> {
                     producto.setId(id);
                     producto.setProductoId(request.getProductoId());
+                    producto.setCodigo(request.getCodigo());
                     producto.setImagen(request.getImagen());
                     producto.setNombre(request.getNombre());
                     producto.setConcepto(request.getConcepto());

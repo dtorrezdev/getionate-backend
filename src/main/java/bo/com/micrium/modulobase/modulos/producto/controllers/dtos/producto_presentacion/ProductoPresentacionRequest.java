@@ -17,6 +17,9 @@ public class ProductoPresentacionRequest implements Serializable {
     @NotNull(message = "Producto Id no puede ser nulo.")
     private Long productoId;
 
+    @NotNull(message = "Codigo no puede ser nulo.")
+    private String codigo;
+
     @NotNull(message = "Nombre Presentacion no puede ser nulo.")
     @NotEmpty(message = "Nombre Presentacion no puede ser vacio.")
     @Size(max = 60, message = "Nombre no debe exceder de 60 letras.")

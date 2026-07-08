@@ -16,6 +16,7 @@ public class ProductoPresentacionMapper {
         ProductoPresentacion.builder()
 //                .id(null)
                 .productoId(request.getProductoId())
+                .codigo(request.getCodigo())
                 .concepto(request.getConcepto())
                 .descripcion(request.getDescripcion())
                 .precioUnitario(request.getPrecioUnitario())
@@ -37,6 +38,7 @@ public class ProductoPresentacionMapper {
         ProductoPresentacionResponse response = new ProductoPresentacionResponse();
         response.setId(entity.getId());
         response.setProductoId(entity.getProductoId());
+        response.setCodigo(entity.getCodigo());
         response.setNombre(entity.getNombre());
         response.setConcepto(entity.getConcepto());
         response.setDescripcion(entity.getDescripcion());
@@ -58,6 +60,7 @@ public class ProductoPresentacionMapper {
         response.setProductoId(entity.getProductoId());
         response.setProducto(entity.getProducto());
         response.setId(entity.getId());
+        response.setCodigo(entity.getCodigo());
         response.setPresentacion(entity.getPresentacion());
         response.setPresentacionLarga(entity.getPresentacionLarga());
         response.setPrincipioActivo(entity.getPrincipioActivo());
@@ -94,6 +97,7 @@ public class ProductoPresentacionMapper {
             toGetResponse = entity -> {
         ProductoPresentacionResponse response = new ProductoPresentacionResponse();
         response.setId(entity.getId());
+        response.setCodigo(entity.getCodigo());
         response.setProductoId(entity.getProductoId());
         response.setConcepto(entity.getConcepto());
         response.setDescripcion(entity.getDescripcion());

@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 public class ProductoPresentacionResponse implements Serializable {
     private Long id;
     private Long productoId;
+    private String codigo;
     private String nombre;
     private String concepto;
     private String descripcion;

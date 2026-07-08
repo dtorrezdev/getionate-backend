@@ -16,6 +16,7 @@ public class ListPresentacionResponse implements Serializable {
     private Long productoId;
     private String producto;
     private Long id;
+    private String codigo;
     private String presentacion;
     private String presentacionLarga;
     private String principioActivo;
