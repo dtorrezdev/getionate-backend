@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.compra.services.proveedor;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.compra.Mappers.ProveedorMapper;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.proveedor.ProveedorRequest;
 import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.proveedor.ProveedorResponse;
@@ -14,23 +15,28 @@ import org.springframework.stereotype.Service;
 public class ProveedorService implements IProveedorService {
 
     private final IProveedorRepository repository;
+    private final CurrentUserProvider currentUserProvider;
 
     @Override
     public Page<ProveedorResponse> list(ProveedorRequest request, Pageable pageRequest) {
+        final Long tenantId = currentUserProvider.getUserTenantId();
+
         return repository.filter(
                 queryfilterTexto(request.getNombre()),
                 filterTextoQueryUpperLike(request.getNombre()),
                 queryfilterTexto(request.getDescripcion()),
                 filterTextoQueryUpperLike(request.getDescripcion()),
-                pageRequest).map(ProveedorMapper.toResponse);
+                pageRequest, tenantId).map(ProveedorMapper.toResponse);
     }
 
     @Override
     public ProveedorResponse create(ProveedorRequest request) {
-        return ProveedorMapper.toEntity
-                .andThen(repository::save)
-                .andThen(ProveedorMapper.toResponse)
-                .apply(request);
+        final Long tenantId = currentUserProvider.getUserTenantId();
+        final var proveedor = ProveedorMapper.toEntity.apply(request);
+        proveedor.setTenantId(tenantId);
+
+        return ProveedorMapper.toResponse
+                .apply(repository.save(proveedor));
     }
 
     @Override
@@ -67,7 +73,10 @@ public class ProveedorService implements IProveedorService {
         return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
     }
 
-    public ProveedorService(IProveedorRepository repository) {
+    public ProveedorService(
+            IProveedorRepository repository,
+            CurrentUserProvider currentUserProvider) {
         this.repository = repository;
+        this.currentUserProvider = currentUserProvider;
     }
 }

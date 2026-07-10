@@ -89,12 +89,12 @@ public class CreateRecepcionProductoServiceImpl implements ICreateRecepcionProdu
     }
 
     private void validarRequest(RecepcionProductoRequest request) {
-        // Validar que el compra existe
+        // Validar que el Recepcion existe
 
         final Long tenantId = currentUserProvider.getUserTenantId();
         repository.findByCodigoAndTenantId(request.getCodigo(), tenantId)
                 .ifPresent(compra -> {
-                    throw new DuplicateEntityException("Compra","codigo", request.getCodigo());
+                    throw new DuplicateEntityException("Recepcion","codigo", request.getCodigo());
                 });
         // Validar todos los detalles
         request.getDetalle().forEach(this::validarDetalle);
