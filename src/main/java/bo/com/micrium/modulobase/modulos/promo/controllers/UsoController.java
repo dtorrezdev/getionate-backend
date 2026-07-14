@@ -11,7 +11,11 @@ import bo.com.micrium.modulobase.modulos.promo.services.uso.IUsoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+@RequestMapping(value = "/promocion_usos")
 public class UsoController implements IListMethod<UsoRequest, UsoResponse>,
         ICreateMethod<UsoRequest, UsoResponse>,
         IUpdateMethod<UsoRequest, UsoResponse, Long>,

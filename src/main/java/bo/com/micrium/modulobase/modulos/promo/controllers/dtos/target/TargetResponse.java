@@ -8,4 +8,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Data
 public class TargetResponse implements Serializable {
+    private Long id;
+    private Long promocionId;
+    private Long presentacionId;
+    private Long categoriaId;
+    private Long marcaId;
 }

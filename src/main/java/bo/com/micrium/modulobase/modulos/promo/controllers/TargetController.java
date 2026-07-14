@@ -1,13 +1,10 @@
 package bo.com.micrium.modulobase.modulos.promo.controllers;
 
-
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
 import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
-import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionRequest;
-import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionResponse;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetResponse;
 import bo.com.micrium.modulobase.modulos.promo.services.target.ITargetService;

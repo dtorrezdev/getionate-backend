@@ -4,7 +4,9 @@ import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.uso.UsoRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.uso.UsoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UsoServiceImpl implements IUsoService {
 
     @Override

@@ -11,7 +11,11 @@ import bo.com.micrium.modulobase.modulos.promo.services.beneficio.IBeneficioServ
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+@RequestMapping(value = "/beneficios")
 public class BeneficioController implements IListMethod<BeneficioRequest, BeneficioResponse>,
         ICreateMethod<BeneficioRequest, BeneficioResponse>,
         IUpdateMethod<BeneficioRequest, BeneficioResponse, Long>,
