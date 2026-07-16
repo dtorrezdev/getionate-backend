@@ -6,6 +6,7 @@ import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionRequest;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionListRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionResponse;
 import bo.com.micrium.modulobase.modulos.promo.services.promocion.IPromocionService;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/promociones")
-public class PromocionController implements IListMethod<PromocionRequest, PromocionResponse>,
+public class PromocionController implements IListMethod<PromocionListRequest, PromocionResponse>,
         ICreateMethod<PromocionRequest, PromocionResponse>,
         IUpdateMethod<PromocionRequest, PromocionResponse, Long>,
         IDeleteMethod<PromocionRequest> {
@@ -38,7 +39,7 @@ public class PromocionController implements IListMethod<PromocionRequest, Promoc
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Page<PromocionResponse>>> list(String token, String tenantId, String ipClient, String form, PromocionRequest request, Pageable pageRequest) {
+    public ResponseEntity<ApiResponse<Page<PromocionResponse>>> list(String token, String tenantId, String ipClient, String form, PromocionListRequest request, Pageable pageRequest) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),

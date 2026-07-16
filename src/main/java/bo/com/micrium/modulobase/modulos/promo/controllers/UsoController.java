@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
 import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.uso.UsoListRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.uso.UsoRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.uso.UsoResponse;
 import bo.com.micrium.modulobase.modulos.promo.services.uso.IUsoService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/promocion_usos")
-public class UsoController implements IListMethod<UsoRequest, UsoResponse>,
+public class UsoController implements IListMethod<UsoListRequest, UsoResponse>,
         ICreateMethod<UsoRequest, UsoResponse>,
         IUpdateMethod<UsoRequest, UsoResponse, Long>,
         IDeleteMethod<UsoRequest> {
@@ -42,7 +43,7 @@ public class UsoController implements IListMethod<UsoRequest, UsoResponse>,
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Page<UsoResponse>>> list(String token, String tenantId, String ipClient, String form, UsoRequest request, Pageable pageRequest) {
+    public ResponseEntity<ApiResponse<Page<UsoResponse>>> list(String token, String tenantId, String ipClient, String form, UsoListRequest request, Pageable pageRequest) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),

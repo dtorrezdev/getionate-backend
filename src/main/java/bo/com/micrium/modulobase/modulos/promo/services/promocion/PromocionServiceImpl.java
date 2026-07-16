@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.promo.services.promocion;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionListRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionResponse;
 import bo.com.micrium.modulobase.modulos.promo.mappers.PromocionMapper;
@@ -17,29 +18,29 @@ public class PromocionServiceImpl implements IPromocionService {
     private IPromocionRepository repository;
 
     @Override
-    public Page<PromocionResponse> list(PromocionRequest params, Pageable pageable) {
+    public Page<PromocionResponse> list(PromocionListRequest params, Pageable pageable) {
 
         return repository.filter(
                 queryfilterTexto(params.getNombre()),
                 filterTextoQueryUpperLike(params.getNombre()),
                 queryfilterTexto(params.getDescripcion()),
                 filterTextoQueryUpperLike(params.getDescripcion()),
-                queryfilterTexto(params.getFechaInicio().toString()),
-                filterTextoQueryUpperLike(params.getFechaInicio().toString()),
-                queryfilterTexto(params.getFechaFin().toString()),
-                filterTextoQueryUpperLike(params.getFechaFin().toString()),
-                queryfilterTexto(params.getLimiteUso().toString()),
-                filterTextoQueryUpperLike(params.getLimiteUso().toString()),
-                queryfilterTexto(params.getLimitePorCliente().toString()),
-                filterTextoQueryUpperLike(params.getLimitePorCliente().toString()),
+                queryfilterTexto(params.getFechaInicio()),
+                filterTextoQueryUpperLike(params.getFechaInicio()),
+                queryfilterTexto(params.getFechaFin()),
+                filterTextoQueryUpperLike(params.getFechaFin()),
+                queryfilterTexto(params.getLimiteUso()),
+                filterTextoQueryUpperLike(params.getLimiteUso()),
+                queryfilterTexto(params.getLimitePorCliente()),
+                filterTextoQueryUpperLike(params.getLimitePorCliente()),
                 pageable
         ).map(PromocionMapper.toResponse);
     }
 
     @Override
     public PromocionResponse create(PromocionRequest request) {
-
         final var promocion = PromocionMapper.toEntity.apply(request);
+
         return PromocionMapper.toResponse
                 .apply(repository.save(promocion));
     }

@@ -5,6 +5,7 @@ import bo.com.micrium.modulobase.controllers.template.ICreateMethod;
 import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetListRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetResponse;
 import bo.com.micrium.modulobase.modulos.promo.services.target.ITargetService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/targets")
-public class TargetController implements IListMethod<TargetRequest, TargetResponse>,
+public class TargetController implements IListMethod<TargetListRequest, TargetResponse>,
         ICreateMethod<TargetRequest, TargetResponse>,
         IUpdateMethod<TargetRequest, TargetResponse, Long>,
         IDeleteMethod<TargetRequest> {
@@ -42,7 +43,7 @@ public class TargetController implements IListMethod<TargetRequest, TargetRespon
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Page<TargetResponse>>> list(String token, String tenantId, String ipClient, String form, TargetRequest request, Pageable pageRequest) {
+    public ResponseEntity<ApiResponse<Page<TargetResponse>>> list(String token, String tenantId, String ipClient, String form, TargetListRequest request, Pageable pageRequest) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),

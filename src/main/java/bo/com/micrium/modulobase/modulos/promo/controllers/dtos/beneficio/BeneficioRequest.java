@@ -12,6 +12,6 @@ public class BeneficioRequest implements Serializable {
 
     private Long promocionId;
     private String tipo;
-    private String valor;
+    private BigDecimal valor;
     private BigDecimal maximoDescuento;
 }

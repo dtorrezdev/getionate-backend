@@ -12,6 +12,6 @@ public class BeneficioResponse implements Serializable {
     private Long id;
     private Long promocionId;
     private String tipo;
-    private String valor;
+    private BigDecimal valor;
     private BigDecimal maximoDescuento;
 }

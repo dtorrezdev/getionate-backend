@@ -1,10 +1,7 @@
 package bo.com.micrium.modulobase.modulos.promo.mappers;
 
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.proveedor.ProveedorRequest;
-import bo.com.micrium.modulobase.modulos.compra.controllers.dtos.proveedor.ProveedorResponse;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.promocion.PromocionResponse;
-import com.micrium.bd.access.jpa.modulo.compra.models.Proveedor;
 import com.micrium.bd.access.jpa.modulo.promo.models.Promocion;
 
 import java.util.function.Function;

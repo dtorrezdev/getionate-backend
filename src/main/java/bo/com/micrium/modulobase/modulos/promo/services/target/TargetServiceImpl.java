@@ -1,9 +1,9 @@
 package bo.com.micrium.modulobase.modulos.promo.services.target;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetListRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetResponse;
-import bo.com.micrium.modulobase.modulos.promo.mappers.PromocionMapper;
 import bo.com.micrium.modulobase.modulos.promo.mappers.TargetMapper;
 import com.micrium.bd.access.jpa.modulo.promo.repository.ITargetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,18 @@ public class TargetServiceImpl implements ITargetService {
     private ITargetRepository repository;
 
     @Override
-    public Page<TargetResponse> list(TargetRequest params, Pageable pageable) {
-        // TODO: implement method
-        return null;
+    public Page<TargetResponse> list(TargetListRequest params, Pageable pageable) {
+
+        return repository.filter(
+                queryfilterTexto(params.getPromocionId()),
+                filterTextoQueryUpperLike(params.getPromocionId()),
+                queryfilterTexto(params.getPresentacionId()),
+                filterTextoQueryUpperLike(params.getPresentacionId()),
+                queryfilterTexto(params.getCategoriaId()),
+                filterTextoQueryUpperLike(params.getCategoriaId()),
+                queryfilterTexto(params.getMarcaId()),
+                filterTextoQueryUpperLike(params.getMarcaId()),
+                pageable).map(TargetMapper.toResponse);
     }
 
     @Override
@@ -50,5 +59,21 @@ public class TargetServiceImpl implements ITargetService {
     @Override
     public void delete(String id) {
         // TODO: implement method
+    }
+
+    private boolean isBlanck(String dato) {
+        return dato == null || dato.trim().isEmpty();
+    }
+
+    private int queryfilterTexto(String texto) {
+        return this.isBlanck(texto) ? -1 : 0;
+    }
+
+    private String filterTextoQueryUpperLike(String texto) {
+        return this.isBlanck(texto) ? "" : "%" + texto.trim().toUpperCase() + "%";
+    }
+
+    private String filterTextoQueryUpper(String texto) {
+        return this.isBlanck(texto) ? "" : texto.trim().toUpperCase();
     }
 }

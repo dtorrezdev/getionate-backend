@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.promo.services.beneficio;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioListRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioResponse;
 import bo.com.micrium.modulobase.modulos.promo.mappers.BeneficioMapper;
@@ -17,11 +18,11 @@ public class BeneficioServiceImpl implements IBeneficioService {
     private IBeneficioRepository repository;
 
     @Override
-    public Page<BeneficioResponse> list(BeneficioRequest request, Pageable pageable) {
+    public Page<BeneficioResponse> list(BeneficioListRequest request, Pageable pageable) {
 
         return repository.filter(
-                queryfilterTexto(request.getPromocionId().toString()),
-                filterTextoQueryUpperLike(request.getPromocionId().toString()),
+                queryfilterTexto(request.getPromocionId()),
+                filterTextoQueryUpperLike(request.getPromocionId()),
                 queryfilterTexto(request.getTipo()),
                 filterTextoQueryUpperLike(request.getTipo()),
                 pageable).map(BeneficioMapper.toResponse);
