@@ -43,7 +43,13 @@ public class UsoController implements IListMethod<UsoListRequest, UsoResponse>,
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Page<UsoResponse>>> list(String token, String tenantId, String ipClient, String form, UsoListRequest request, Pageable pageRequest) {
+    public ResponseEntity<ApiResponse<Page<UsoResponse>>> list(
+            String token,
+            String tenantId,
+            String ipClient,
+            String form, UsoListRequest request,
+            Pageable pageRequest
+    ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),

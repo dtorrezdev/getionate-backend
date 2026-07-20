@@ -6,6 +6,7 @@ import bo.com.micrium.modulobase.controllers.template.IDeleteMethod;
 import bo.com.micrium.modulobase.controllers.template.IListMethod;
 import bo.com.micrium.modulobase.controllers.template.IUpdateMethod;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioListRequest;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioListResponse;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.beneficio.BeneficioResponse;
 import bo.com.micrium.modulobase.modulos.promo.services.beneficio.IBeneficioService;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/beneficios")
-public class BeneficioController implements IListMethod<BeneficioListRequest, BeneficioResponse>,
+public class BeneficioController implements
+        IListMethod<BeneficioListRequest, BeneficioListResponse>,
         ICreateMethod<BeneficioRequest, BeneficioResponse>,
         IUpdateMethod<BeneficioRequest, BeneficioResponse, Long>,
         IDeleteMethod<BeneficioRequest> {
@@ -39,7 +41,14 @@ public class BeneficioController implements IListMethod<BeneficioListRequest, Be
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Page<BeneficioResponse>>> list(String token, String tenantId, String ipClient, String form, BeneficioListRequest request, Pageable pageRequest) {
+    public ResponseEntity<ApiResponse<Page<BeneficioListResponse>>> list(
+            String token,
+            String tenantId,
+            String ipClient,
+            String form,
+            BeneficioListRequest request,
+            Pageable pageRequest
+    ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.list(request, pageRequest),
