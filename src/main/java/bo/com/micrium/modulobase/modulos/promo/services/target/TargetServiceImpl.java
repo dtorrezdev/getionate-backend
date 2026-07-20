@@ -2,6 +2,7 @@ package bo.com.micrium.modulobase.modulos.promo.services.target;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetListRequest;
+import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetListResponse;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetRequest;
 import bo.com.micrium.modulobase.modulos.promo.controllers.dtos.target.TargetResponse;
 import bo.com.micrium.modulobase.modulos.promo.mappers.TargetMapper;
@@ -18,7 +19,7 @@ public class TargetServiceImpl implements ITargetService {
     private ITargetRepository repository;
 
     @Override
-    public Page<TargetResponse> list(TargetListRequest params, Pageable pageable) {
+    public Page<TargetListResponse> list(TargetListRequest params, Pageable pageable) {
 
         return repository.filter(
                 queryfilterTexto(params.getPromocionId()),
@@ -29,7 +30,7 @@ public class TargetServiceImpl implements ITargetService {
                 filterTextoQueryUpperLike(params.getCategoriaId()),
                 queryfilterTexto(params.getMarcaId()),
                 filterTextoQueryUpperLike(params.getMarcaId()),
-                pageable).map(TargetMapper.toResponse);
+                pageable).map(TargetMapper.toResponseList);
     }
 
     @Override
