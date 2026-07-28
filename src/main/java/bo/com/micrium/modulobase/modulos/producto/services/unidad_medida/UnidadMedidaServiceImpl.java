@@ -40,8 +40,6 @@ public class UnidadMedidaServiceImpl implements  IUnidadMedidaService {
                 filterTextoQueryUpperLike(request.getAbreviatura()),
                 queryfilterTexto(request.getNombre()),
                 filterTextoQueryUpperLike(request.getNombre()),
-                queryfilterTexto(request.getEsUnidadMinima()),
-                filterTextoQueryUpperLike(request.getEsUnidadMinima()),
                 pageRequest, tenantId
         ).map(UnidadMedidaMapper.fromEntityToResponse);
     }
