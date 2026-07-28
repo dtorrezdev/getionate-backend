@@ -1,5 +1,6 @@
 package bo.com.micrium.modulobase.modulos.producto.services.producto;
 
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoListRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
 import org.springframework.data.domain.Page;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 public interface IProductoService {
 
-    Page<ProductoResponse> list(Map<String, String> params, Pageable pageRequest);
+    Page<ProductoResponse> list(ProductoListRequest params, Pageable pageRequest);
 
     ProductoResponse get(Long id);
 

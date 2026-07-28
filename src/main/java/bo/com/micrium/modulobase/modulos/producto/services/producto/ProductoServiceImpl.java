@@ -2,6 +2,7 @@ package bo.com.micrium.modulobase.modulos.producto.services.producto;
 
 import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoListRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
 import bo.com.micrium.modulobase.modulos.producto.mappers.ProductoMapper;
@@ -20,20 +21,18 @@ public class ProductoServiceImpl implements IProductoService {
     private final CurrentUserProvider currentUserProvider;
 
     @Override
-    public Page<ProductoResponse> list(Map<String, String> params, Pageable pageRequest) {
-
-        final String codigo = params.get("codigo");
-        final String nombre = params.get("nombre");
-        final String descripcion = params.get("descripcion");
+    public Page<ProductoResponse> list(ProductoListRequest request, Pageable pageRequest) {
         final Long tenantId = currentUserProvider.getUserTenantId();
 
         return repository.filter(
-                queryfilterTexto(codigo),
-                filterTextoQueryUpperLike(codigo),
-                queryfilterTexto(nombre),
-                filterTextoQueryUpperLike(nombre),
-                queryfilterTexto(descripcion),
-                filterTextoQueryUpperLike(descripcion),
+                queryfilterTexto(request.getCodigo()),
+                filterTextoQueryUpperLike(request.getCodigo()),
+                queryfilterTexto(request.getNombre()),
+                filterTextoQueryUpperLike(request.getNombre()),
+                queryfilterTexto(request.getDescripcion()),
+                filterTextoQueryUpperLike(request.getDescripcion()),
+                queryfilterTexto(request.getCategoria()),
+                filterTextoQueryUpperLike(request.getCategoria()),
                 pageRequest, tenantId).map(ProductoMapper.fromProjectiontoResponse);
     }
 

@@ -2,6 +2,7 @@ package bo.com.micrium.modulobase.modulos.producto.controllers;
 
 import bo.com.micrium.modulobase.common.response.ApiResponse;
 import bo.com.micrium.modulobase.controllers.template.ICrudMethods;
+import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoListRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoRequest;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto.ProductoResponse;
 import bo.com.micrium.modulobase.modulos.producto.services.producto.IProductoService;
@@ -30,9 +31,14 @@ public class ProductoController implements
             Map<String, String> params,
             Pageable pageRequest
     ) {
+        final String codigo = params.get("codigo");
+        final String nombre = params.get("nombre");
+        final String descripcion = params.get("descripcion");
+        final String categoria = params.get("categoria");
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.ok(
-                        this.service.list(params, pageRequest),
+                        this.service.list(new ProductoListRequest(codigo, nombre, descripcion, categoria), pageRequest),
                         "Productos listado correctamente.")
                 );
     }
