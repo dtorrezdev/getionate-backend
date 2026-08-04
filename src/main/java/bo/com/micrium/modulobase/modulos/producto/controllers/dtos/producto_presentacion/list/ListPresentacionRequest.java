@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class ListPresentacionRequest implements Serializable {
     private String productoId;
     private String producto;
-    private String id;
+    private String codigo;
     private String presentacion;
     private String descripcion;
     private String principioActivo;

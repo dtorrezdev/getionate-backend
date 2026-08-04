@@ -29,14 +29,10 @@ public class ListVentaServiceImpl implements IListVentaService {
         log.info("params: " + request);
         log.info("page: " + page);
         return repository.filter(
-                queryfilterTexto(request.getId()),
-                filterTextoQueryUpperLike(request.getId()),
                 queryfilterTexto(request.getCodigo()),
                 filterTextoQueryUpperLike(request.getCodigo()),
                 queryfilterTexto(request.getGlosa()),
                 filterTextoQueryUpperLike(request.getGlosa()),
-                queryfilterTexto(request.getTotal()),
-                filterTextoQueryUpperLike(request.getTotal()),
                 queryfilterTexto(request.getCliente()),
                 filterTextoQueryUpperLike(request.getCliente()),
                 queryfilterTexto(request.getEstado()),
