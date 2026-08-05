@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class ListProductoPresentacionServiceImpl implements IListProductoPresentacionService {
 
@@ -60,6 +62,28 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
         log.info("getCategoria " +queryfilterTexto(request.getCategoria()));
         log.info("getCategoria " +filterTextoQueryUpperLike(request.getCategoria()));
 
+        if(Objects.nonNull(request.getSeControlaStock())) {
+            return repository.getProductoStockable(
+                            queryfilterTexto(request.getCodigo()),
+                            filterTextoQueryUpperLike(request.getCodigo()),
+                            queryfilterTexto(request.getProducto()),
+                            filterTextoQueryUpperLike(request.getProducto()),
+                            queryfilterTexto(request.getPresentacion()),
+                            filterTextoQueryUpperLike(request.getPresentacion()),
+                            queryfilterTexto(request.getDescripcion()),
+                            filterTextoQueryUpperLike(request.getDescripcion()),
+                            queryfilterTexto(request.getPrincipioActivo()),
+                            filterTextoQueryUpperLike(request.getPrincipioActivo()),
+                            queryfilterTexto(request.getUnidadMedida()),
+                            filterTextoQueryUpperLike(request.getUnidadMedida()),
+                            queryfilterTexto(request.getMarca()),
+                            filterTextoQueryUpperLike(request.getMarca()),
+                            queryfilterTexto(request.getCategoria()),
+                            filterTextoQueryUpperLike(request.getCategoria()),
+                            page, tenantId)
+                    .map(ProductoPresentacionMapper.fromProjectionToListPresentacionResponse);
+        }
+
         return repository.filter(
                 queryfilterTexto(request.getCodigo()),
                 filterTextoQueryUpperLike(request.getCodigo()),
@@ -77,7 +101,6 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
                 filterTextoQueryUpperLike(request.getMarca()),
                 queryfilterTexto(request.getCategoria()),
                 filterTextoQueryUpperLike(request.getCategoria()),
-
                 page, tenantId)
                 .map(ProductoPresentacionMapper.fromProjectionToListPresentacionResponse);
     }
