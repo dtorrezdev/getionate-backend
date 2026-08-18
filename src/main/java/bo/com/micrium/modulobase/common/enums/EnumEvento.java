@@ -13,6 +13,7 @@ public class EnumEvento {
         STOCK_SIN_EXPIRACION,
         PROD_SIN_MIN_STOCK_DISPONIBLE,
         PROD_SIN_DIAS_ANTES_EXPIRACION,
+        PROD_EXPIRADO,
         PROD_PROXIMO_A_EXPIRAR;
 
     }

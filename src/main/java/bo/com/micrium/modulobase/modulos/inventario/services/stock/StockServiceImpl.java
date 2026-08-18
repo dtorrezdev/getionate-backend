@@ -129,16 +129,23 @@ public class StockServiceImpl implements IStockService {
                 .stream()
                 .map(StockMapper.toResponse)
                 .toList();
+
         list.forEach(stock-> {
             var fechaExp = stock.getExpiracion();
             var hoy = new Date(System.currentTimeMillis());
+
             if(Objects.nonNull(fechaExp)) {
                 int diffInDays = (int)( (fechaExp.getTime() - hoy.getTime())
                         / (1000 * 60 * 60 * 24) );
+
+                if(diffInDays <= 0) {
+                    System.out.println("Alerta stock producto vencido");
+                    EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.PROD_EXPIRADO.name(), presentacion.getId());
+                    log.info("Se creado evento type PROD_EXPIRADO: " + event);
+
+                } else
                 if(diffInDays <= presentacion.getDiasAntesExpiracion()) {
                     System.out.println("Alerta stock fecha proxima a vencer");
-                 // TODO: llamar a servicio notificacion y registras
-                 // * tomar en cuenta si ya se ha registrado esta notificacion
                     EventoNotificacion event = eventoService.registrarEvento(EnumEvento.Type.PROD_PROXIMO_A_EXPIRAR.name(), presentacion.getId());
                     log.info("Se creado evento type PROD_PROXIMO_A_EXPIRAR: " + event);
                 }
@@ -152,6 +159,7 @@ public class StockServiceImpl implements IStockService {
     public boolean validateUbicacionStock(Long ubicacionStockId) {
         ubicacionStockRepository.findById(ubicacionStockId)
                 .orElseThrow(() -> new EntityNotFoundException("Ubicacion Stock", "id", ubicacionStockId));
+
         return true;
     }
 

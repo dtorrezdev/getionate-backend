@@ -36,31 +36,6 @@ public class ListProductoPresentacionServiceImpl implements IListProductoPresent
         final Long tenantId = currentUserProvider.getUserTenantId();
         log.info("params: " + request);
         log.info("page: " + page);
-        log.info("ProductoId " +queryfilterTexto(request.getProductoId()));
-        log.info("ProductoId " +filterTextoQueryUpperLike(request.getProductoId()));
-
-        log.info("getProducto " +queryfilterTexto(request.getProducto()));
-        log.info("getProducto " +filterTextoQueryUpperLike(request.getProducto()));
-
-
-        log.info("getPresentacion " +queryfilterTexto(request.getPresentacion()));
-        log.info("getPresentacion " +filterTextoQueryUpperLike(request.getPresentacion()));
-
-        log.info("getDescripcion " +queryfilterTexto(request.getDescripcion()));
-        log.info("getDescripcion " +filterTextoQueryUpperLike(request.getDescripcion()));
-
-        log.info("getPrincipioActivo " +queryfilterTexto(request.getPrincipioActivo()));
-        log.info("getPrincipioActivo " +filterTextoQueryUpperLike(request.getPrincipioActivo()));
-
-        log.info("getUnidadMedida " +queryfilterTexto(request.getUnidadMedida()));
-        log.info("getUnidadMedida " +filterTextoQueryUpperLike(request.getUnidadMedida()));
-
-        log.info("getMarca " +queryfilterTexto(request.getMarca()));
-        log.info("getMarca " +filterTextoQueryUpperLike(request.getMarca()));
-
-
-        log.info("getCategoria " +queryfilterTexto(request.getCategoria()));
-        log.info("getCategoria " +filterTextoQueryUpperLike(request.getCategoria()));
 
         if(Objects.nonNull(request.getSeControlaStock())) {
             return repository.getProductoStockable(
