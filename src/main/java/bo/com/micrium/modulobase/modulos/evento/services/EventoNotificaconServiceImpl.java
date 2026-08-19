@@ -1,6 +1,7 @@
 package bo.com.micrium.modulobase.modulos.evento.services;
 
 import bo.com.micrium.modulobase.common.enums.EnumEvento;
+import bo.com.micrium.modulobase.common.exceptions.EntityNotFoundException;
 import bo.com.micrium.modulobase.common.providers.CurrentUserProvider;
 import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionRequest;
 import bo.com.micrium.modulobase.modulos.evento.controllers.dtos.EventoNotificacionResponse;
@@ -8,6 +9,8 @@ import com.micrium.bd.access.jpa.modulo.eventos.models.EventoNotificacion;
 import com.micrium.bd.access.jpa.modulo.eventos.models.Notificacion;
 import com.micrium.bd.access.jpa.modulo.eventos.repositories.IEventoNotificacionRepository;
 import com.micrium.bd.access.jpa.modulo.eventos.repositories.INotificacionRepository;
+import com.micrium.bd.access.jpa.modulo.productos.models.ProductoPresentacion;
+import com.micrium.bd.access.jpa.modulo.productos.repository.IProductoPresentacionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,8 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
     private final INotificacionRepository notificacionRepository;
 
     private final CurrentUserProvider currentUserProvider;
+
+    private final IProductoPresentacionRepository presentacionRepository;
 
     private final Logger log = LogManager.getLogger(EventoNotificaconServiceImpl.class);
 
@@ -118,6 +123,14 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
             response.setMensaje(notificacionUpdate.getMensaje());
             response.setDescripcion(notificacionUpdate.getDescripcion());
             response.setTipoNotificacion(notificacionUpdate.getTipo());
+
+            var optEventoNotification = this.repository.findById(notificacion.getEventoNotificacionId());
+            if(optEventoNotification.isPresent()) {
+                final var eventoNotification =  optEventoNotification.get();
+                eventoNotification.setEstado(EnumEvento.NotificacionStatus.NOTIFICADO.name());
+                this.repository.save(eventoNotification);
+            }
+
             return response;
         } else {
             log.warn("notificacionLeido no se encontro la notificacion con id: " + notificacionId);
@@ -130,15 +143,22 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
-        notificacion.setTitulo("El Producto PR-" + eventoNotificacion.getPresentacionId());
 
-        notificacion.setMensaje(" esta " + eventoNotificacion.getTipoEvento());
-        notificacion.setDescripcion("es una descripcion cualquiera");
+        final Optional<ProductoPresentacion> optPresentacion = this.presentacionRepository.findById(eventoNotificacion.getPresentacionId());
 
-        final String tipoNotificacion = eventoNotificacion.
-                getTipoEvento().equals(EnumEvento.Type.SIN_STOCK.name()) ?
-                EnumEvento.NotificacionTipo.ALERTA.name() :
-                EnumEvento.NotificacionTipo.RECORDATORIO.name();
+        if(optPresentacion.isEmpty()) {
+            throw new EntityNotFoundException("ProductoPresentacion", "presentacion_id", eventoNotificacion.getPresentacionId());
+        }
+        final var presentacion = optPresentacion.get();
+        notificacion.setTitulo("El Producto " + presentacion.getNombre());
+        notificacion.setMensaje("esta "+ EnumEvento.Type.getMessageByTypeEvent(eventoNotificacion.getTipoEvento()));
+        notificacion.setDescripcion("notificacion de producto en ventas");
+
+        String tipoNotificacion = EnumEvento.NotificacionTipo.RECOMENDACION.name();
+
+        if(this.isNotificationTypeAlert(eventoNotificacion.getTipoEvento())) {
+            tipoNotificacion = EnumEvento.NotificacionTipo.ALERTA.name();
+        }
 
         notificacion.setTipo(tipoNotificacion);
         notificacion.setTenantId(tenantId);
@@ -152,25 +172,44 @@ public class EventoNotificaconServiceImpl implements IEventoNotificacionService 
         Notificacion notificacion = new Notificacion();
         notificacion.setEventoNotificacionId(eventoNotificacion.getId());
         notificacion.setFechaEnvio(new Timestamp(System.currentTimeMillis()));
-        notificacion.setTitulo("El Producto PR-" + eventoNotificacion.getPresentacionId());
 
-        notificacion.setMensaje(" esta " + eventoNotificacion.getTipoEvento());
+        final Optional<ProductoPresentacion> optPresentacion = this.presentacionRepository.findById(eventoNotificacion.getPresentacionId());
+
+        if(optPresentacion.isEmpty()) {
+          throw new EntityNotFoundException("ProductoPresentacion", "presentacion_id", eventoNotificacion.getPresentacionId());
+        }
+        final var presentacion = optPresentacion.get();
+        notificacion.setTitulo("El Producto " + presentacion.getNombre());
+        notificacion.setMensaje("esta "+ EnumEvento.Type.getMessageByTypeEvent(eventoNotificacion.getTipoEvento()));
         notificacion.setDescripcion("Este producto no esta configurado adecuadamente");
 
-        notificacion.setTipo(EnumEvento.NotificacionTipo.RECOMENDACION.name());
+        String tipoNotificacion = EnumEvento.NotificacionTipo.RECOMENDACION.name();
+
+        if(this.isNotificationTypeAlert(eventoNotificacion.getTipoEvento())) {
+            tipoNotificacion = EnumEvento.NotificacionTipo.ALERTA.name();
+        }
+
+        notificacion.setTipo(tipoNotificacion);
         notificacion.setTenantId(tenantId);
         //notificacion.setUsuarioId(null);
         log.info("CreandoNotificacion: " + notificacion);
         this.notificacionRepository.save(notificacion);
     }
 
+    private boolean isNotificationTypeAlert(String typeEvent) {
+        return typeEvent.equals(EnumEvento.Type.PROD_EXPIRADO.name()) ||
+                typeEvent.equals(EnumEvento.Type.SIN_STOCK.name());
+    }
+
     public EventoNotificaconServiceImpl(
             IEventoNotificacionRepository repository,
             INotificacionRepository notificacionRepository,
-            CurrentUserProvider currentUserProvider) {
+            CurrentUserProvider currentUserProvider,
+            IProductoPresentacionRepository presentacionRepository) {
         this.repository = repository;
         this.notificacionRepository = notificacionRepository;
         this.currentUserProvider = currentUserProvider;
+        this.presentacionRepository = presentacionRepository;
     }
 
     private boolean isBlanck(String dato) {
