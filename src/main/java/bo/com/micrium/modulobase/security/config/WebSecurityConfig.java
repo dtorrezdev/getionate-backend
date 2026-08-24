@@ -64,6 +64,7 @@ public class WebSecurityConfig implements Serializable {
                             .requestMatchers(EtiquetaControler.RESOURCE_BY_LLAVE).permitAll()
                             .requestMatchers(EtiquetaControler.RESOURCE_BY_GRUPO).permitAll()
                             // .requestMatchers(PerfilControler.RESOURCE_CAMBIOLOGIN).permitAll().
+                            .requestMatchers(HttpMethod.GET, "/tenants/**").permitAll()
                             .requestMatchers(JwtAuthenticationController.METODO_AUTENTICACION).permitAll()
                             .requestMatchers(JwtAuthenticationController.METODO_VERSION).permitAll()
                             .anyRequest().authenticated()

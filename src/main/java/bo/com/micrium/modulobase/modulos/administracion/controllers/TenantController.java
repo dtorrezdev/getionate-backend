@@ -5,17 +5,17 @@ import bo.com.micrium.modulobase.controllers.template.*;
 import bo.com.micrium.modulobase.modulos.administracion.controllers.dtos.tenant.*;
 import bo.com.micrium.modulobase.modulos.administracion.services.tenant.ITenantService;
 import bo.com.micrium.modulobase.modulos.producto.controllers.dtos.producto_presentacion.ProductoPresentacionResponse;
+import bo.com.micrium.modulobase.security.utils.JwtTokenUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/tenants")
 public class TenantController implements IListMethod<TenantRequest, TenantResponse>,
         ICreateMethod<TenantRequest, TenantResponse>,
-        IGetMethod<TenantResponse, Long>,
+//        IGetMethod<TenantResponse, Long>,
         IUpdateMethod<TenantRequest, TenantResponse, Long>,
         IDeleteMethod<TenantRequest>
 {
@@ -37,12 +37,12 @@ public class TenantController implements IListMethod<TenantRequest, TenantRespon
                 );
     }
 
-    @Override
+    @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TenantResponse>> get(
-            String token,
-            String ipClient,
-            String form,
-            Long id) {
+            @RequestHeader(value = JwtTokenUtil.IP_CLIENT, required = false) String ipClient,
+            @RequestHeader(value = JwtTokenUtil.ROUTE, defaultValue = "/local-test") String form,
+            @PathVariable Long id
+            ) {
         return ResponseEntity.status(200)
                 .body(ApiResponse.ok(
                         this.service.get(id),

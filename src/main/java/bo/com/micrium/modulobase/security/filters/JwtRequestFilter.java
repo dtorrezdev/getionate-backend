@@ -190,7 +190,7 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Serializab
         if (!request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_AUTENTICACION)
                 && !request.getRequestURI().equals(request.getContextPath() + JwtAuthenticationController.METODO_VERSION)
                 && !request.getRequestURI().equals(request.getContextPath() + EtiquetaControler.RESOURCE_BY_LLAVE)
-                //&& !request.getRequestURI().equals(request.getContextPath() + "/notificacion")
+                && !request.getRequestURI().contains(request.getContextPath() + "/tenants/")
                 && !request.getRequestURI().equals(request.getContextPath() + EtiquetaControler.RESOURCE_BY_GRUPO)) {
             String requestTokenHeader = request.getHeader(JwtTokenUtil.KEY_TOKEN);
 
