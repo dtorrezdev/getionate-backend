@@ -1,0 +1,20 @@
+package com.dtorrez.main.modulos.ventas.controllers.dtos.venta;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.io.Serializable;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = false)
+public class AnularVentaRequest implements Serializable {
+    private Long ventaId;
+    private String glosa;
+    private Long clienteId;
+}

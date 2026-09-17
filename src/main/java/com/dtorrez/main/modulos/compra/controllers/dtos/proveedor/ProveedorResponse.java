@@ -1,0 +1,16 @@
+package com.dtorrez.main.modulos.compra.controllers.dtos.proveedor;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
+
+import java.io.Serializable;
+
+@Setter
+@Getter
+@AllArgsConstructor
+public class ProveedorResponse implements Serializable {
+    private Long id;
+    private String nombre;
+    private String descripcion;
+}
+

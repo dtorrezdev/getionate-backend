@@ -1,0 +1,16 @@
+package com.dtorrez.main.modulos.promo.controllers.dtos.uso;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@AllArgsConstructor
+@Data
+public class UsoRequest implements Serializable {
+    private Long promocionId;
+    private Long clienteId;
+    private Long ventaId;
+    private BigDecimal cantidadDescuento;
+}

@@ -2,7 +2,7 @@ package bo.com.micrium.base.modulobase;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
-import bo.com.micrium.modulobase.ModulobaseApplication;
+import com.dtorrez.main.ModulobaseApplication;
 
 import org.junit.jupiter.api.Test;
 

@@ -8,7 +8,7 @@
         <version>3.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>bo.com.micrium.base</groupId>
+    <groupId>com.dtorrez.base</groupId>
     <artifactId>modulobase</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging> <!-- Cambiar el empaquetado a WAR -->
