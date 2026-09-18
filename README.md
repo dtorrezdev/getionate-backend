@@ -34,8 +34,8 @@ Sistema completo de microservicios desarrollado con **NestJS** y **TypeScript**,
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/jaimeirazabal1/microservicios-base-nestjs
-cd base_microservicios
+git clone https://github.com/dtorrezdev/getionate-backend.git
+cd getionate-backend
 ```
 
 ### 2. Configurar variables de entorno
@@ -303,7 +303,7 @@ netstat -tulpn | grep :3000
 
 ## 📈 Próximos Pasos
 
-- [ ] Tests unitarios y de integración
+- [X] Tests unitarios y de integración
 - [ ] Documentación Swagger/OpenAPI  
 - [ ] Circuit breakers y resilience
 - [ ] Monitoreo y métricas (Prometheus)
